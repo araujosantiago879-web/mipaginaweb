@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "nombre": "Vibrador Onda Pulsátil",
+    "categoria": "Vibradores",
+    "precio": "$24.900",
+    "precioAnterior": null,
+    "descripcion": "Silicona médica, 12 modos de vibración y estimulación por ondas de presión. Carga USB, 100% impermeable.",
+    "imagen": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&q=80",
+    "badge": "new",
+    "rating": 5,
+    "destacado": true
+  },
+  {
+    "id": 2,
+    "nombre": "Kit Dados Eróticos",
+    "categoria": "Para parejas",
+    "precio": "$8.500",
+    "precioAnterior": null,
+    "descripcion": "Set de dados con instrucciones, vela aromática y accesorios. Presentación en caja regalo.",
+    "imagen": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=600&q=80",
+    "badge": "hot",
+    "rating": 4.9,
+    "destacado": false
+  },
+  {
+    "id": 3,
+    "nombre": "Body Encaje Negro",
+    "categoria": "Lencería",
+    "precio": "$18.200",
+    "precioAnterior": null,
+    "descripcion": "Body de encaje premium, talle S-M-L-XL. Tela suave y elástica, fácil apertura.",
+    "imagen": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+    "badge": "",
+    "rating": 4.8,
+    "destacado": false
+  },
+  {
+    "id": 4,
+    "nombre": "Lubricante Base Agua 100ml",
+    "categoria": "Lubricantes",
+    "precio": "$5.800",
+    "precioAnterior": "$7.200",
+    "descripcion": "Sin parabenos, sin colorantes. Compatible con todos los materiales. Fórmula dermatológicamente testeada.",
+    "imagen": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80",
+    "badge": "sale",
+    "rating": 4.7,
+    "destacado": false
+  },
+  {
+    "id": 5,
+    "nombre": "Kit Esposas + Venda",
+    "categoria": "Bondage",
+    "precio": "$14.500",
+    "precioAnterior": null,
+    "descripcion": "Kit introductorio con esposas acolchadas de cuero sintético y venda satinada. Llave de seguridad incluida.",
+    "imagen": "https://images.unsplash.com/photo-1516062423079-7ca13cdc7f5a?w=600&q=80",
+    "badge": "new",
+    "rating": 4.3,
+    "destacado": false
+  },
+  {
+    "id": 6,
+    "nombre": "Mini Bala Vibrador",
+    "categoria": "Vibradores",
+    "precio": "$11.900",
+    "precioAnterior": null,
+    "descripcion": "Vibrador compacto tipo bala. 10 velocidades, ultra silencioso, recargable por USB. Ideal para principiantes.",
+    "imagen": "https://images.unsplash.com/photo-1620315808304-66597517ec41?w=600&q=80",
+    "badge": "",
+    "rating": 4.9,
+    "destacado": false
+  },
+  {
+    "id": 7,
+    "nombre": "Aceite de Masajes Efecto Calor",
+    "categoria": "Para parejas",
+    "precio": "$9.200",
+    "precioAnterior": null,
+    "descripcion": "Aceite comestible con efecto calor. Sabor vainilla, apto para zonas íntimas. Frasco 50ml con dosificador.",
+    "imagen": "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&q=80",
+    "badge": "hot",
+    "rating": 4.8,
+    "destacado": false
+  }
+]

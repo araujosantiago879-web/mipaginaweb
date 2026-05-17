@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin · El Lado B</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Archivo:wght@400;500;600;700&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#050508; color:#eef2f5; font-family:'Archivo',sans-serif; padding:2rem; }
+    .container { max-width:1400px; margin:0 auto; }
+    h1 { font-family:'Cormorant Garamond',serif; font-size:3rem; margin-bottom:0.5rem; }
+    h1 em { color:#ff3366; font-style:italic; }
+    .login-box { max-width:400px; margin:10vh auto; background:#111118; border:1px solid rgba(255,255,255,0.05); padding:2rem; border-radius:12px; }
+    .login-box input, .login-box button { width:100%; padding:12px; margin-top:1rem; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:'Inconsolata'; border-radius:6px; }
+    .login-box button { background:#ff3366; cursor:pointer; font-weight:bold; }
+    .login-box button:hover { background:#cc2952; }
+    .admin-panel { display:none; }
+    .tabs { display:flex; gap:1rem; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:2rem; flex-wrap:wrap; }
+    .tab-btn { background:none; border:none; color:#aaa; padding:0.8rem 1.5rem; cursor:pointer; font-family:'Inconsolata'; font-size:0.9rem; transition:0.2s; }
+    .tab-btn.active { color:#ff3366; border-bottom:2px solid #ff3366; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .productos-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1rem; margin-top:1.5rem; }
+    .producto-card { background:#111118; border:1px solid rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition:0.2s; }
+    .producto-card:hover { border-color:#ff336640; }
+    .producto-card img { width:100%; height:150px; object-fit:cover; border-radius:6px; background:#0a0a10; }
+    .form-group { margin-bottom:1rem; }
+    .form-group label { display:block; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:0.3rem; color:#aaa; }
+    .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); color:#eef2f5; font-family:'Inconsolata'; border-radius:6px; }
+    button { background:#ff3366; border:none; padding:10px 20px; color:#fff; cursor:pointer; font-weight:bold; border-radius:6px; transition:0.2s; }
+    button:hover { background:#cc2952; }
+    .btn-secondary { background:#1a1a24; border:1px solid #444; }
+    .btn-secondary:hover { background:#2a2a34; }
+    .error { color:#ff3366; margin-top:0.5rem; }
+    .success { color:#66ffcc; }
+    .toast-admin {
+      position:fixed; bottom:24px; right:24px; background:#111118; border:1px solid #66ffcc;
+      padding:12px 20px; border-radius:40px; display:flex; align-items:center; gap:10px;
+      font-size:13px; z-index:9999; transform:translateY(80px); opacity:0;
+      transition:all 0.3s; pointer-events:none;
+    }
+    .toast-admin.show { transform:none; opacity:1; }
+    .toast-dot { width:8px; height:8px; background:#66ffcc; border-radius:50%; }
+    .loading-spinner { text-align:center; padding:2rem; color:#aaa; }
+
+    /* MODAL */
+    .modal-backdrop {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(5,5,8,0.95); backdrop-filter: blur(8px);
+      z-index: 1000; display: none; align-items: center; justify-content: center;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-container {
+      background: #111118; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; width: 90%; max-width: 550px; max-height: 90vh;
+      overflow-y: auto; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    .modal-container h3 { font-size: 1.8rem; margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; }
+    .modal-container h3 em { color: #ff3366; font-style: italic; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+    .modal-actions button { margin: 0; }
+    .btn-cancel { background: #2a2a34; }
+    .btn-cancel:hover { background: #3a3a44; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="login-box" id="login-box">
+    <h2>🔐 Panel de Administración</h2>
+    <input type="password" id="admin-password" placeholder="Contraseña">
+    <button id="login-btn">Ingresar</button>
+    <div id="login-error" class="error"></div>
+  </div>
+  <div class="admin-panel" id="admin-panel">
+    <h1>El <em>Lado B</em> · Admin</h1>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="productos">📦 Productos</button>
+      <button class="tab-btn" data-tab="config">⚙️ Configuración</button>
+    </div>
+    <div id="tab-productos" class="tab-content active">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
+        <h2>Gestión de productos</h2>
+        <button id="btn-nuevo-producto">+ Nuevo producto</button>
+      </div>
+      <div id="productos-loading" class="loading-spinner">Cargando productos...</div>
+      <div class="productos-grid" id="productos-list" style="display:none;"></div>
+    </div>
+    <div id="tab-config" class="tab-content">
+      <h2>Configuración general</h2>
+      <div class="form-group"><label>📱 WhatsApp (sin +)</label><input type="text" id="config-whatsapp" placeholder="5492494000000"></div>
+      <div class="form-group"><label>🕘 Horario L-V</label><input type="text" id="config-lv"></div>
+      <div class="form-group"><label>🕘 Horario Sábados</label><input type="text" id="config-sab"></div>
+      <div class="form-group"><label>🕘 Horario Domingos</label><input type="text" id="config-dom"></div>
+      <div class="form-group"><label>🕘 Horario Feriados</label><input type="text" id="config-fer"></div>
+      <div class="form-group"><label>📢 Ticker (separar por coma)</label><textarea id="config-ticker" rows="3"></textarea></div>
+      <div class="form-group"><label>🔑 Cambiar contraseña admin</label><input type="password" id="new-password" placeholder="Nueva contraseña"></div>
+      <button id="guardar-config">Guardar configuración</button>
+      <div id="config-msg" class="error" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARA PRODUCTO -->
+<div id="productModal" class="modal-backdrop">
+  <div class="modal-container">
+    <h3><em>Producto</em></h3>
+    <form id="productForm">
+      <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre" required></div>
+      <div class="form-group"><label>Categoría</label><input type="text" id="prod-categoria" required></div>
+      <div class="form-group"><label>Precio (ej: $24.900)</label><input type="text" id="prod-precio" required></div>
+      <div class="form-group"><label>Precio anterior (opcional)</label><input type="text" id="prod-precioAnterior"></div>
+      <div class="form-group"><label>Descripción corta</label><textarea id="prod-descripcion" rows="3" required></textarea></div>
+      <div class="form-group"><label>URL de la imagen</label><input type="text" id="prod-imagenUrl" required></div>
+      <div class="form-group"><label>Badge (new / hot / sale / vacío)</label><input type="text" id="prod-badge" placeholder="new, hot, sale"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modal-cancel">Cancelar</button>
+        <button type="submit" id="modal-save">Guardar producto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-admin" class="toast-admin"><span class="toast-dot"></span><span id="toast-msg-admin"></span></div>
+
+<script>
+// --- Toast ---
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast-admin');
+  const span = document.getElementById('toast-msg-admin');
+  span.textContent = msg;
+  toast.style.borderColor = isError ? '#ff3366' : '#66ffcc';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// --- Variables globales ---
+let token = null;
+let productos = [];
+let editandoId = null; // null = crear nuevo, número = editar
+
+// --- Modal control ---
+function openModal(producto = null) {
+  const modal = document.getElementById('productModal');
+  if (producto) {
+    // Editar
+    editandoId = producto.id;
+    document.getElementById('prod-nombre').value = producto.nombre || '';
+    document.getElementById('prod-categoria').value = producto.categoria || '';
+    document.getElementById('prod-precio').value = producto.precio || '';
+    document.getElementById('prod-precioAnterior').value = producto.precioAnterior || '';
+    document.getElementById('prod-descripcion').value = producto.descripcion || '';
+    document.getElementById('prod-imagenUrl').value = producto.imagen || '';
+    document.getElementById('prod-badge').value = producto.badge || '';
+  } else {
+    // Nuevo
+    editandoId = null;
+    document.getElementById('prod-nombre').value = '';
+    document.getElementById('prod-categoria').value = '';
+    document.getElementById('prod-precio').value = '';
+    document.getElementById('prod-precioAnterior').value = '';
+    document.getElementById('prod-descripcion').value = '';
+    document.getElementById('prod-imagenUrl').value = '';
+    document.getElementById('prod-badge').value = '';
+  }
+  modal.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('productModal').classList.remove('active');
+  editandoId = null;
+}
+
+// Envío del formulario (crear o editar)
+document.getElementById('productForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById('prod-nombre').value.trim();
+  const categoria = document.getElementById('prod-categoria').value.trim();
+  const precio = document.getElementById('prod-precio').value.trim();
+  const precioAnterior = document.getElementById('prod-precioAnterior').value.trim() || null;
+  const descripcion = document.getElementById('prod-descripcion').value.trim();
+  const imagenUrl = document.getElementById('prod-imagenUrl').value.trim();
+  const badge = document.getElementById('prod-badge').value.trim();
+
+  if (!nombre || !categoria || !precio || !descripcion || !imagenUrl) {
+    showToast('Completá todos los campos obligatorios', true);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('nombre', nombre);
+  formData.append('categoria', categoria);
+  formData.append('precio', precio);
+  if (precioAnterior) formData.append('precioAnterior', precioAnterior);
+  formData.append('descripcion', descripcion);
+  formData.append('imagenUrl', imagenUrl);
+  if (badge) formData.append('badge', badge);
+
+  try {
+    let url = '/api/products';
+    let method = 'POST';
+    if (editandoId) {
+      url = `/api/products/${editandoId}`;
+      method = 'PUT';
+    }
+    const res = await fetch(url, {
+      method: method,
+      headers: { 'Authorization': token },
+      body: formData
+    });
+    if (res.ok) {
+      showToast(editandoId ? '✅ Producto actualizado' : '✅ Producto creado');
+      closeModal();
+      await cargarProductos();
+    } else {
+      showToast('❌ Error al guardar', true);
+    }
+  } catch (err) {
+    showToast('Error de red', true);
+  }
+});
+
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+// Cerrar modal si se clickea fuera del contenido
+document.getElementById('productModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('productModal')) closeModal();
+});
+
+// --- Login ---
+async function login(password) {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      token = data.token;
+      localStorage.setItem('adminToken', token);
+      document.getElementById('login-box').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      await cargarProductos();
+      await cargarConfig();
+    } else {
+      document.getElementById('login-error').textContent = '❌ Contraseña incorrecta';
+    }
+  } catch (err) {
+    document.getElementById('login-error').textContent = '⚠️ No se pudo conectar al servidor. ¿Está corriendo "node server.js"?';
+  }
+}
+
+// --- Productos ---
+async function cargarProductos() {
+  const loadingDiv = document.getElementById('productos-loading');
+  const gridDiv = document.getElementById('productos-list');
+  loadingDiv.style.display = 'block';
+  gridDiv.style.display = 'none';
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) throw new Error('Error HTTP');
+    productos = await res.json();
+    renderProductos();
+    loadingDiv.style.display = 'none';
+    gridDiv.style.display = 'grid';
+  } catch (err) {
+    loadingDiv.innerHTML = '❌ Error al cargar productos. Verifica que el servidor esté corriendo.';
+    showToast('Error al cargar productos', true);
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+
+function renderProductos() {
+  const container = document.getElementById('productos-list');
+  if (!productos.length) {
+    container.innerHTML = '<p style="text-align:center; grid-column:1/-1;">📭 No hay productos aún. Creá uno nuevo.</p>';
+    return;
+  }
+  container.innerHTML = productos.map(p => `
+    <div class="producto-card">
+      <img src="${p.imagen}" onerror="this.src='https://placehold.co/400x300?text=Sin+imagen'">
+      <h3 style="margin-top:8px;">${escapeHtml(p.nombre)}</h3>
+      <p><strong>${p.precio}</strong> ${p.precioAnterior ? `<del>${p.precioAnterior}</del>` : ''}</p>
+      <p>Categoría: ${escapeHtml(p.categoria)}</p>
+      <p>Badge: ${p.badge ? (p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Hot' : p.badge === 'sale' ? '💰 Oferta' : p.badge) : 'ninguno'}</p>
+      <div style="margin-top:0.8rem; display:flex; gap:0.5rem;">
+        <button onclick="editarProducto(${p.id})">✏️ Editar</button>
+        <button onclick="eliminarProducto(${p.id})" style="background:#333;">🗑️ Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function eliminarProducto(id) {
+  if (!confirm('¿Eliminar este producto permanentemente?')) return;
+  try {
+    const res = await fetch(`/api/products/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': token }
+    });
+    if (res.ok) {
+      showToast('✅ Producto eliminado');
+      await cargarProductos();
+    } else {
+      showToast('❌ Error al eliminar', true);
+    }
+  } catch (err) {
+    showToast('Error de red', true);
+  }
+}
+
+function editarProducto(id) {
+  const prod = productos.find(p => p.id === id);
+  if (prod) openModal(prod);
+}
+
+// Nuevo producto: abrir modal vacío
+document.getElementById('btn-nuevo-producto').addEventListener('click', () => {
+  openModal();
+});
+
+// --- Configuración ---
+async function cargarConfig() {
+  try {
+    const res = await fetch('/api/admin/config', { headers: { 'Authorization': token } });
+    if (!res.ok) throw new Error();
+    const cfg = await res.json();
+    document.getElementById('config-whatsapp').value = cfg.whatsappNumber || '';
+    document.getElementById('config-lv').value = cfg.horarios?.lunesViernes || '';
+    document.getElementById('config-sab').value = cfg.horarios?.sabados || '';
+    document.getElementById('config-dom').value = cfg.horarios?.domingos || '';
+    document.getElementById('config-fer').value = cfg.horarios?.feriados || '';
+    document.getElementById('config-ticker').value = (cfg.tickerItems || []).join(', ');
+  } catch (err) {
+    showToast('Error al cargar configuración', true);
+  }
+}
+
+document.getElementById('guardar-config').addEventListener('click', async () => {
+  const newConfig = {
+    whatsappNumber: document.getElementById('config-whatsapp').value,
+    horarios: {
+      lunesViernes: document.getElementById('config-lv').value,
+      sabados: document.getElementById('config-sab').value,
+      domingos: document.getElementById('config-dom').value,
+      feriados: document.getElementById('config-fer').value
+    },
+    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s)
+  };
+  const newPassword = document.getElementById('new-password').value;
+  if (newPassword) newConfig.adminPassword = newPassword;
+
+  try {
+    const res = await fetch('/api/admin/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': token },
+      body: JSON.stringify(newConfig)
+    });
+    if (res.ok) {
+      const msgDiv = document.getElementById('config-msg');
+      msgDiv.className = 'success';
+      msgDiv.textContent = '✅ Configuración guardada correctamente';
+      setTimeout(() => msgDiv.textContent = '', 3000);
+      showToast('Configuración actualizada');
+      if (newPassword) {
+        localStorage.removeItem('adminToken');
+        alert('Contraseña cambiada. Reiniciá sesión.');
+        location.reload();
+      }
+    } else throw new Error();
+  } catch (err) {
+    document.getElementById('config-msg').className = 'error';
+    document.getElementById('config-msg').textContent = '❌ Error al guardar';
+    showToast('Error al guardar', true);
+  }
+});
+
+// --- Tabs ---
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+// --- Auto-login ---
+const storedToken = localStorage.getItem('adminToken');
+if (storedToken) {
+  token = storedToken;
+  fetch('/api/products')
+    .then(res => {
+      if (!res.ok) throw new Error();
+      document.getElementById('login-box').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      cargarProductos();
+      cargarConfig();
+    })
+    .catch(() => {
+      localStorage.removeItem('adminToken');
+      location.reload();
+    });
+}
+document.getElementById('login-btn').addEventListener('click', () => login(document.getElementById('admin-password').value));
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "el-lado-b-sexshop",
+  "version": "1.0.0",
+  "description": "Tienda online con panel admin",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
+  }
+}
