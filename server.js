@@ -13,11 +13,19 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static('uploads'));
 
-if (!fs.existsSync('./data')) fs.mkdirSync('./data');
-if (!fs.existsSync('./uploads')) fs.mkdirSync('./uploads');
+const dataDir = '/tmp/data';
+const uploadsDir = '/tmp/uploads';
 
-const productsFile = './data/products.json';
-const configFile = './data/config.json';
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const productsFile = path.join(dataDir, 'products.json');
+const configFile = path.join(dataDir, 'config.json');
 
 const defaultConfig = {
   whatsappNumber: "5492494000000",
@@ -51,7 +59,7 @@ function readConfig() { return JSON.parse(fs.readFileSync(configFile)); }
 function writeConfig(data) { fs.writeFileSync(configFile, JSON.stringify(data, null, 2)); }
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, './uploads'),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, unique + path.extname(file.originalname));
@@ -158,7 +166,4 @@ app.post('/api/admin/change-password', checkAuth, (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`Admin: http://localhost:${PORT}/admin.html`);
-});
+module.exports = app;
