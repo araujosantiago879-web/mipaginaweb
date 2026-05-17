@@ -3,7 +3,7 @@ const multer = require('multer');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
-const fs = require('fs');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
 
@@ -12,257 +12,246 @@ app.use(bodyParser.json());
 
 // Carpetas públicas
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static('/tmp/uploads'));
 
-// Directorios temporales para Vercel
-const dataDir = '/tmp/data';
-const uploadsDir = '/tmp/uploads';
+// ─── MongoDB ────────────────────────────────────────────────────────────────
+const MONGO_URI = process.env.MONGO_URI; // variable de entorno en Vercel
+let db;
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+async function connectDB() {
+  if (db) return db;
+  const client = new MongoClient(MONGO_URI);
+  await client.connect();
+  db = client.db('eladob'); // nombre de tu base de datos
+  console.log('✅ Conectado a MongoDB Atlas');
+
+  // Crear config por defecto si no existe
+  const configCol = db.collection('config');
+  const existing = await configCol.findOne({ _id: 'main' });
+  if (!existing) {
+    await configCol.insertOne({
+      _id: 'main',
+      whatsappNumber: '5492494000000',
+      horarios: {
+        lunesViernes: '9:00 — 23:00 hs',
+        sabados: '9:00 — 23:00 hs',
+        domingos: '10:00 — 22:00 hs',
+        feriados: '10:00 — 21:00 hs'
+      },
+      tickerItems: [
+        '📦 Packaging discreto',
+        '⚡ Entrega hoy en Tandil',
+        '💳 Todos los medios de pago',
+        '📲 Atención 9 a 23 hs',
+        '✅ Productos certificados',
+        '🔒 Compra 100% privada'
+      ],
+      adminPassword: 'admin123'
+    });
+  }
+
+  return db;
 }
 
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// Helper para obtener colecciones
+async function getProducts() {
+  const database = await connectDB();
+  return database.collection('products');
+}
+async function getConfig() {
+  const database = await connectDB();
+  return database.collection('config');
 }
 
-const productsFile = path.join(dataDir, 'products.json');
-const configFile = path.join(dataDir, 'config.json');
-
-// Configuración por defecto
-const defaultConfig = {
-  whatsappNumber: "5492494000000",
-  horarios: {
-    lunesViernes: "9:00 — 23:00 hs",
-    sabados: "9:00 — 23:00 hs",
-    domingos: "10:00 — 22:00 hs",
-    feriados: "10:00 — 21:00 hs"
-  },
-  tickerItems: [
-    "📦 Packaging discreto",
-    "⚡ Entrega hoy en Tandil",
-    "💳 Todos los medios de pago",
-    "📲 Atención 9 a 23 hs",
-    "✅ Productos certificados",
-    "🔒 Compra 100% privada"
-  ],
-  adminPassword: "admin123"
-};
-
-// Crear archivos si no existen
-if (!fs.existsSync(productsFile)) {
-  fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
-}
-
-if (!fs.existsSync(configFile)) {
-  fs.writeFileSync(configFile, JSON.stringify(defaultConfig, null, 2));
-}
-
-// Funciones helper
-function readProducts() {
-  return JSON.parse(fs.readFileSync(productsFile));
-}
-
-function writeProducts(data) {
-  fs.writeFileSync(productsFile, JSON.stringify(data, null, 2));
-}
-
-function readConfig() {
-  return JSON.parse(fs.readFileSync(configFile));
-}
-
-function writeConfig(data) {
-  fs.writeFileSync(configFile, JSON.stringify(data, null, 2));
-}
-
-// Multer
+// ─── Multer (imágenes en /tmp) ───────────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
+  destination: (req, file, cb) => cb(null, '/tmp'),
   filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));
   }
 });
-
 const upload = multer({ storage });
 
-// Ruta principal
+// ─── Ruta principal ──────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API pública
-app.get('/api/products', (req, res) => {
-  const products = readProducts();
-  const { categoria } = req.query;
+// ─── API pública ─────────────────────────────────────────────────────────────
 
-  if (categoria && categoria !== 'Todo') {
-    return res.json(products.filter(p => p.categoria === categoria));
+// GET /api/products
+app.get('/api/products', async (req, res) => {
+  try {
+    const col = await getProducts();
+    const { categoria } = req.query;
+    const query = categoria && categoria !== 'Todo' ? { categoria } : {};
+    const products = await col.find(query).toArray();
+    // Convertir _id de mongo a id numérico para el frontend
+    const result = products.map(({ _id, ...p }) => ({ id: _id, ...p }));
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
   }
-
-  res.json(products);
 });
 
-app.get('/api/config', (req, res) => {
-  const { adminPassword, ...publicConfig } = readConfig();
-  res.json(publicConfig);
+// GET /api/config
+app.get('/api/config', async (req, res) => {
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    const { adminPassword, _id, ...publicConfig } = cfg;
+    res.json(publicConfig);
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
-// Middleware auth
-const checkAuth = (req, res, next) => {
+// ─── Middleware auth ─────────────────────────────────────────────────────────
+const checkAuth = async (req, res, next) => {
   const token = req.headers.authorization;
-  const config = readConfig();
-
-  if (token === config.adminPassword) {
-    next();
-  } else {
-    res.status(401).json({ error: 'No autorizado' });
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    if (token === cfg.adminPassword) {
+      next();
+    } else {
+      res.status(401).json({ error: 'No autorizado' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
   }
 };
 
-// Login
-app.post('/api/login', (req, res) => {
+// ─── Login ───────────────────────────────────────────────────────────────────
+app.post('/api/login', async (req, res) => {
   const { password } = req.body;
-  const config = readConfig();
-
-  if (password === config.adminPassword) {
-    res.json({
-      success: true,
-      token: password
-    });
-  } else {
-    res.status(401).json({
-      error: 'Contraseña incorrecta'
-    });
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    if (password === cfg.adminPassword) {
+      res.json({ success: true, token: password });
+    } else {
+      res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
   }
 });
 
-// Crear producto
-app.post('/api/products', checkAuth, upload.single('imagen'), (req, res) => {
-  const products = readProducts();
+// ─── Crear producto ───────────────────────────────────────────────────────────
+app.post('/api/products', checkAuth, upload.single('imagen'), async (req, res) => {
+  try {
+    const col = await getProducts();
 
-  const newId =
-    products.length > 0
-      ? Math.max(...products.map(p => p.id)) + 1
-      : 1;
+    let imagenUrl = req.body.imagenUrl || '';
+    // Nota: subida de archivos locales no persiste en Vercel.
+    // Recomendamos usar URL de imagen externa (Cloudinary, etc.)
+    if (req.file) {
+      imagenUrl = `/uploads/${req.file.filename}`;
+    }
 
-  let imagenUrl = req.body.imagenUrl || '';
+    const nuevo = {
+      nombre: req.body.nombre,
+      categoria: req.body.categoria,
+      precio: req.body.precio,
+      precioAnterior: req.body.precioAnterior || null,
+      descripcion: req.body.descripcion,
+      imagen: imagenUrl,
+      badge: req.body.badge || '',
+      rating: parseFloat(req.body.rating) || 4.5,
+      destacado: req.body.destacado === 'true',
+      creadoEn: new Date()
+    };
 
-  if (req.file) {
-    imagenUrl = `/uploads/${req.file.filename}`;
+    const result = await col.insertOne(nuevo);
+    res.json({ id: result.insertedId, ...nuevo });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al crear producto' });
   }
-
-  const nuevo = {
-    id: newId,
-    nombre: req.body.nombre,
-    categoria: req.body.categoria,
-    precio: req.body.precio,
-    precioAnterior: req.body.precioAnterior || null,
-    descripcion: req.body.descripcion,
-    imagen: imagenUrl,
-    badge: req.body.badge || '',
-    rating: parseFloat(req.body.rating) || 4.5,
-    destacado: req.body.destacado === 'true'
-  };
-
-  products.push(nuevo);
-
-  writeProducts(products);
-
-  res.json(nuevo);
 });
 
-// Editar producto
-app.put('/api/products/:id', checkAuth, upload.single('imagen'), (req, res) => {
-  let products = readProducts();
+// ─── Editar producto ──────────────────────────────────────────────────────────
+app.put('/api/products/:id', checkAuth, upload.single('imagen'), async (req, res) => {
+  try {
+    const col = await getProducts();
+    const id = new ObjectId(req.params.id);
 
-  const id = parseInt(req.params.id);
+    const existing = await col.findOne({ _id: id });
+    if (!existing) return res.status(404).json({ error: 'No encontrado' });
 
-  const index = products.findIndex(p => p.id === id);
+    let imagenUrl = req.body.imagenUrl || existing.imagen;
+    if (req.file) imagenUrl = `/uploads/${req.file.filename}`;
 
-  if (index === -1) {
-    return res.status(404).json({
-      error: 'No encontrado'
-    });
+    const updated = {
+      nombre: req.body.nombre,
+      categoria: req.body.categoria,
+      precio: req.body.precio,
+      precioAnterior: req.body.precioAnterior || null,
+      descripcion: req.body.descripcion,
+      imagen: imagenUrl,
+      badge: req.body.badge || '',
+      rating: parseFloat(req.body.rating) || existing.rating,
+      destacado: req.body.destacado === 'true'
+    };
+
+    await col.updateOne({ _id: id }, { $set: updated });
+    res.json({ id: req.params.id, ...updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al editar producto' });
   }
+});
 
-  let imagenUrl = req.body.imagenUrl || products[index].imagen;
-
-  if (req.file) {
-    imagenUrl = `/uploads/${req.file.filename}`;
+// ─── Eliminar producto ────────────────────────────────────────────────────────
+app.delete('/api/products/:id', checkAuth, async (req, res) => {
+  try {
+    const col = await getProducts();
+    const id = new ObjectId(req.params.id);
+    const result = await col.deleteOne({ _id: id });
+    if (result.deletedCount === 0) return res.status(404).json({ error: 'No encontrado' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al eliminar' });
   }
-
-  products[index] = {
-    ...products[index],
-    nombre: req.body.nombre,
-    categoria: req.body.categoria,
-    precio: req.body.precio,
-    precioAnterior: req.body.precioAnterior || null,
-    descripcion: req.body.descripcion,
-    imagen: imagenUrl,
-    badge: req.body.badge || '',
-    rating: parseFloat(req.body.rating) || products[index].rating,
-    destacado: req.body.destacado === 'true'
-  };
-
-  writeProducts(products);
-
-  res.json(products[index]);
 });
 
-// Eliminar producto
-app.delete('/api/products/:id', checkAuth, (req, res) => {
-  let products = readProducts();
-
-  const id = parseInt(req.params.id);
-
-  const newProducts = products.filter(p => p.id !== id);
-
-  if (newProducts.length === products.length) {
-    return res.status(404).json({
-      error: 'No encontrado'
-    });
+// ─── Config admin ─────────────────────────────────────────────────────────────
+app.get('/api/admin/config', checkAuth, async (req, res) => {
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    const { _id, ...data } = cfg;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
   }
-
-  writeProducts(newProducts);
-
-  res.json({
-    success: true
-  });
 });
 
-// Config admin
-app.get('/api/admin/config', checkAuth, (req, res) => {
-  res.json(readConfig());
+app.put('/api/admin/config', checkAuth, async (req, res) => {
+  try {
+    const col = await getConfig();
+    const current = await col.findOne({ _id: 'main' });
+    const updated = { ...current, ...req.body, _id: 'main' };
+    await col.replaceOne({ _id: 'main' }, updated);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al guardar config' });
+  }
 });
 
-app.put('/api/admin/config', checkAuth, (req, res) => {
-  const current = readConfig();
-
-  const updated = {
-    ...current,
-    ...req.body
-  };
-
-  writeConfig(updated);
-
-  res.json(updated);
-});
-
-// Cambiar contraseña
-app.post('/api/admin/change-password', checkAuth, (req, res) => {
+// ─── Cambiar contraseña ───────────────────────────────────────────────────────
+app.post('/api/admin/change-password', checkAuth, async (req, res) => {
   const { newPassword } = req.body;
-
-  const config = readConfig();
-
-  config.adminPassword = newPassword;
-
-  writeConfig(config);
-
-  res.json({
-    success: true
-  });
+  try {
+    const col = await getConfig();
+    await col.updateOne({ _id: 'main' }, { $set: { adminPassword: newPassword } });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al cambiar contraseña' });
+  }
 });
 
-// Export para Vercel
+// ─── Export para Vercel ───────────────────────────────────────────────────────
 module.exports = app;

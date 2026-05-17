@@ -294,8 +294,8 @@ function renderProductos() {
       <p>Categoría: ${escapeHtml(p.categoria)}</p>
       <p>Badge: ${p.badge ? (p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Hot' : p.badge === 'sale' ? '💰 Oferta' : p.badge) : 'ninguno'}</p>
       <div style="margin-top:0.8rem; display:flex; gap:0.5rem;">
-        <button onclick="editarProducto(${p.id})">✏️ Editar</button>
-        <button onclick="eliminarProducto(${p.id})" style="background:#333;">🗑️ Eliminar</button>
+        <button onclick="editarProducto('${p.id}')">✏️ Editar</button>
+        <button onclick="eliminarProducto('${p.id}')" style="background:#333;">🗑️ Eliminar</button>
       </div>
     </div>
   `).join('');
@@ -399,7 +399,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 const storedToken = localStorage.getItem('adminToken');
 if (storedToken) {
   token = storedToken;
-  fetch('/api/products')
+  // Validamos contra una ruta protegida para verificar que el token sigue siendo válido
+  fetch('/api/admin/config', { headers: { 'Authorization': token } })
     .then(res => {
       if (!res.ok) throw new Error();
       document.getElementById('login-box').style.display = 'none';
@@ -409,6 +410,7 @@ if (storedToken) {
     })
     .catch(() => {
       localStorage.removeItem('adminToken');
+      token = null;
       location.reload();
     });
 }
