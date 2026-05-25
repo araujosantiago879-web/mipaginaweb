@@ -77,6 +77,104 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ─── Página de producto con Open Graph (para preview rico en WhatsApp) ───────
+// URL: /producto/:id
+// WhatsApp escanea esta página y muestra imagen + título + descripción en el chat
+app.get('/producto/:id', async (req, res) => {
+  try {
+    const col = await getProducts();
+    const { ObjectId } = require('mongodb');
+    let producto = null;
+
+    // Buscar por ObjectId
+    try {
+      producto = await col.findOne({ _id: new ObjectId(req.params.id) });
+    } catch (_) {
+      // Si el id no es un ObjectId válido, buscar de otra manera
+      producto = null;
+    }
+
+    if (!producto) {
+      return res.redirect('/');
+    }
+
+    const siteUrl   = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3000}`;
+
+    const nombre    = producto.nombre      || 'Producto';
+    const precio    = producto.precio      || '';
+    const desc      = producto.descripcion || '';
+    const imagen    = producto.imagen      || '';
+    const categoria = producto.categoria   || '';
+    const badge     = producto.badge       === 'new'  ? ' · 🆕 Nuevo'
+                    : producto.badge       === 'hot'  ? ' · 🔥 Más vendido'
+                    : producto.badge       === 'sale' ? ' · 🏷️ Oferta'
+                    : '';
+
+    const ogTitle       = `${nombre} — ${precio}${badge}`;
+    const ogDescription = `${desc} | 📦 Envío discreto · Atención 9 a 23 hs · El Lado B Sex Shop Tandil`;
+    const ogUrl         = `${siteUrl}/producto/${req.params.id}`;
+
+    // HTML mínimo con todas las meta OG que WhatsApp necesita
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${ogTitle} — El Lado B · Sex Shop Tandil</title>
+
+  <!-- Open Graph (WhatsApp, Facebook, Telegram) -->
+  <meta property="og:type"        content="product">
+  <meta property="og:site_name"   content="El Lado B · Sex Shop Tandil">
+  <meta property="og:url"         content="${ogUrl}">
+  <meta property="og:title"       content="${ogTitle}">
+  <meta property="og:description" content="${ogDescription}">
+  <meta property="og:image"       content="${imagen}">
+  <meta property="og:image:width"  content="800">
+  <meta property="og:image:height" content="800">
+  <meta property="og:locale"      content="es_AR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="${ogTitle}">
+  <meta name="twitter:description" content="${ogDescription}">
+  <meta name="twitter:image"       content="${imagen}">
+
+  <!-- WhatsApp usa canonical para identificar la URL -->
+  <link rel="canonical" href="${ogUrl}">
+
+  <!-- Redirige al visitante humano a la tienda -->
+  <meta http-equiv="refresh" content="0; url=/">
+  <style>
+    body { margin:0; background:#050508; color:#eef2f5; font-family:sans-serif;
+           display:flex; align-items:center; justify-content:center; min-height:100vh;
+           flex-direction:column; gap:16px; text-align:center; padding:20px; }
+    img  { max-width:260px; border-radius:4px; }
+    h1   { font-size:20px; margin:0; }
+    p    { color:#66ffcc; font-size:18px; font-weight:700; margin:0; }
+    a    { color:#ff3366; }
+  </style>
+</head>
+<body>
+  <img src="${imagen}" alt="${nombre}">
+  <h1>${nombre}</h1>
+  <p>${precio}</p>
+  <a href="/">← Ir a la tienda</a>
+</body>
+</html>`;
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    // Cache 5 min para que WhatsApp retenga la preview
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.send(html);
+
+  } catch (err) {
+    console.error('Error en /producto/:id', err);
+    res.redirect('/');
+  }
+});
+
 // ─── API pública ─────────────────────────────────────────────────────────────
 
 // GET /api/products
@@ -253,5 +351,9 @@ app.post('/api/admin/change-password', checkAuth, async (req, res) => {
   }
 });
 
-// ─── Export para Vercel ───────────────────────────────────────────────────────
+// ─── Export para Vercel / escuchar en local ───────────────────────────────────
 module.exports = app;
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`✅ Servidor corriendo en http://localhost:${PORT}`));
+}
