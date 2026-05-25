@@ -24,13 +24,16 @@ async function connectDB() {
   db = client.db('eladob'); // nombre de tu base de datos
   console.log('✅ Conectado a MongoDB Atlas');
 
+  // Número correcto de WhatsApp
+  const WA_NUMBER = '5492494639700';
+
   // Crear config por defecto si no existe
   const configCol = db.collection('config');
   const existing = await configCol.findOne({ _id: 'main' });
   if (!existing) {
     await configCol.insertOne({
       _id: 'main',
-      whatsappNumber: '5492494000000',
+      whatsappNumber: WA_NUMBER,
       horarios: {
         lunesViernes: '9:00 — 23:00 hs',
         sabados: '9:00 — 23:00 hs',
@@ -47,6 +50,13 @@ async function connectDB() {
       ],
       adminPassword: 'admin123'
     });
+  } else if (
+    existing.whatsappNumber === '5492494000000' ||
+    existing.whatsappNumber === '5492490000000'
+  ) {
+    // Migración: actualizar número placeholder al número real
+    await configCol.updateOne({ _id: 'main' }, { $set: { whatsappNumber: WA_NUMBER } });
+    console.log('✅ Número de WhatsApp actualizado a', WA_NUMBER);
   }
 
   return db;

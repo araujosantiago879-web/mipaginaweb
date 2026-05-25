@@ -51,6 +51,7 @@
     .logo small { display:block; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
     .nav-links { display:flex; gap:28px; list-style:none; }
     .nav-links a { font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); transition:color .25s; cursor:pointer; }
+    .nav-links a { font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); transition:color .25s; cursor:pointer; display:inline-block; padding:4px 0; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
     .nav-links a:hover { color:var(--paper); }
     .nav-links a.active { color:var(--rose); border-bottom:2px solid var(--rose); padding-bottom:4px; }
     .nav-actions { display:flex; gap:10px; align-items:center; flex-shrink:0; }
@@ -549,10 +550,10 @@
 <nav>
   <a href="#" class="logo">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
   <ul class="nav-links">
-    <li><a data-tab="tienda" class="active">Tienda</a></li>
-    <li><a data-tab="discrecion">Discreción</a></li>
-    <li><a data-tab="testimonios">Reseñas</a></li>
-    <li><a data-tab="contacto">Contacto</a></li>
+    <li><a href="#" data-tab="tienda" class="active">Tienda</a></li>
+    <li><a href="#" data-tab="discrecion">Discreción</a></li>
+    <li><a href="#" data-tab="testimonios">Reseñas</a></li>
+    <li><a href="#" data-tab="contacto">Contacto</a></li>
   </ul>
   <div class="nav-actions">
     <span class="tag-online">Abierto ahora</span>
@@ -791,6 +792,8 @@
       <ul class="f-links">
         <li><a data-tab="discrecion">Cómo funciona</a></li>
         <li><a data-tab="contacto">Envíos y entregas</a></li>
+        <li><a href="#" data-tab="discrecion">Cómo funciona</a></li>
+        <li><a href="#" data-tab="contacto">Envíos y entregas</a></li>
         <li><a href="#">Cambios y devoluciones</a></li>
         <li><a href="#">Medios de pago</a></li>
         <li><a href="#">Preguntas frecuentes</a></li>
@@ -850,7 +853,8 @@
 
 <script>
 // ── Número de WhatsApp (se pisa desde /api/config) ──
-let configWhatsappNumber = '5492494000000';
+
+let configWhatsappNumber = '5492494639700'; // número real de El Lado B
 
 // ── Helpers WhatsApp ──
 // Arma el mensaje completo; incluye la URL /producto/:id para que
@@ -968,6 +972,25 @@ if (savedTab && ['tienda','discrecion','testimonios','contacto'].includes(savedT
   activateTab('tienda');
 }
 
+// ── Event delegation global para TODOS los [data-tab] ──
+// Un solo listener en document captura clicks actuales y futuros, en desktop y móvil
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-tab]');
+  if (!el) return;
+  e.preventDefault();
+  const tab = el.getAttribute('data-tab');
+  if (tab) activateTab(tab);
+});
+
+// Botón hero "Ver productos"
+document.getElementById('hero-tienda-btn')?.addEventListener('click', e => {
+  e.preventDefault();
+  activateTab('tienda');
+});
+
+// Siempre arrancar en "Tienda" para que los productos sean lo primero que se ve
+activateTab('tienda');
+
 // ── Productos ──
 let productos = [];
 let categoriasUnicas = [];
@@ -976,11 +999,31 @@ let ordenActual = 'default';
 let busquedaActual = '';
 
 async function loadProducts() {
-  const res = await fetch('/api/products');
-  productos = await res.json();
-  categoriasUnicas = ['Todo', ...new Set(productos.map(p => p.categoria))];
-  renderTabs();
-  renderProducts();
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Respuesta inválida');
+    productos = data;
+    categoriasUnicas = ['Todo', ...new Set(productos.map(p => p.categoria))];
+    renderTabs();
+    renderProducts();
+  } catch (err) {
+    console.error('Error cargando productos:', err);
+    // Mostrar mensaje amigable en la grilla si falla
+    const container = document.getElementById('products-container');
+    if (container) {
+      container.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);">
+          <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+          <div style="font-family:'Inconsolata',monospace;font-size:11px;letter-spacing:2px;">
+            Error al cargar los productos. Recargá la página o consultanos por
+            <a href="https://wa.me/${configWhatsappNumber}" target="_blank"
+               style="color:var(--lime);">WhatsApp</a>.
+          </div>
+        </div>`;
+    }
+  }
 }
 
 function renderTabs() {
