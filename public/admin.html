@@ -63,6 +63,7 @@
     .modal-actions button { margin: 0; }
     .btn-cancel { background: #2a2a34; }
     .btn-cancel:hover { background: #3a3a44; }
+    .precio-anterior { color:#ff6666; text-decoration:line-through; font-size:0.85rem; opacity:0.9; margin-left:6px; }
   </style>
 </head>
 <body>
@@ -110,7 +111,7 @@
       <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre" required></div>
       <div class="form-group"><label>Categoría</label><input type="text" id="prod-categoria" required></div>
       <div class="form-group"><label>Precio (ej: $24.900)</label><input type="text" id="prod-precio" required></div>
-      <div class="form-group"><label>Precio anterior (opcional)</label><input type="text" id="prod-precioAnterior"></div>
+      <div class="form-group"><label>💰 Precio anterior (opcional — tachado)</label><input type="text" id="prod-precioAnterior" placeholder="ej: $34.900" style="border-color:#ff666644;"></div>
       <div class="form-group"><label>Descripción corta</label><textarea id="prod-descripcion" rows="3" required></textarea></div>
       <div class="form-group"><label>URL de la imagen</label><input type="text" id="prod-imagenUrl" required></div>
       <div class="form-group"><label>Badge (new / hot / sale / vacío)</label><input type="text" id="prod-badge" placeholder="new, hot, sale"></div>
@@ -290,7 +291,7 @@ function renderProductos() {
     <div class="producto-card">
       <img src="${p.imagen}" onerror="this.src='https://placehold.co/400x300?text=Sin+imagen'">
       <h3 style="margin-top:8px;">${escapeHtml(p.nombre)}</h3>
-      <p><strong>${p.precio}</strong> ${p.precioAnterior ? `<del>${p.precioAnterior}</del>` : ''}</p>
+      <p><strong style="font-size:1.1rem;">${p.precio}</strong> ${p.precioAnterior ? `<span class="precio-anterior">${p.precioAnterior}</span>` : ''}</p>
       <p>Categoría: ${escapeHtml(p.categoria)}</p>
       <p>Badge: ${p.badge ? (p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Hot' : p.badge === 'sale' ? '💰 Oferta' : p.badge) : 'ninguno'}</p>
       <div style="margin-top:0.8rem; display:flex; gap:0.5rem;">
