@@ -1269,7 +1269,8 @@ document.addEventListener('click', e => {
 let reviewRating = 0;
 document.querySelectorAll('.review-star').forEach(s => {
   s.addEventListener('click', () => {
-    reviewRating = parseInt(s.dataset.val);
+    const val = parseInt(s.dataset.val);
+    reviewRating = reviewRating === val ? 0 : val;
     document.querySelectorAll('.review-star').forEach(st => st.classList.toggle('active', parseInt(st.dataset.val) <= reviewRating));
   });
 });
