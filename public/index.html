@@ -574,7 +574,7 @@
     <h1 class="hero-h1">Todo lo que<br><em>deseás,</em><br><span class="ghost">en tu puerta.</span></h1>
     <p class="hero-p">La tienda de adultos más discreta de Tandil. Packaging sin logos, entrega el mismo día, atención real de 9 a 23 hs. Sin vergüenzas, sin complicaciones.</p>
     <div class="hero-btns">
-      <a href="#" class="btn-fill" id="hero-tienda-btn"><span>Ver productos</span><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+      <a href="#" class="btn-fill" id="hero-tienda-btn" data-tab="tienda"><span>Ver productos</span><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       <a href="#" target="_blank" class="btn-ghost" id="hero-whatsapp">Consultar por WA</a>
     </div>
     <div class="hero-chips">
@@ -957,14 +957,6 @@ function activateTab(tabId) {
   if (activeLink) activeLink.classList.add('active');
   localStorage.setItem('activeTab', tabId);
 }
-document.querySelectorAll('[data-tab]').forEach(el => {
-  el.addEventListener('click', e => {
-    e.preventDefault();
-    const tab = el.getAttribute('data-tab');
-    if (tab) activateTab(tab);
-  });
-});
-document.getElementById('hero-tienda-btn')?.addEventListener('click', e => { e.preventDefault(); activateTab('tienda'); });
 const savedTab = localStorage.getItem('activeTab');
 if (savedTab && ['tienda','discrecion','testimonios','contacto'].includes(savedTab)) {
   activateTab(savedTab);
@@ -973,19 +965,16 @@ if (savedTab && ['tienda','discrecion','testimonios','contacto'].includes(savedT
 }
 
 // ── Event delegation global para TODOS los [data-tab] ──
-// Un solo listener en document captura clicks actuales y futuros, en desktop y móvil
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-tab]');
   if (!el) return;
   e.preventDefault();
   const tab = el.getAttribute('data-tab');
-  if (tab) activateTab(tab);
-});
-
-// Botón hero "Ver productos"
-document.getElementById('hero-tienda-btn')?.addEventListener('click', e => {
-  e.preventDefault();
-  activateTab('tienda');
+  if (tab) {
+    activateTab(tab);
+    const section = document.getElementById(`tab-${tab}`);
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 });
 
 // Siempre arrancar en "Tienda" para que los productos sean lo primero que se ve
@@ -1222,6 +1211,8 @@ function renderFooterCats() {
     a.addEventListener('click', e => {
       e.preventDefault();
       activateTab('tienda');
+      const section = document.getElementById('tab-tienda');
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setTimeout(() => {
         const t = document.querySelector(`.tab[data-categoria="${a.dataset.cat}"]`);
         if (t) t.click();
