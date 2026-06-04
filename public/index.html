@@ -288,6 +288,22 @@
     .testi-name { font-size:13px; font-weight:700; }
     .testi-when { font-family:'Inconsolata',monospace; font-size:9px; color:var(--muted); }
 
+    /* ── Formulario de reseña ── */
+    .review-form-wrap { margin-top:48px; padding:40px; background:var(--ink-2); border:1px solid var(--edge); }
+    .review-form-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; margin-bottom:24px; }
+    .review-form-title em { font-style:italic; color:var(--rose); }
+    .review-form { display:flex; flex-direction:column; gap:16px; }
+    .review-fields { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+    .review-input { flex:1; min-width:180px; padding:12px 16px; background:var(--ink-3); border:1px solid var(--edge); color:var(--paper); font-family:'Inconsolata',monospace; font-size:13px; border-radius:1px; }
+    .review-input:focus { outline:none; border-color:var(--rose); }
+    .review-stars-input { display:flex; gap:4px; }
+    .review-star { font-size:24px; color:var(--muted-2); cursor:pointer; transition:color .2s; user-select:none; }
+    .review-star.active, .review-star:hover { color:var(--amber); }
+    .review-textarea { width:100%; padding:12px 16px; background:var(--ink-3); border:1px solid var(--edge); color:var(--paper); font-family:'Inconsolata',monospace; font-size:13px; border-radius:1px; resize:vertical; }
+    .review-textarea:focus { outline:none; border-color:var(--rose); }
+    .review-submit { align-self:flex-start; padding:14px 28px; background:var(--rose); color:var(--ink); font-weight:800; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:background .2s; border-radius:1px; }
+    .review-submit:hover { background:var(--rose-d); }
+
     /* ── WPP block ── */
     .wpp-block { margin:0 48px 96px; background:linear-gradient(135deg,#0a1f14 0%,#0e1c12 100%); border:1px solid rgba(102,255,204,.12); padding:60px 68px; display:grid; grid-template-columns:1fr auto; gap:40px; align-items:center; }
     .wpp-block h2 { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:700; }
@@ -681,6 +697,25 @@
       <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Pedí un vibrador y llegó en menos de dos horas, en una bolsa completamente discreta. La atención por WhatsApp fue re amable y sin hacerme sentir incómoda.</div><div class="testi-foot"><div class="testi-av">M</div><div><div class="testi-name">María G.</div><div class="testi-when">Mayo 2025 · Compra verificada ✓</div></div></div></div>
       <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Me asesoraron sin juzgarme para nada. El producto llegó al día siguiente exactamente como lo describían. Voy a volver a comprar sin dudas.</div><div class="testi-foot"><div class="testi-av">L</div><div><div class="testi-name">Lucía R.</div><div class="testi-when">Abril 2025 · Compra verificada ✓</div></div></div></div>
       <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Compré un kit de regalo y llegó en una caja súper prolija sin que nadie supiera qué había adentro. Los precios son muy buenos comparado con otros lugares de Tandil.</div><div class="testi-foot"><div class="testi-av">C</div><div><div class="testi-name">Carlos M.</div><div class="testi-when">Marzo 2025 · Compra verificada ✓</div></div></div></div>
+    </div>
+
+    <!-- ── Formulario de reseña ── -->
+    <div class="review-form-wrap reveal">
+      <h3 class="review-form-title">Dejanos tu <em>opinión</em></h3>
+      <form class="review-form" id="reviewForm">
+        <div class="review-fields">
+          <input type="text" id="review-name" placeholder="Tu nombre" required class="review-input">
+          <div class="review-stars-input">
+            <span class="review-star" data-val="1">★</span>
+            <span class="review-star" data-val="2">★</span>
+            <span class="review-star" data-val="3">★</span>
+            <span class="review-star" data-val="4">★</span>
+            <span class="review-star" data-val="5">★</span>
+          </div>
+        </div>
+        <textarea id="review-text" placeholder="Contá tu experiencia…" required class="review-textarea" rows="3"></textarea>
+        <button type="submit" class="review-submit">Enviar reseña por WhatsApp</button>
+      </form>
     </div>
   </section>
 </div>
@@ -1228,6 +1263,28 @@ document.addEventListener('click', e => {
     e.target.textContent = e.target.textContent === '♡' ? '♥' : '♡';
     e.target.style.color = e.target.textContent === '♥' ? 'var(--rose)' : '';
   }
+});
+
+// ── Formulario de reseña ──
+let reviewRating = 0;
+document.querySelectorAll('.review-star').forEach(s => {
+  s.addEventListener('click', () => {
+    reviewRating = parseInt(s.dataset.val);
+    document.querySelectorAll('.review-star').forEach(st => st.classList.toggle('active', parseInt(st.dataset.val) <= reviewRating));
+  });
+});
+document.getElementById('reviewForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = document.getElementById('review-name').value.trim();
+  const text = document.getElementById('review-text').value.trim();
+  if (!name || !text || !reviewRating) { showToast('Completá tu nombre, puntuación y reseña', true); return; }
+  const stars = '★'.repeat(reviewRating) + '☆'.repeat(5 - reviewRating);
+  const msg = `¡Hola! Quiero dejar una reseña:\n\n👤 ${name}\n⭐ ${stars}\n📝 ${text}`;
+  window.open(`https://wa.me/${configWhatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
+  showToast('¡Gracias por tu reseña!');
+  document.getElementById('reviewForm').reset();
+  document.querySelectorAll('.review-star').forEach(st => st.classList.remove('active'));
+  reviewRating = 0;
 });
 
 // ── Scroll reveal ──
