@@ -189,43 +189,6 @@
     .search-empty p { font-family:'Inconsolata',monospace; font-size:11px; color:var(--muted-2); }
     .search-empty-clear { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--rose); border-bottom:1px solid transparent; transition:border-color .2s; }
     .search-empty-clear:hover { border-bottom-color:var(--rose); }
-    .search-dropdown {
-      position:absolute; top:calc(100% + 4px); left:0; right:0;
-      background:var(--ink-2); border:1px solid var(--edge);
-      border-radius:0; max-height:400px; overflow-y:auto;
-      display:none; z-index:100;
-      box-shadow:0 12px 40px rgba(0,0,0,.5);
-    }
-    .search-dropdown.open { display:block; }
-    .search-dropdown-item {
-      display:flex; align-items:center; gap:12px;
-      padding:10px 14px; cursor:pointer;
-      transition:background .15s; border-bottom:1px solid var(--ink-3);
-    }
-    .search-dropdown-item:last-child { border-bottom:none; }
-    .search-dropdown-item:hover,
-    .search-dropdown-item.highlight { background:var(--ink-3); }
-    .search-dropdown-item img {
-      width:40px; height:40px; object-fit:cover;
-      border-radius:4px; flex-shrink:0;
-    }
-    .search-dropdown-item .sdi-info { flex:1; min-width:0; }
-    .search-dropdown-item .sdi-name {
-      font-family:'Archivo',sans-serif; font-size:13px; font-weight:600;
-      color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .search-dropdown-item .sdi-cat {
-      font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1px;
-      color:var(--muted); text-transform:uppercase;
-    }
-    .search-dropdown-item .sdi-price {
-      font-family:'Archivo',sans-serif; font-size:13px; font-weight:700;
-      color:var(--rose); white-space:nowrap;
-    }
-    .search-dropdown-empty {
-      padding:32px 20px; text-align:center;
-      font-family:'Inconsolata',monospace; font-size:11px; color:var(--muted-2);
-    }
 
     .tabs-bar { display:flex; gap:0; border-bottom:1px solid var(--edge); margin-bottom:40px; overflow-x:auto; scrollbar-width:none; }
     .tabs-bar::-webkit-scrollbar { display:none; }
@@ -720,10 +683,9 @@
         type="search"
         autocomplete="off"
         placeholder="Buscar producto, categoría…"
-        oninput="handleSearch(this.value)" onfocus="handleSearchFocus()"
+        oninput="handleSearch(this.value)"
       >
       <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpiar búsqueda">✕</button>
-      <div class="search-dropdown" id="search-dropdown"></div>
     </div>
     <div class="search-results-count" id="search-results-count"></div>
 
@@ -1271,77 +1233,13 @@ document.getElementById('modal-close').addEventListener('click', () => {
 // handleNL eliminado — reemplazado por canal de WhatsApp
 
 // ── Buscador ──
-function handleSearchFocus() {
-  const tabTodo = document.querySelector('.tab[data-categoria="Todo"]');
-  if (tabTodo && !tabTodo.classList.contains('on')) {
-    tabTodo.click();
-  }
-  openSearchDropdown();
-}
-
-function openSearchDropdown() {
-  const dd = document.getElementById('search-dropdown');
-  if (!dd) return;
-  renderSearchDropdown(busquedaActual);
-  dd.classList.add('open');
-}
-
-function closeSearchDropdown() {
-  const dd = document.getElementById('search-dropdown');
-  if (dd) dd.classList.remove('open');
-}
-
-function renderSearchDropdown(query) {
-  const dd = document.getElementById('search-dropdown');
-  if (!dd) return;
-  let items = [...productos];
-  if (query) {
-    const q = query.toLowerCase().trim();
-    items = items.filter(p =>
-      p.nombre?.toLowerCase().includes(q) ||
-      p.descripcion?.toLowerCase().includes(q) ||
-      p.categoria?.toLowerCase().includes(q)
-    );
-  }
-  if (items.length === 0) {
-    dd.innerHTML = `<div class="search-dropdown-empty">${query ? `Sin resultados para "${query}"` : 'No hay productos disponibles'}</div>`;
-    return;
-  }
-  dd.innerHTML = items.map(p => `
-    <div class="search-dropdown-item" data-p="${encodeURIComponent(JSON.stringify(p))}">
-      <img src="${p.imagen}" alt="${p.nombre}" loading="lazy">
-      <div class="sdi-info">
-        <div class="sdi-name">${p.nombre}</div>
-        <div class="sdi-cat">${p.categoria}</div>
-      </div>
-      <div class="sdi-price">${p.precio}</div>
-    </div>
-  `).join('');
-  dd.querySelectorAll('.search-dropdown-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const p = JSON.parse(decodeURIComponent(el.dataset.p));
-      const card = document.querySelector(`.card[data-p="${el.dataset.p}"]`);
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.style.outline = '2px solid var(--rose)';
-        setTimeout(() => card.style.outline = '', 1500);
-      }
-      closeSearchDropdown();
-    });
-  });
-}
-
 function handleSearch(val) {
   busquedaActual = val.trim();
   const clearBtn = document.getElementById('search-clear');
   if (clearBtn) clearBtn.classList.toggle('visible', busquedaActual.length > 0);
+  // Al buscar, reseteamos el tab a "Todo" para no limitar la búsqueda por categoría
   const catActual = document.querySelector('.tab.on')?.dataset.categoria;
   renderProducts(catActual === 'Todo' ? null : catActual || null);
-  renderSearchDropdown(busquedaActual);
-  const dd = document.getElementById('search-dropdown');
-  if (dd && document.activeElement === document.getElementById('search-input')) {
-    dd.classList.add('open');
-  }
 }
 
 function clearSearch() {
@@ -1354,20 +1252,8 @@ function clearSearch() {
   if (countEl) countEl.innerHTML = '';
   const catActual = document.querySelector('.tab.on')?.dataset.categoria;
   renderProducts(catActual === 'Todo' ? null : catActual || null);
-  renderSearchDropdown('');
-  const dd = document.getElementById('search-dropdown');
-  if (dd && document.activeElement === inp) dd.classList.add('open');
   if (inp) inp.focus();
 }
-
-// Cerrar dropdown al hacer clic fuera
-document.addEventListener('click', e => {
-  const wrap = document.querySelector('.search-wrap');
-  const dd = document.getElementById('search-dropdown');
-  if (dd && wrap && !wrap.contains(e.target)) {
-    dd.classList.remove('open');
-  }
-});
 
 // Atajo de teclado: / abre el buscador, Escape limpia
 document.addEventListener('keydown', e => {
@@ -1381,29 +1267,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.activeElement === inp) {
     clearSearch();
     inp.blur();
-    closeSearchDropdown();
   }
 });
-
-// Refrescar productos cada 30s para reflejar cambios del admin automáticamente
-setInterval(async () => {
-  try {
-    const res = await fetch('/api/products');
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length !== productos.length) {
-        productos = data;
-        categoriasUnicas = ['Todo', ...new Set(productos.map(p => p.categoria))];
-        renderTabs();
-        const catActual = document.querySelector('.tab.on')?.dataset.categoria;
-        renderProducts(catActual === 'Todo' ? null : catActual || null);
-        if (document.getElementById('search-dropdown').classList.contains('open')) {
-          renderSearchDropdown(busquedaActual);
-        }
-      }
-    }
-  } catch (_) {}
-}, 30000);
 
 // ── Filtros ──
 document.querySelectorAll('.filter-btn').forEach(btn => {
