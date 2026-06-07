@@ -683,7 +683,7 @@
         type="search"
         autocomplete="off"
         placeholder="Buscar producto, categoría…"
-        oninput="handleSearch(this.value)"
+        oninput="handleSearch(this.value)" onfocus="handleSearchFocus()"
       >
       <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpiar búsqueda">✕</button>
     </div>
@@ -1233,6 +1233,13 @@ document.getElementById('modal-close').addEventListener('click', () => {
 // handleNL eliminado — reemplazado por canal de WhatsApp
 
 // ── Buscador ──
+function handleSearchFocus() {
+  const tabTodo = document.querySelector('.tab[data-categoria="Todo"]');
+  if (tabTodo && !tabTodo.classList.contains('on')) {
+    tabTodo.click();
+  }
+}
+
 function handleSearch(val) {
   busquedaActual = val.trim();
   const clearBtn = document.getElementById('search-clear');
