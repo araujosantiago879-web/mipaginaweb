@@ -27,7 +27,16 @@
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior:smooth; }
-    body { background:var(--ink); color:var(--paper); font-family:'Archivo',sans-serif; overflow-x:hidden; }
+    body { background:var(--ink); color:var(--paper); font-family:'Archivo',sans-serif; overflow-x:hidden; position:relative; }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:-1;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 30%, rgba(255,51,102,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 70% at 80% 60%, rgba(255,170,51,.05) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 50% at 50% 80%, rgba(102,255,204,.06) 0%, transparent 50%);
+      animation:bodyAmbient 25s ease-in-out infinite;
+      pointer-events:none;
+    }
     a { color:inherit; text-decoration:none; }
     button { font-family:inherit; border:none; background:none; cursor:pointer; }
 
@@ -121,7 +130,7 @@
     .chip-trust { display:inline-flex; align-items:center; gap:8px; font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); background:var(--ink-3); border:1px solid var(--edge); padding:8px 14px; }
     .chip-trust .dot { width:6px; height:6px; border-radius:50%; background:var(--lime); }
     .hero-r { position:relative; overflow:hidden; background:#000; }
-    .hero-r-bg-gradient { position:absolute; inset:0; background:radial-gradient(circle at 30% 50%,#000000 0%,#2a0a12 70%,#4a1a2a 100%); z-index:1; opacity:.85; mix-blend-mode:multiply; }
+    .hero-r-bg-gradient { position:absolute; inset:0; background:radial-gradient(circle at 30% 50%,#1a0008 0%,#2a0a12 50%,#1a0a00 100%); z-index:1; opacity:.85; mix-blend-mode:multiply; }
     .hero-people-blur { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(4px) brightness(.7) saturate(1.2); transform:scale(1.05); opacity:.75; z-index:0; transition:all .5s ease; }
     .hero-r-blend { position:absolute; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px); z-index:2; mix-blend-mode:overlay; }
     .hero-r-veil { position:absolute; inset:0; background:linear-gradient(to right,var(--ink) 0%,transparent 40%),linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 60%); z-index:3; }
@@ -141,7 +150,8 @@
     .ts-item p { font-family:'Inconsolata',monospace; font-size:10px; color:var(--muted); }
 
     /* ── Tienda ── */
-    .tienda { padding:96px 48px; }
+    .tienda { padding:96px 48px; position:relative; background: radial-gradient(ellipse 50% 60% at 30% 25%, rgba(255,51,102,.05) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 70% 75%, rgba(102,255,204,.04) 0%, transparent 50%), radial-gradient(ellipse 30% 40% at 50% 50%, rgba(255,170,51,.03) 0%, transparent 50%); background-size:200% 200%; animation:tiendaBg 30s ease-in-out infinite; }
+    @keyframes tiendaBg { 0%{background-position:0% 0%} 50%{background-position:100% 100%} 100%{background-position:0% 0%} }
     .section-head { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:52px; gap:20px; flex-wrap:wrap; }
     .section-h2 { font-family:'Cormorant Garamond',serif; font-size:clamp(42px,5vw,68px); font-weight:700; line-height:.9; letter-spacing:-1.5px; }
     .section-h2 em { font-style:italic; color:var(--rose); }
@@ -206,40 +216,67 @@
     @keyframes fadein { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 
     /* ── Fondos animados sutiles ── */
-    @keyframes gradientShift {
+    @keyframes lightDrift {
+      0% { transform: translate(0%,0%); }
+      25% { transform: translate(8%,-6%); }
+      50% { transform: translate(-4%,10%); }
+      75% { transform: translate(6%,-3%); }
+      100% { transform: translate(0%,0%); }
+    }
+    @keyframes heroGradientMove {
+      0% { transform:scale(1) translate(0%,0%); }
+      33% { transform:scale(1.08) translate(3%,-2%); }
+      66% { transform:scale(.95) translate(-2%,3%); }
+      100% { transform:scale(1) translate(0%,0%); }
+    }
+    @keyframes gradientBreath {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    @keyframes ambientGlow {
-      0%, 100% { opacity:.3; transform:scale(1) translate(0,0); }
-      33% { opacity:.6; transform:scale(1.04) translate(1%,-1%); }
-      66% { opacity:.4; transform:scale(.98) translate(-1%,1%); }
+    @keyframes bodyAmbient {
+      0% { transform:scale(1) translate(0%,0%); }
+      33% { transform:scale(1.06) translate(3%,-2%); }
+      66% { transform:scale(.94) translate(-2%,4%); }
+      100% { transform:scale(1) translate(0%,0%); }
     }
+    @keyframes sectionBg { 0%{background-position:0% 0%} 50%{background-position:100% 100%} 100%{background-position:0% 0%} }
+    /* Hero: gradiente que respira */
     .hero-r-bg-gradient {
-      background-size:200% 200%;
-      animation:gradientShift 14s ease infinite;
+      animation:heroGradientMove 16s ease-in-out infinite;
     }
+    /* WPP y Canal: gradiente animado */
     .wpp-block {
-      background-size:200% 200%;
-      animation:gradientShift 16s ease infinite;
+      background:linear-gradient(135deg,#0a1f14 0%,#14502e 30%,#0e1c12 70%,#0a1f14 100%);
+      background-size:300% 300%;
+      animation:gradientBreath 20s ease infinite;
     }
     .canal-block {
-      background-size:200% 200%;
-      animation:gradientShift 18s ease infinite;
+      background:linear-gradient(135deg,#071a10 0%,#0e3d20 30%,#0a1f14 60%,#0a2e18 100%);
+      background-size:300% 300%;
+      animation:gradientBreath 22s ease infinite;
     }
+    /* Discreción: luz ambiental que se mueve */
     .disc-img::after {
       content:''; position:absolute; inset:0;
-      background:radial-gradient(ellipse at 30% 50%,rgba(255,51,102,.06) 0%,transparent 60%);
-      pointer-events:none; animation:ambientGlow 12s ease-in-out infinite;
+      background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(255,51,102,.1) 0%,transparent 60%);
+      pointer-events:none; animation:lightDrift 20s ease-in-out infinite;
     }
+    /* Cards oscuras: brillo sutil animado */
     .hor-card, .testi, .review-form-wrap {
       position:relative; overflow:hidden;
     }
     .hor-card::after, .testi::after, .review-form-wrap::after {
       content:''; position:absolute; inset:0;
-      background:radial-gradient(ellipse at 50% 0%,rgba(255,51,102,.04) 0%,transparent 60%);
-      pointer-events:none; animation:ambientGlow 10s ease-in-out infinite;
+      background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(255,51,102,.07) 0%,transparent 60%);
+      pointer-events:none; animation:lightDrift 22s ease-in-out infinite;
+    }
+    /* Footer: luz tenue */
+    footer { position:relative; overflow:hidden; }
+    footer::after {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(255,51,102,.05) 0%,transparent 60%);
+      pointer-events:none; animation:lightDrift 25s ease-in-out infinite;
     }
 
     /* ── Grilla de productos ── */
@@ -319,7 +356,7 @@
     .ib-link:hover { gap:14px; }
 
     /* ── Discreción ── */
-    .discrecion { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--edge); border-bottom:1px solid var(--edge); }
+    .discrecion { display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--edge); border-bottom:1px solid var(--edge); position:relative; background: radial-gradient(ellipse 40% 50% at 70% 30%, rgba(255,170,51,.04) 0%, transparent 50%), radial-gradient(ellipse 50% 60% at 30% 70%, rgba(255,51,102,.03) 0%, transparent 50%); background-size:200% 200%; animation:sectionBg 35s ease-in-out infinite; }
     .disc-img { position:relative; min-height:420px; background:var(--ink-2); overflow:hidden; }
     .disc-img img { width:100%; height:100%; object-fit:cover; opacity:.45; filter:grayscale(40%); }
     .disc-img-veil { position:absolute; inset:0; background:linear-gradient(to right,transparent 50%,var(--ink-2)); }
@@ -333,7 +370,7 @@
     .check { width:22px; height:22px; background:rgba(102,255,204,.08); border:1px solid rgba(102,255,204,.25); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--lime); flex-shrink:0; }
 
     /* ── Horarios ── */
-    .horarios { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:0 48px 96px; }
+    .horarios { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:0 48px 96px; position:relative; background: radial-gradient(ellipse 45% 55% at 30% 40%, rgba(255,51,102,.04) 0%, transparent 50%), radial-gradient(ellipse 40% 50% at 70% 60%, rgba(255,170,51,.03) 0%, transparent 50%); background-size:200% 200%; animation:sectionBg 35s ease-in-out infinite; }
     .hor-card { background:var(--ink-2); border:1px solid var(--edge); padding:44px; display:flex; flex-direction:column; gap:22px; }
     .hor-icon { width:48px; height:48px; background:rgba(255,51,102,.08); border:1px solid rgba(255,51,102,.15); display:flex; align-items:center; justify-content:center; color:var(--rose); }
     .hor-card h3 { font-size:20px; font-weight:700; }
@@ -343,7 +380,7 @@
     .hor-row span:last-child { color:var(--lime); }
 
     /* ── Testimonios ── */
-    .testimonios { padding:0 48px 96px; }
+    .testimonios { padding:0 48px 96px; position:relative; background: radial-gradient(ellipse 50% 60% at 50% 30%, rgba(102,255,204,.04) 0%, transparent 50%), radial-gradient(ellipse 40% 50% at 30% 70%, rgba(255,51,102,.03) 0%, transparent 50%); background-size:200% 200%; animation:sectionBg 30s ease-in-out infinite; }
     .testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:48px; }
     .testi { background:var(--ink-2); border:1px solid var(--edge); padding:32px; display:flex; flex-direction:column; gap:16px; }
     .testi-stars { display:flex; gap:2px; }
