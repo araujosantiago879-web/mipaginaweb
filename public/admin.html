@@ -64,6 +64,112 @@
     .btn-cancel { background: #2a2a34; }
     .btn-cancel:hover { background: #3a3a44; }
     .precio-anterior { color:#ff6666; text-decoration:line-through; font-size:0.85rem; opacity:0.9; margin-left:6px; }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      position: relative;
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.02);
+    }
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: #ff3366;
+      background: rgba(255,51,102,0.05);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .upload-zone .upload-icon { font-size: 2rem; }
+    .upload-zone .upload-hint { font-size: 0.75rem; color: #888; }
+
+    /* IMAGE ITEMS */
+    .img-item {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .img-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .img-item .img-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+      padding: 0;
+    }
+    .img-item .img-remove:hover {
+      background: #ff3366;
+    }
+    .img-item.removing {
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+    .img-item.removing::after {
+      content: '✕';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #ff3366;
+      background: rgba(0,0,0,0.4);
+    }
+
+    /* CARD GALLERY */
+    .card-gallery { position: relative; }
+    .card-main-img {
+      width:100%; height:160px; object-fit:cover; border-radius:6px;
+      background:#0a0a10; display:block; transition: opacity 0.2s;
+    }
+    .card-thumbs {
+      display:flex; gap:4px; margin-top:6px; overflow-x:auto;
+      padding-bottom:2px;
+    }
+    .card-thumbs img {
+      width:40px; height:40px; object-fit:cover; border-radius:4px;
+      border:1px solid rgba(255,255,255,0.1); cursor:pointer;
+      flex-shrink:0; transition: 0.15s;
+    }
+    .card-thumbs img:hover { border-color:#ff3366; }
+    .card-thumbs img.active { border-color:#ff3366; box-shadow: 0 0 0 2px #ff3366; }
+    .card-img-count {
+      position: absolute; bottom:6px; right:6px;
+      background: rgba(0,0,0,0.75); color:#fff; font-size:11px;
+      padding:2px 8px; border-radius:20px; font-weight:600;
+      backdrop-filter: blur(4px);
+    }
   </style>
 </head>
 <body>
@@ -113,7 +219,17 @@
       <div class="form-group"><label>Precio (ej: $24.900)</label><input type="text" id="prod-precio" required></div>
       <div class="form-group"><label>💰 Precio anterior (opcional — tachado)</label><input type="text" id="prod-precioAnterior" placeholder="ej: $34.900" style="border-color:#ff666644;"></div>
       <div class="form-group"><label>Descripción corta</label><textarea id="prod-descripcion" rows="3" required></textarea></div>
-      <div class="form-group"><label>URL de la imagen</label><input type="text" id="prod-imagenUrl" required></div>
+      <div class="form-group">
+        <label>Imágenes del producto</label>
+        <div class="upload-zone" id="upload-zone">
+          <span class="upload-icon">📸</span>
+          <span>Hacé clic o arrastrá imágenes acá</span>
+          <span class="upload-hint">Podés seleccionar varias a la vez</span>
+          <input type="file" id="prod-imagenes" accept="image/*" multiple>
+        </div>
+      </div>
+      <div class="form-group" id="preview-imagenes" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+      <div class="form-group" id="preview-nuevas" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;"></div>
       <div class="form-group"><label>Badge (new / hot / sale / vacío)</label><input type="text" id="prod-badge" placeholder="new, hot, sale"></div>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" id="modal-cancel">Cancelar</button>
@@ -140,33 +256,116 @@ function showToast(msg, isError = false) {
 let token = null;
 let productos = [];
 let editandoId = null; // null = crear nuevo, número = editar
+let imagenesExistentes = []; // urls de imágenes existentes al editar
+let imagenesARemover = []; // urls de imágenes existentes marcadas para eliminar
 
 // --- Modal control ---
+function renderPreviewImagenes() {
+  const container = document.getElementById('preview-imagenes');
+  const nuevasContainer = document.getElementById('preview-nuevas');
+
+  // Mostrar imágenes existentes (no removidas) con botón de eliminar
+  container.innerHTML = imagenesExistentes
+    .filter(url => !imagenesARemover.includes(url))
+    .map((url, i) => `
+      <div class="img-item">
+        <img src="${url}">
+        <button class="img-remove" data-url="${url}" onclick="marcarRemover(this)" title="Eliminar">✕</button>
+      </div>
+    `).join('') || '<span style="color:#666;font-size:13px;">Sin imágenes guardadas</span>';
+
+  // Mostrar nuevas imágenes seleccionadas (desde el input file)
+  const fileInput = document.getElementById('prod-imagenes');
+  nuevasContainer.innerHTML = Array.from(fileInput.files).map((file, i) => {
+    const url = URL.createObjectURL(file);
+    return `
+      <div class="img-item">
+        <img src="${url}">
+        <button class="img-remove" onclick="quitarNuevaImagen(${i})" title="Quitar">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function marcarRemover(btn) {
+  const url = btn.dataset.url;
+  if (url && !imagenesARemover.includes(url)) {
+    imagenesARemover.push(url);
+  }
+  renderPreviewImagenes();
+}
+
+function quitarNuevaImagen(index) {
+  const dt = new DataTransfer();
+  const files = document.getElementById('prod-imagenes').files;
+  for (let i = 0; i < files.length; i++) {
+    if (i !== index) dt.items.add(files[i]);
+  }
+  document.getElementById('prod-imagenes').files = dt.files;
+  renderPreviewImagenes();
+}
+
 function openModal(producto = null) {
   const modal = document.getElementById('productModal');
+  const fileInput = document.getElementById('prod-imagenes');
+  fileInput.value = '';
+  imagenesARemover = [];
+
   if (producto) {
-    // Editar
     editandoId = producto.id;
     document.getElementById('prod-nombre').value = producto.nombre || '';
     document.getElementById('prod-categoria').value = producto.categoria || '';
     document.getElementById('prod-precio').value = producto.precio || '';
     document.getElementById('prod-precioAnterior').value = producto.precioAnterior || '';
     document.getElementById('prod-descripcion').value = producto.descripcion || '';
-    document.getElementById('prod-imagenUrl').value = producto.imagen || '';
     document.getElementById('prod-badge').value = producto.badge || '';
+    imagenesExistentes = producto.imagenes && producto.imagenes.length
+      ? [...producto.imagenes]
+      : (producto.imagen ? [producto.imagen] : []);
   } else {
-    // Nuevo
     editandoId = null;
     document.getElementById('prod-nombre').value = '';
     document.getElementById('prod-categoria').value = '';
     document.getElementById('prod-precio').value = '';
     document.getElementById('prod-precioAnterior').value = '';
     document.getElementById('prod-descripcion').value = '';
-    document.getElementById('prod-imagenUrl').value = '';
     document.getElementById('prod-badge').value = '';
+    imagenesExistentes = [];
   }
+  renderPreviewImagenes();
   modal.classList.add('active');
 }
+
+// Preview al seleccionar archivos
+document.getElementById('prod-imagenes').addEventListener('change', function() {
+  renderPreviewImagenes();
+});
+
+// Drag & drop visual feedback
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('drag-over');
+});
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const files = e.dataTransfer.files;
+  if (files.length) {
+    const input = document.getElementById('prod-imagenes');
+    // Combinar archivos existentes con los nuevos
+    const dt = new DataTransfer();
+    for (const f of input.files) dt.items.add(f);
+    for (const f of files) {
+      if (f.type.startsWith('image/')) dt.items.add(f);
+    }
+    input.files = dt.files;
+    renderPreviewImagenes();
+  }
+});
 
 function closeModal() {
   document.getElementById('productModal').classList.remove('active');
@@ -181,10 +380,10 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const precio = document.getElementById('prod-precio').value.trim();
   const precioAnterior = document.getElementById('prod-precioAnterior').value.trim() || null;
   const descripcion = document.getElementById('prod-descripcion').value.trim();
-  const imagenUrl = document.getElementById('prod-imagenUrl').value.trim();
   const badge = document.getElementById('prod-badge').value.trim();
+  const fileInput = document.getElementById('prod-imagenes');
 
-  if (!nombre || !categoria || !precio || !descripcion || !imagenUrl) {
+  if (!nombre || !categoria || !precio || !descripcion) {
     showToast('Completá todos los campos obligatorios', true);
     return;
   }
@@ -195,8 +394,18 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   formData.append('precio', precio);
   if (precioAnterior) formData.append('precioAnterior', precioAnterior);
   formData.append('descripcion', descripcion);
-  formData.append('imagenUrl', imagenUrl);
   if (badge) formData.append('badge', badge);
+  for (const file of fileInput.files) {
+    formData.append('imagenes', file);
+  }
+  // Enviar qué imágenes existentes conservar y cuáles eliminar
+  if (editandoId) {
+    const conservar = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
+    formData.append('imagenesConservar', JSON.stringify(conservar));
+    if (imagenesARemover.length) {
+      formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
+    }
+  }
 
   try {
     let url = '/api/products';
@@ -287,9 +496,25 @@ function renderProductos() {
     container.innerHTML = '<p style="text-align:center; grid-column:1/-1;">📭 No hay productos aún. Creá uno nuevo.</p>';
     return;
   }
-  container.innerHTML = productos.map(p => `
+  container.innerHTML = productos.map((p, idx) => {
+    const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+    const idSafe = (p.id || '').toString().replace(/[^a-zA-Z0-9]/g, '');
+    const idxGlobal = idx;
+    return `
     <div class="producto-card">
-      <img src="${p.imagen}" onerror="this.src='https://placehold.co/400x300?text=Sin+imagen'">
+      <div class="card-gallery">
+        ${imgs.length ? `
+          <div style="position:relative;">
+            <img class="card-main-img" id="mainimg-${idSafe}" src="${imgs[0]}" onerror="this.style.display='none'" data-idx="${idxGlobal}">
+            ${imgs.length > 1 ? `<span class="card-img-count">${imgs.length} fotos</span>` : ''}
+          </div>
+        ` : `<div style="width:100%;height:150px;background:#0a0a10;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#666;">Sin imagen</div>`}
+        ${imgs.length > 1 ? `
+        <div class="card-thumbs">${imgs.map((url, i) =>
+          `<img src="${url}" onerror="this.style.display='none'" onclick="cambiarMainImg(${idxGlobal}, ${i})" class="${i === 0 ? 'active' : ''}">`
+        ).join('')}</div>
+        ` : ''}
+      </div>
       <h3 style="margin-top:8px;">${escapeHtml(p.nombre)}</h3>
       <p><strong style="font-size:1.1rem;">${p.precio}</strong> ${p.precioAnterior ? `<span class="precio-anterior">${p.precioAnterior}</span>` : ''}</p>
       <p>Categoría: ${escapeHtml(p.categoria)}</p>
@@ -298,8 +523,25 @@ function renderProductos() {
         <button onclick="editarProducto('${p.id}')">✏️ Editar</button>
         <button onclick="eliminarProducto('${p.id}')" style="background:#333;">🗑️ Eliminar</button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
+}
+
+// Mini-galería en tarjetas del admin
+function cambiarMainImg(idx, index) {
+  const prod = productos[idx];
+  if (!prod) return;
+  const imgs = prod.imagenes && prod.imagenes.length ? prod.imagenes : (prod.imagen ? [prod.imagen] : []);
+  const idSafe = (prod.id || '').toString().replace(/[^a-zA-Z0-9]/g, '');
+  const mainImg = document.getElementById(`mainimg-${idSafe}`);
+  if (!mainImg || !imgs[index]) return;
+  mainImg.src = imgs[index];
+  mainImg.style.display = '';
+  const parent = mainImg.closest('.card-gallery');
+  if (!parent) return;
+  parent.querySelectorAll('.card-thumbs img').forEach((img, i) => {
+    img.classList.toggle('active', i === index);
+  });
 }
 
 async function eliminarProducto(id) {

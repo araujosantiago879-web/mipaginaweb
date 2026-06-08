@@ -1016,7 +1016,12 @@
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
   <button class="modal-close-btn" id="modal-close">✕</button>
   <div class="modal">
-    <div class="modal-photo"><img id="m-img" src="" alt=""></div>
+    <div class="modal-photo" style="position:relative;">
+      <img id="m-img" src="" alt="">
+      <button id="m-prev" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:none;z-index:5;">‹</button>
+      <button id="m-next" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.6);color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:none;z-index:5;">›</button>
+      <div id="m-dots" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5;"></div>
+    </div>
     <div class="modal-info">
       <div class="modal-cat" id="m-cat"></div>
       <div class="modal-name" id="m-name"></div>
@@ -1273,10 +1278,11 @@ function renderProducts(categoria = null) {
   container.innerHTML = filtered.map((p, i) => {
     // Guardar el índice en el array para luego recuperar el objeto
     const safeData = encodeURIComponent(JSON.stringify(p));
+    const thumbSrc = p.imagenes?.[0] || p.imagen || '';
     return `
       <div class="card" data-p="${safeData}">
         <div class="card-thumb">
-          <img src="${p.imagen}" alt="${p.nombre}" loading="lazy">
+          <img src="${thumbSrc}" alt="${p.nombre}" loading="lazy">
           ${p.badge ? `<span class="card-badge b-${p.badge}">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : 'Oferta'}</span>` : ''}
           <button class="card-fav" onclick="event.stopPropagation()">♡</button>
           <div class="card-hover-overlay">
@@ -1315,9 +1321,42 @@ window.consultarWaCard = function(btn) {
 };
 
 // ── Modal ──
+let modalImagenes = [];
+let modalImgIdx = 0;
+
+function showModalImage(idx) {
+  if (!modalImagenes.length) return;
+  const img = document.getElementById('m-img');
+  img.src = modalImagenes[idx] || modalImagenes[0];
+  document.getElementById('m-prev').style.display = modalImagenes.length > 1 ? '' : 'none';
+  document.getElementById('m-next').style.display = modalImagenes.length > 1 ? '' : 'none';
+  document.getElementById('m-dots').innerHTML = modalImagenes.map((_, i) =>
+    `<span style="width:8px;height:8px;border-radius:50%;background:${i === idx ? '#fff' : 'rgba(255,255,255,.4)'};cursor:pointer;" data-idx="${i}"></span>`
+  ).join('');
+  modalImgIdx = idx;
+}
+
+document.getElementById('m-prev').addEventListener('click', e => {
+  e.stopPropagation();
+  if (modalImagenes.length < 2) return;
+  showModalImage((modalImgIdx - 1 + modalImagenes.length) % modalImagenes.length);
+});
+document.getElementById('m-next').addEventListener('click', e => {
+  e.stopPropagation();
+  if (modalImagenes.length < 2) return;
+  showModalImage((modalImgIdx + 1) % modalImagenes.length);
+});
+document.getElementById('m-dots').addEventListener('click', e => {
+  const dot = e.target.closest('[data-idx]');
+  if (!dot) return;
+  showModalImage(parseInt(dot.dataset.idx));
+});
+
 function openModal(card) {
   const p = JSON.parse(decodeURIComponent(card.dataset.p));
-  document.getElementById('m-img').src = p.imagen;
+  modalImagenes = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+  modalImgIdx = 0;
+  showModalImage(0);
   document.getElementById('m-img').alt = p.nombre;
   document.getElementById('m-cat').textContent = p.categoria;
   document.getElementById('m-name').textContent = p.nombre;
@@ -1427,7 +1466,7 @@ function renderDrawer(items) {
   if (!items.length) { list.innerHTML = '<div class="drawer-empty">No se encontraron productos</div>'; return; }
   list.innerHTML = items.map(p => `
     <div class="drawer-item" data-p="${encodeURIComponent(JSON.stringify(p))}">
-      <img class="drawer-item-img" src="${p.imagen}" alt="${p.nombre}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2244%22 height=%2244%22><rect fill=%22%232a2a2f%22 width=%2244%22 height=%2244%22/></svg>'">
+      <img class="drawer-item-img" src="${p.imagenes?.[0] || p.imagen || ''}" alt="${p.nombre}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2244%22 height=%2244%22><rect fill=%22%232a2a2f%22 width=%2244%22 height=%2244%22/></svg>'">
       <div class="drawer-item-info">
         <div class="drawer-item-name">${p.nombre}</div>
         <div class="drawer-item-price">${p.precio}</div>
@@ -1438,7 +1477,9 @@ function renderDrawer(items) {
   list.querySelectorAll('.drawer-item').forEach(el => {
     el.addEventListener('click', () => {
       const p = JSON.parse(decodeURIComponent(el.dataset.p));
-      document.getElementById('m-img').src = p.imagen;
+      modalImagenes = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+      modalImgIdx = 0;
+      showModalImage(0);
       document.getElementById('m-img').alt = p.nombre;
       document.getElementById('m-cat').textContent = p.categoria;
       document.getElementById('m-name').textContent = p.nombre;

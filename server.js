@@ -72,9 +72,14 @@ async function getConfig() {
   return database.collection('config');
 }
 
-// ─── Multer (imágenes en /tmp) ───────────────────────────────────────────────
+// ─── Multer (imágenes → /uploads/) ──────────────────────────────────────────
+const uploadDir = path.join(__dirname, 'public', 'uploads');
+// Crear carpeta de uploads si no existe
+if (!require('fs').existsSync(uploadDir)) {
+  require('fs').mkdirSync(uploadDir, { recursive: true });
+}
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, '/tmp'),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
     const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, unique + path.extname(file.originalname));
@@ -248,15 +253,13 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ─── Crear producto ───────────────────────────────────────────────────────────
-app.post('/api/products', checkAuth, upload.single('imagen'), async (req, res) => {
+app.post('/api/products', checkAuth, upload.array('imagenes', 10), async (req, res) => {
   try {
     const col = await getProducts();
 
-    let imagenUrl = req.body.imagenUrl || '';
-    // Nota: subida de archivos locales no persiste en Vercel.
-    // Recomendamos usar URL de imagen externa (Cloudinary, etc.)
-    if (req.file) {
-      imagenUrl = `/uploads/${req.file.filename}`;
+    let imagenes = [];
+    if (req.files && req.files.length > 0) {
+      imagenes = req.files.map(f => `/uploads/${f.filename}`);
     }
 
     const nuevo = {
@@ -265,7 +268,8 @@ app.post('/api/products', checkAuth, upload.single('imagen'), async (req, res) =
       precio: req.body.precio,
       precioAnterior: req.body.precioAnterior || null,
       descripcion: req.body.descripcion,
-      imagen: imagenUrl,
+      imagen: imagenes[0] || '',
+      imagenes: imagenes,
       badge: req.body.badge || '',
       rating: parseFloat(req.body.rating) || 4.5,
       destacado: req.body.destacado === 'true',
@@ -281,7 +285,7 @@ app.post('/api/products', checkAuth, upload.single('imagen'), async (req, res) =
 });
 
 // ─── Editar producto ──────────────────────────────────────────────────────────
-app.put('/api/products/:id', checkAuth, upload.single('imagen'), async (req, res) => {
+app.put('/api/products/:id', checkAuth, upload.array('imagenes', 10), async (req, res) => {
   try {
     const col = await getProducts();
     const id = new ObjectId(req.params.id);
@@ -289,8 +293,39 @@ app.put('/api/products/:id', checkAuth, upload.single('imagen'), async (req, res
     const existing = await col.findOne({ _id: id });
     if (!existing) return res.status(404).json({ error: 'No encontrado' });
 
-    let imagenUrl = req.body.imagenUrl || existing.imagen;
-    if (req.file) imagenUrl = `/uploads/${req.file.filename}`;
+    const fs = require('fs');
+
+    // 1. Determinar imágenes a conservar (enviadas desde el frontend)
+    let imagenesFinal = [];
+    if (req.body.imagenesConservar) {
+      try {
+        imagenesFinal = JSON.parse(req.body.imagenesConservar);
+      } catch (_) {
+        imagenesFinal = [];
+      }
+    } else {
+      // Si no se envió, mantener las existentes (compatibilidad)
+      imagenesFinal = existing.imagenes || (existing.imagen ? [existing.imagen] : []);
+    }
+
+    // 2. Eliminar del filesystem las imágenes marcadas para remover
+    if (req.body.imagenesARemover) {
+      try {
+        const aRemover = JSON.parse(req.body.imagenesARemover);
+        aRemover.forEach(imgPath => {
+          const filePath = path.join(__dirname, 'public', imgPath.replace(/^\//, ''));
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        });
+      } catch (_) {}
+    }
+
+    // 3. Agregar imágenes nuevas subidas
+    if (req.files && req.files.length > 0) {
+      const nuevas = req.files.map(f => `/uploads/${f.filename}`);
+      imagenesFinal = [...imagenesFinal, ...nuevas];
+    }
 
     const updated = {
       nombre: req.body.nombre,
@@ -298,7 +333,8 @@ app.put('/api/products/:id', checkAuth, upload.single('imagen'), async (req, res
       precio: req.body.precio,
       precioAnterior: req.body.precioAnterior || null,
       descripcion: req.body.descripcion,
-      imagen: imagenUrl,
+      imagen: imagenesFinal[0] || '',
+      imagenes: imagenesFinal,
       badge: req.body.badge || '',
       rating: parseFloat(req.body.rating) || existing.rating,
       destacado: req.body.destacado === 'true'
@@ -317,10 +353,23 @@ app.delete('/api/products/:id', checkAuth, async (req, res) => {
   try {
     const col = await getProducts();
     const id = new ObjectId(req.params.id);
+    const existing = await col.findOne({ _id: id });
+    if (!existing) return res.status(404).json({ error: 'No encontrado' });
+
+    // Eliminar archivos de imágenes del filesystem
+    const fs = require('fs');
+    const todas = existing.imagenes || (existing.imagen ? [existing.imagen] : []);
+    todas.forEach(imgPath => {
+      const filePath = path.join(__dirname, 'public', imgPath.replace(/^\//, ''));
+      if (filePath.startsWith(path.join(__dirname, 'public', 'uploads')) && fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
+
     const result = await col.deleteOne({ _id: id });
-    if (result.deletedCount === 0) return res.status(404).json({ error: 'No encontrado' });
     res.json({ success: true });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al eliminar' });
   }
 });
