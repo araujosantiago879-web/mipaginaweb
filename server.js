@@ -252,6 +252,33 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// ─── Recuperación de contraseña ───────────────────────────────────────────────
+app.get('/api/recovery-question', async (req, res) => {
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    res.json({ question: cfg.recoveryQuestion || '' });
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+app.post('/api/recover-password', async (req, res) => {
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    const userAnswer = (req.body.answer || '').trim().toLowerCase();
+    const storedAnswer = (cfg.recoveryAnswer || '').trim().toLowerCase();
+    if (userAnswer && storedAnswer && userAnswer === storedAnswer) {
+      res.json({ password: cfg.adminPassword });
+    } else {
+      res.status(401).json({ error: 'Respuesta incorrecta' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 // ─── Crear producto ───────────────────────────────────────────────────────────
 app.post('/api/products', checkAuth, upload.array('imagenes', 10), async (req, res) => {
   try {

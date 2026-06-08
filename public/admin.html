@@ -170,15 +170,80 @@
       padding:2px 8px; border-radius:20px; font-weight:600;
       backdrop-filter: blur(4px);
     }
+
+    /* PASSWORD TOGGLE */
+    .pw-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .pw-field input {
+      width: 100%;
+      padding-right: 40px;
+    }
+    .pw-toggle {
+      position: absolute;
+      right: 8px;
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      line-height: 1;
+      transition: 0.2s;
+    }
+    .pw-toggle:hover { color: #ff3366; }
+
+    /* FORGOT PASSWORD */
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #888;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: 0.2s;
+      background: none;
+      border: none;
+      font-family: 'Inconsolata';
+    }
+    .forgot-link:hover { color: #ff3366; }
+    .recovery-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #0a0a10;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      display: none;
+    }
+    .recovery-box.show { display: block; }
+    .recovery-box input, .recovery-box button {
+      width: 100%; padding: 10px; margin-top: 8px;
+      background: #111118; border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; font-family: 'Inconsolata'; border-radius: 6px;
+    }
+    .recovery-box button { background: #ff3366; cursor: pointer; font-weight: bold; }
+    .recovery-box button:hover { background: #cc2952; }
   </style>
 </head>
 <body>
 <div class="container">
   <div class="login-box" id="login-box">
     <h2>🔐 Panel de Administración</h2>
-    <input type="password" id="admin-password" placeholder="Contraseña">
+    <div class="pw-field">
+      <input type="password" id="admin-password" placeholder="Contraseña">
+      <button class="pw-toggle" id="toggle-login-pw" type="button" title="Ver/ocultar contraseña">👁️</button>
+    </div>
     <button id="login-btn">Ingresar</button>
+    <button class="forgot-link" id="forgot-link">¿Olvidaste tu contraseña?</button>
     <div id="login-error" class="error"></div>
+    <div class="recovery-box" id="recovery-box">
+      <p style="font-size:13px;color:#aaa;" id="recovery-question">Cargando pregunta de seguridad...</p>
+      <input type="text" id="recovery-answer" placeholder="Tu respuesta">
+      <button id="recovery-btn">Recuperar contraseña</button>
+      <div id="recovery-result" style="margin-top:8px;font-size:13px;"></div>
+    </div>
   </div>
   <div class="admin-panel" id="admin-panel">
     <h1>El <em>Lado B</em> · Admin</h1>
@@ -202,7 +267,14 @@
       <div class="form-group"><label>🕘 Horario Domingos</label><input type="text" id="config-dom"></div>
       <div class="form-group"><label>🕘 Horario Feriados</label><input type="text" id="config-fer"></div>
       <div class="form-group"><label>📢 Ticker (separar por coma)</label><textarea id="config-ticker" rows="3"></textarea></div>
-      <div class="form-group"><label>🔑 Cambiar contraseña admin</label><input type="password" id="new-password" placeholder="Nueva contraseña"></div>
+      <div class="form-group"><label>🔑 Cambiar contraseña admin</label>
+        <div class="pw-field">
+          <input type="password" id="new-password" placeholder="Nueva contraseña">
+          <button class="pw-toggle" id="toggle-new-pw" type="button" title="Ver/ocultar contraseña">👁️</button>
+        </div>
+      </div>
+      <div class="form-group"><label>❓ Pregunta de seguridad (para recuperar contraseña)</label><input type="text" id="config-recovery-question" placeholder="ej: ¿Cuál es tu color favorito?"></div>
+      <div class="form-group"><label>🔐 Respuesta (sin mayúsculas ni espacios de más)</label><input type="text" id="config-recovery-answer" placeholder="ej: azul"></div>
       <button id="guardar-config">Guardar configuración</button>
       <div id="config-msg" class="error" style="margin-top:1rem;"></div>
     </div>
@@ -437,6 +509,79 @@ document.getElementById('productModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('productModal')) closeModal();
 });
 
+// --- Password toggle (ojo) ---
+document.querySelectorAll('.pw-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = btn.parentElement.querySelector('input');
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    btn.textContent = isPassword ? '🙈' : '👁️';
+  });
+});
+
+// --- Forgot password ---
+document.getElementById('forgot-link').addEventListener('click', async () => {
+  const box = document.getElementById('recovery-box');
+  const questionEl = document.getElementById('recovery-question');
+  const resultEl = document.getElementById('recovery-result');
+  const answerInput = document.getElementById('recovery-answer');
+  resultEl.textContent = '';
+  answerInput.value = '';
+
+  if (box.classList.contains('show')) {
+    box.classList.remove('show');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/recovery-question');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    if (data.question) {
+      questionEl.textContent = data.question;
+      box.classList.add('show');
+    } else {
+      questionEl.textContent = '⚠️ No hay pregunta de seguridad configurada. Contactá al administrador.';
+      box.classList.add('show');
+      document.getElementById('recovery-btn').style.display = 'none';
+      answerInput.style.display = 'none';
+    }
+  } catch (err) {
+    questionEl.textContent = '⚠️ Error al conectar con el servidor';
+    box.classList.add('show');
+  }
+});
+
+document.getElementById('recovery-btn').addEventListener('click', async () => {
+  const answer = document.getElementById('recovery-answer').value.trim().toLowerCase();
+  const resultEl = document.getElementById('recovery-result');
+  if (!answer) {
+    resultEl.textContent = '❌ Escribí tu respuesta';
+    resultEl.style.color = '#ff3366';
+    return;
+  }
+  try {
+    const res = await fetch('/api/recover-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer })
+    });
+    const data = await res.json();
+    if (res.ok && data.password) {
+      resultEl.innerHTML = `✅ Tu contraseña es: <strong>${data.password}</strong><br><span style="font-size:12px;color:#888;">Usala para iniciar sesión</span>`;
+      resultEl.style.color = '#66ffcc';
+      document.getElementById('admin-password').value = data.password;
+    } else {
+      resultEl.textContent = '❌ Respuesta incorrecta';
+      resultEl.style.color = '#ff3366';
+    }
+  } catch (err) {
+    resultEl.textContent = '⚠️ Error de conexión';
+    resultEl.style.color = '#ff3366';
+  }
+});
+
 // --- Login ---
 async function login(password) {
   try {
@@ -584,6 +729,8 @@ async function cargarConfig() {
     document.getElementById('config-dom').value = cfg.horarios?.domingos || '';
     document.getElementById('config-fer').value = cfg.horarios?.feriados || '';
     document.getElementById('config-ticker').value = (cfg.tickerItems || []).join(', ');
+    document.getElementById('config-recovery-question').value = cfg.recoveryQuestion || '';
+    document.getElementById('config-recovery-answer').value = cfg.recoveryAnswer || '';
   } catch (err) {
     showToast('Error al cargar configuración', true);
   }
@@ -598,7 +745,9 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
       domingos: document.getElementById('config-dom').value,
       feriados: document.getElementById('config-fer').value
     },
-    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s)
+    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s),
+    recoveryQuestion: document.getElementById('config-recovery-question').value.trim(),
+    recoveryAnswer: document.getElementById('config-recovery-answer').value.trim()
   };
   const newPassword = document.getElementById('new-password').value;
   if (newPassword) newConfig.adminPassword = newPassword;
