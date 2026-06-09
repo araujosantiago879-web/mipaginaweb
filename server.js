@@ -74,9 +74,12 @@ async function getConfig() {
 
 // ─── Multer (imágenes → /uploads/) ──────────────────────────────────────────
 const uploadDir = path.join(__dirname, 'public', 'uploads');
-// Crear carpeta de uploads si no existe
-if (!require('fs').existsSync(uploadDir)) {
-  require('fs').mkdirSync(uploadDir, { recursive: true });
+try {
+  if (!require('fs').existsSync(uploadDir)) {
+    require('fs').mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (_) {
+  // Vercel: filesystem de solo lectura, ignorar
 }
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
