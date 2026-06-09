@@ -32,7 +32,7 @@ async function connectDB() {
   // Número correcto de WhatsApp
   const WA_NUMBER = '5492494639700';
 
-  // Crear config por defecto si no existe
+  // Crear config por defecto o asegurar passwords conocidas
   const configCol = db.collection('config');
   const existing = await configCol.findOne({ _id: 'main' });
   if (!existing) {
@@ -56,13 +56,21 @@ async function connectDB() {
       adminPassword: 'admin123',
       pageAccessPassword: 'admin123'
     });
-  } else if (
-    existing.whatsappNumber === '5492494000000' ||
-    existing.whatsappNumber === '5492490000000'
-  ) {
-    // Migración: actualizar número placeholder al número real
-    await configCol.updateOne({ _id: 'main' }, { $set: { whatsappNumber: WA_NUMBER } });
-    console.log('✅ Número de WhatsApp actualizado a', WA_NUMBER);
+    console.log('✅ Config creada por defecto');
+  } else {
+    const updates = {};
+    // Asegurar pageAccessPassword si no existe
+    if (!existing.pageAccessPassword) {
+      updates.pageAccessPassword = existing.adminPassword || 'admin123';
+    }
+    // Actualizar número placeholder si es necesario
+    if (existing.whatsappNumber === '5492494000000' || existing.whatsappNumber === '5492490000000') {
+      updates.whatsappNumber = WA_NUMBER;
+    }
+    if (Object.keys(updates).length > 0) {
+      await configCol.updateOne({ _id: 'main' }, { $set: updates });
+      console.log('✅ Config actualizada:', Object.keys(updates).join(', '));
+    }
   }
 
   return db;
