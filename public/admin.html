@@ -209,6 +209,17 @@
       font-family: 'Inconsolata';
     }
     .forgot-link:hover { color: #ff3366; }
+
+    /* SACAR FONDOS DE AUTOFILL DEL NAVEGADOR */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px #0a0a10 inset !important;
+      -webkit-text-fill-color: #fff !important;
+      box-shadow: 0 0 0 1000px #0a0a10 inset !important;
+      caret-color: #fff !important;
+    }
     .recovery-box {
       margin-top: 1rem;
       padding: 1rem;
@@ -231,14 +242,8 @@
 <div class="container">
   <div class="login-box" id="login-box">
     <h2>🔐 Panel de Administración</h2>
-    <div class="pw-field" style="margin-top:1rem;">
-      <input type="text" id="access-password" placeholder="Contraseña de acceso">
-      <button class="pw-toggle" type="button" title="Ver/ocultar contraseña">👁️</button>
-    </div>
-    <div class="pw-field">
-      <input type="text" id="admin-password" placeholder="Contraseña del admin">
-      <button class="pw-toggle" type="button" title="Ver/ocultar contraseña">👁️</button>
-    </div>
+    <input type="text" id="access-password" placeholder="Contraseña de acceso" style="margin-top:1rem; color:#fff; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); padding:12px; width:100%; font-family:'Inconsolata'; border-radius:6px;">
+    <input type="text" id="admin-password" placeholder="Contraseña del admin" style="margin-top:0.5rem; color:#fff; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); padding:12px; width:100%; font-family:'Inconsolata'; border-radius:6px;">
     <button id="login-btn">Ingresar</button>
     <button class="forgot-link" id="forgot-link">¿Olvidaste tu contraseña?</button>
     <div id="login-error" class="error"></div>
