@@ -248,10 +248,19 @@
     <button class="forgot-link" id="forgot-link">¿Olvidaste tu contraseña?</button>
     <div id="login-error" class="error"></div>
     <div class="recovery-box" id="recovery-box">
-      <p style="font-size:13px;color:#aaa;" id="recovery-question">Cargando pregunta de seguridad...</p>
-      <input type="text" id="recovery-answer" placeholder="Tu respuesta">
-      <button id="recovery-btn">Recuperar contraseña</button>
-      <div id="recovery-result" style="margin-top:8px;font-size:13px;"></div>
+      <div id="recovery-step1">
+        <p style="font-size:13px;color:#aaa;" id="recovery-question">Cargando pregunta de seguridad...</p>
+        <input type="text" id="recovery-answer" placeholder="Tu respuesta">
+        <button id="recovery-btn">Verificar respuesta</button>
+        <div id="recovery-error" style="margin-top:8px;font-size:13px;color:#ff3366;"></div>
+      </div>
+      <div id="recovery-step2" style="display:none;">
+        <p style="font-size:13px;color:#66ffcc;">✅ Respuesta correcta. Ahora creá tus nuevas contraseñas:</p>
+        <input type="text" id="recovery-new-access" placeholder="Nueva contraseña de acceso" style="margin-top:8px; color:#fff; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); padding:10px; width:100%; font-family:'Inconsolata'; border-radius:6px;">
+        <input type="text" id="recovery-new-admin" placeholder="Nueva contraseña del admin" style="margin-top:6px; color:#fff; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); padding:10px; width:100%; font-family:'Inconsolata'; border-radius:6px;">
+        <button id="recovery-save-btn" style="margin-top:8px;">Guardar nuevas contraseñas</button>
+        <div id="recovery-result" style="margin-top:8px;font-size:13px;"></div>
+      </div>
     </div>
   </div>
   <div class="admin-panel" id="admin-panel">
@@ -532,13 +541,15 @@ document.querySelectorAll('.pw-toggle').forEach(btn => {
   });
 });
 
-// --- Forgot password ---
+// --- Forgot password (estilo Google) ---
 document.getElementById('forgot-link').addEventListener('click', async () => {
   const box = document.getElementById('recovery-box');
   const questionEl = document.getElementById('recovery-question');
-  const resultEl = document.getElementById('recovery-result');
   const answerInput = document.getElementById('recovery-answer');
-  resultEl.textContent = '';
+
+  document.getElementById('recovery-step1').style.display = 'block';
+  document.getElementById('recovery-step2').style.display = 'none';
+  document.getElementById('recovery-error').textContent = '';
   answerInput.value = '';
 
   if (box.classList.contains('show')) {
@@ -554,7 +565,7 @@ document.getElementById('forgot-link').addEventListener('click', async () => {
       questionEl.textContent = data.question;
       box.classList.add('show');
     } else {
-      questionEl.textContent = '⚠️ No hay pregunta de seguridad configurada. Contactá al administrador.';
+      questionEl.textContent = '⚠️ No hay pregunta de seguridad configurada.';
       box.classList.add('show');
       document.getElementById('recovery-btn').style.display = 'none';
       answerInput.style.display = 'none';
@@ -567,10 +578,9 @@ document.getElementById('forgot-link').addEventListener('click', async () => {
 
 document.getElementById('recovery-btn').addEventListener('click', async () => {
   const answer = document.getElementById('recovery-answer').value.trim().toLowerCase();
-  const resultEl = document.getElementById('recovery-result');
+  const errorEl = document.getElementById('recovery-error');
   if (!answer) {
-    resultEl.textContent = '❌ Escribí tu respuesta';
-    resultEl.style.color = '#ff3366';
+    errorEl.textContent = '❌ Escribí tu respuesta';
     return;
   }
   try {
@@ -580,12 +590,45 @@ document.getElementById('recovery-btn').addEventListener('click', async () => {
       body: JSON.stringify({ answer })
     });
     const data = await res.json();
-    if (res.ok && data.password) {
-      resultEl.innerHTML = `✅ Tu contraseña es: <strong>${data.password}</strong><br><span style="font-size:12px;color:#888;">Usala para iniciar sesión</span>`;
-      resultEl.style.color = '#66ffcc';
-      document.getElementById('admin-password').value = data.password;
+    if (res.ok && data.verified) {
+      document.getElementById('recovery-step1').style.display = 'none';
+      document.getElementById('recovery-step2').style.display = 'block';
+      document.getElementById('recovery-result').textContent = '';
     } else {
-      resultEl.textContent = '❌ Respuesta incorrecta';
+      errorEl.textContent = '❌ Respuesta incorrecta';
+    }
+  } catch (err) {
+    document.getElementById('recovery-error').textContent = '⚠️ Error de conexión';
+  }
+});
+
+document.getElementById('recovery-save-btn').addEventListener('click', async () => {
+  const newAccess = document.getElementById('recovery-new-access').value.trim();
+  const newAdmin = document.getElementById('recovery-new-admin').value.trim();
+  const resultEl = document.getElementById('recovery-result');
+  if (!newAccess || !newAdmin) {
+    resultEl.textContent = '❌ Completá ambas contraseñas';
+    resultEl.style.color = '#ff3366';
+    return;
+  }
+  try {
+    const answer = document.getElementById('recovery-answer').value.trim().toLowerCase();
+    const res = await fetch('/api/reset-passwords', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer, newAccessPassword: newAccess, newAdminPassword: newAdmin })
+    });
+    if (res.ok) {
+      resultEl.innerHTML = '✅ Contraseñas actualizadas. Ahora iniciá sesión con las nuevas.';
+      resultEl.style.color = '#66ffcc';
+      document.getElementById('access-password').value = newAccess;
+      document.getElementById('admin-password').value = newAdmin;
+      setTimeout(() => {
+        document.getElementById('recovery-box').classList.remove('show');
+      }, 2000);
+    } else {
+      const data = await res.json();
+      resultEl.textContent = data.error || '❌ Error al guardar';
       resultEl.style.color = '#ff3366';
     }
   } catch (err) {

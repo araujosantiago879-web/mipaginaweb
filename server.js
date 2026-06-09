@@ -297,11 +297,35 @@ app.post('/api/recover-password', async (req, res) => {
     const userAnswer = (req.body.answer || '').trim().toLowerCase();
     const storedAnswer = (cfg.recoveryAnswer || '').trim().toLowerCase();
     if (userAnswer && storedAnswer && userAnswer === storedAnswer) {
-      res.json({ password: cfg.adminPassword });
+      res.json({ verified: true });
     } else {
       res.status(401).json({ error: 'Respuesta incorrecta' });
     }
   } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+app.post('/api/reset-passwords', async (req, res) => {
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    const userAnswer = (req.body.answer || '').trim().toLowerCase();
+    const storedAnswer = (cfg.recoveryAnswer || '').trim().toLowerCase();
+    if (!userAnswer || !storedAnswer || userAnswer !== storedAnswer) {
+      return res.status(401).json({ error: 'Respuesta incorrecta' });
+    }
+    const { newAccessPassword, newAdminPassword } = req.body;
+    if (!newAccessPassword || !newAdminPassword) {
+      return res.status(400).json({ error: 'Faltan contraseñas' });
+    }
+    await col.updateOne(
+      { _id: 'main' },
+      { $set: { pageAccessPassword: newAccessPassword, adminPassword: newAdminPassword } }
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
