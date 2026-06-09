@@ -276,6 +276,9 @@
       <div class="form-group"><label>🕘 Horario Domingos</label><input type="text" id="config-dom"></div>
       <div class="form-group"><label>🕘 Horario Feriados</label><input type="text" id="config-fer"></div>
       <div class="form-group"><label>📢 Ticker (separar por coma)</label><textarea id="config-ticker" rows="3"></textarea></div>
+      <div class="form-group"><label>🔑 Cambiar contraseña de acceso</label>
+        <input type="text" id="new-access-password" placeholder="Nueva contraseña de acceso" style="color:#fff; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); padding:10px; width:100%; font-family:'Inconsolata'; border-radius:6px;">
+      </div>
       <div class="form-group"><label>🔑 Cambiar contraseña admin</label>
         <div class="pw-field">
           <input type="password" id="new-password" placeholder="Nueva contraseña">
@@ -763,6 +766,8 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
     recoveryQuestion: document.getElementById('config-recovery-question').value.trim(),
     recoveryAnswer: document.getElementById('config-recovery-answer').value.trim()
   };
+  const newAccessPw = document.getElementById('new-access-password').value;
+  if (newAccessPw) newConfig.pageAccessPassword = newAccessPw;
   const newPassword = document.getElementById('new-password').value;
   if (newPassword) newConfig.adminPassword = newPassword;
 
@@ -778,8 +783,8 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
       msgDiv.textContent = '✅ Configuración guardada correctamente';
       setTimeout(() => msgDiv.textContent = '', 3000);
       showToast('Configuración actualizada');
-      if (newPassword) {
-        alert('Contraseña cambiada. Reiniciá sesión.');
+      if (newAccessPw || newPassword) {
+        alert('Contraseña(s) cambiada(s). Reiniciá sesión.');
         location.reload();
       }
     } else throw new Error();

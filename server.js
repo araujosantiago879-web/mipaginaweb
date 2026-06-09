@@ -267,9 +267,10 @@ app.post('/api/verify-admin-access', async (req, res) => {
   try {
     const col = await getConfig();
     const cfg = await col.findOne({ _id: 'main' });
-    const storedPw = cfg.adminPassword || '';
-    if (accessPassword === storedPw && adminPassword === storedPw) {
-      res.json({ success: true, token: storedPw });
+    const storedAccess = cfg.pageAccessPassword || cfg.adminPassword || '';
+    const storedAdmin = cfg.adminPassword || '';
+    if (accessPassword === storedAccess && adminPassword === storedAdmin) {
+      res.json({ success: true, token: storedAdmin });
     } else {
       res.status(401).json({ error: 'Contraseña incorrecta' });
     }
@@ -443,10 +444,6 @@ app.put('/api/admin/config', checkAuth, async (req, res) => {
   try {
     const col = await getConfig();
     const current = await col.findOne({ _id: 'main' });
-    // Si cambia adminPassword, sincronizar pageAccessPassword
-    if (req.body.adminPassword && req.body.adminPassword !== current.adminPassword) {
-      req.body.pageAccessPassword = req.body.adminPassword;
-    }
     const updated = { ...current, ...req.body, _id: 'main' };
     await col.replaceOne({ _id: 'main' }, updated);
     res.json(updated);
@@ -461,7 +458,7 @@ app.post('/api/admin/change-password', checkAuth, async (req, res) => {
   const { newPassword } = req.body;
   try {
     const col = await getConfig();
-    await col.updateOne({ _id: 'main' }, { $set: { adminPassword: newPassword, pageAccessPassword: newPassword } });
+    await col.updateOne({ _id: 'main' }, { $set: { adminPassword: newPassword } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Error al cambiar contraseña' });
