@@ -10,6 +10,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// ─── Admin panel (protegido) ────────────────────────────────────────────────
+app.get('/admin.html', async (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Carpetas públicas
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -48,7 +53,8 @@ async function connectDB() {
         '✅ Productos certificados',
         '🔒 Compra 100% privada'
       ],
-      adminPassword: 'admin123'
+      adminPassword: 'admin123',
+      pageAccessPassword: 'admin123'
     });
   } else if (
     existing.whatsappNumber === '5492494000000' ||
@@ -255,6 +261,23 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// ─── Verificar acceso al panel (dos contraseñas) ────────────────────────────
+app.post('/api/verify-admin-access', async (req, res) => {
+  const { accessPassword, adminPassword } = req.body;
+  try {
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    const storedPw = cfg.adminPassword || '';
+    if (accessPassword === storedPw && adminPassword === storedPw) {
+      res.json({ success: true, token: storedPw });
+    } else {
+      res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
 // ─── Recuperación de contraseña ───────────────────────────────────────────────
 app.get('/api/recovery-question', async (req, res) => {
   try {
@@ -420,10 +443,15 @@ app.put('/api/admin/config', checkAuth, async (req, res) => {
   try {
     const col = await getConfig();
     const current = await col.findOne({ _id: 'main' });
+    // Si cambia adminPassword, sincronizar pageAccessPassword
+    if (req.body.adminPassword && req.body.adminPassword !== current.adminPassword) {
+      req.body.pageAccessPassword = req.body.adminPassword;
+    }
     const updated = { ...current, ...req.body, _id: 'main' };
     await col.replaceOne({ _id: 'main' }, updated);
     res.json(updated);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Error al guardar config' });
   }
 });
@@ -433,7 +461,7 @@ app.post('/api/admin/change-password', checkAuth, async (req, res) => {
   const { newPassword } = req.body;
   try {
     const col = await getConfig();
-    await col.updateOne({ _id: 'main' }, { $set: { adminPassword: newPassword } });
+    await col.updateOne({ _id: 'main' }, { $set: { adminPassword: newPassword, pageAccessPassword: newPassword } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Error al cambiar contraseña' });

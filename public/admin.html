@@ -231,9 +231,13 @@
 <div class="container">
   <div class="login-box" id="login-box">
     <h2>🔐 Panel de Administración</h2>
+    <div class="pw-field" style="margin-top:1rem;">
+      <input type="password" id="access-password" placeholder="Contraseña de acceso">
+      <button class="pw-toggle" type="button" title="Ver/ocultar contraseña">👁️</button>
+    </div>
     <div class="pw-field">
-      <input type="password" id="admin-password" placeholder="Contraseña">
-      <button class="pw-toggle" id="toggle-login-pw" type="button" title="Ver/ocultar contraseña">👁️</button>
+      <input type="password" id="admin-password" placeholder="Contraseña del admin">
+      <button class="pw-toggle" type="button" title="Ver/ocultar contraseña">👁️</button>
     </div>
     <button id="login-btn">Ingresar</button>
     <button class="forgot-link" id="forgot-link">¿Olvidaste tu contraseña?</button>
@@ -583,17 +587,22 @@ document.getElementById('recovery-btn').addEventListener('click', async () => {
 });
 
 // --- Login ---
-async function login(password) {
+async function login() {
+  const accessPw = document.getElementById('access-password').value;
+  const adminPw = document.getElementById('admin-password').value;
+  if (!accessPw || !adminPw) {
+    document.getElementById('login-error').textContent = '❌ Completá ambos campos';
+    return;
+  }
   try {
-    const res = await fetch('/api/login', {
+    const res = await fetch('/api/verify-admin-access', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password })
+      body: JSON.stringify({ accessPassword: accessPw, adminPassword: adminPw })
     });
     if (res.ok) {
       const data = await res.json();
       token = data.token;
-      localStorage.setItem('adminToken', token);
       document.getElementById('login-box').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       await cargarProductos();
@@ -765,7 +774,6 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
       setTimeout(() => msgDiv.textContent = '', 3000);
       showToast('Configuración actualizada');
       if (newPassword) {
-        localStorage.removeItem('adminToken');
         alert('Contraseña cambiada. Reiniciá sesión.');
         location.reload();
       }
@@ -787,26 +795,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// --- Auto-login ---
-const storedToken = localStorage.getItem('adminToken');
-if (storedToken) {
-  token = storedToken;
-  // Validamos contra una ruta protegida para verificar que el token sigue siendo válido
-  fetch('/api/admin/config', { headers: { 'Authorization': token } })
-    .then(res => {
-      if (!res.ok) throw new Error();
-      document.getElementById('login-box').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
-      cargarProductos();
-      cargarConfig();
-    })
-    .catch(() => {
-      localStorage.removeItem('adminToken');
-      token = null;
-      location.reload();
-    });
-}
-document.getElementById('login-btn').addEventListener('click', () => login(document.getElementById('admin-password').value));
+document.getElementById('login-btn').addEventListener('click', login);
 </script>
 </body>
 </html>
