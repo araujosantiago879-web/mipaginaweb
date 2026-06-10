@@ -209,18 +209,42 @@ app.get('/producto/:id', async (req, res) => {
 
 // ─── API pública ─────────────────────────────────────────────────────────────
 
-// GET /api/products
+// GET /api/products (con búsqueda)
 app.get('/api/products', async (req, res) => {
   try {
     const col = await getProducts();
-    const { categoria } = req.query;
-    const query = categoria && categoria !== 'Todo' ? { categoria } : {};
+    const { categoria, search } = req.query;
+    let query = {};
+    if (categoria && categoria !== 'Todo') query.categoria = categoria;
+    if (search && search.trim()) {
+      const s = search.trim();
+      const regex = new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      query.$or = [
+        { nombre: regex },
+        { categoria: regex },
+        { descripcion: regex },
+        { badge: regex }
+      ];
+    }
     const products = await col.find(query).toArray();
-    // Convertir _id de mongo a id numérico para el frontend
     const result = products.map(({ _id, ...p }) => ({ id: _id, ...p }));
     res.json(result);
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+// GET /api/products/:id
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const col = await getProducts();
+    let producto;
+    try { producto = await col.findOne({ _id: new ObjectId(req.params.id) }); } catch (_) {}
+    if (!producto) return res.status(404).json({ error: 'No encontrado' });
+    const { _id, ...data } = producto;
+    res.json({ id: _id, ...data });
+  } catch (err) {
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
