@@ -275,14 +275,18 @@ app.post('/api/verify-admin-access', async (req, res) => {
   try {
     const col = await getConfig();
     const cfg = await col.findOne({ _id: 'main' });
-    const storedAccess = cfg.pageAccessPassword || cfg.adminPassword || '';
-    const storedAdmin = cfg.adminPassword || '';
-    if (accessPassword === storedAccess && adminPassword === storedAdmin) {
+    const storedAccess = (cfg.pageAccessPassword || cfg.adminPassword || '').trim();
+    const storedAdmin = (cfg.adminPassword || '').trim();
+    const accessOk = accessPassword.trim() === storedAccess;
+    const adminOk = adminPassword.trim() === storedAdmin;
+    console.log('LOGIN intento:', { recibido: accessPassword, accessOk, adminOk });
+    if (accessOk && adminOk) {
       res.json({ success: true, token: storedAdmin });
     } else {
       res.status(401).json({ error: 'Contraseña incorrecta' });
     }
   } catch (err) {
+    console.error('LOGIN error:', err);
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
