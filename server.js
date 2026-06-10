@@ -239,7 +239,20 @@ app.get('/api/config', async (req, res) => {
 
 // ─── Middleware auth ─────────────────────────────────────────────────────────
 const checkAuth = async (req, res, next) => {
-  next();
+  try {
+    const token = req.headers['authorization'];
+    if (!token) {
+      return res.status(401).json({ error: 'Token requerido' });
+    }
+    const col = await getConfig();
+    const cfg = await col.findOne({ _id: 'main' });
+    if (token !== cfg.adminPassword) {
+      return res.status(401).json({ error: 'Token inválido' });
+    }
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Error de autenticación' });
+  }
 };
 
 // ─── Login ───────────────────────────────────────────────────────────────────
