@@ -371,6 +371,14 @@
           <div class="form-group"><label>🕘 Feriados</label><input type="text" id="config-fer" class="form-input"></div>
         </div>
         <div class="config-card">
+          <h3><em>Pago</em> online</h3>
+          <div class="form-group"><label>💰 Mercado Pago (link de pago)</label><input type="text" id="config-mp" class="form-input" placeholder="https://mpago.liner/..."></div>
+          <div class="form-group"><label>🏦 Nombre del banco</label><input type="text" id="config-banco" class="form-input" placeholder="Banco Nación"></div>
+          <div class="form-group"><label>🔢 CBU</label><input type="text" id="config-cbu" class="form-input" placeholder="0000000000000000000000"></div>
+          <div class="form-group"><label>🔤 Alias</label><input type="text" id="config-alias" class="form-input" placeholder="lado-b.mp"></div>
+          <div class="form-group"><label>👤 Titular</label><input type="text" id="config-titular" class="form-input" placeholder="Nombre del titular"></div>
+        </div>
+        <div class="config-card">
           <h3><em>Tienda</em> y seguridad</h3>
           <div class="form-group"><label>📢 Ticker (separar por coma)</label><textarea id="config-ticker" class="form-input" rows="3"></textarea></div>
           <div class="form-group"><label>🔑 Cambiar contraseña</label>
@@ -704,6 +712,11 @@ async function cargarConfig() {
     document.getElementById('config-dom').value = cfg.horarios?.domingos || '';
     document.getElementById('config-fer').value = cfg.horarios?.feriados || '';
     document.getElementById('config-ticker').value = (cfg.tickerItems || []).join(', ');
+    document.getElementById('config-mp').value = cfg.mercadoPagoLink || '';
+    document.getElementById('config-banco').value = cfg.banco || '';
+    document.getElementById('config-cbu').value = cfg.cbu || '';
+    document.getElementById('config-alias').value = cfg.alias || '';
+    document.getElementById('config-titular').value = cfg.titular || '';
   } catch (err) { showToast('Error al cargar configuración', true); }
 }
 
@@ -716,7 +729,12 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
       domingos: document.getElementById('config-dom').value,
       feriados: document.getElementById('config-fer').value
     },
-    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s)
+    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s),
+    mercadoPagoLink: document.getElementById('config-mp').value,
+    banco: document.getElementById('config-banco').value,
+    cbu: document.getElementById('config-cbu').value,
+    alias: document.getElementById('config-alias').value,
+    titular: document.getElementById('config-titular').value
   };
   const newPassword = document.getElementById('new-password').value;
   if (newPassword) newConfig.adminPassword = newPassword;
