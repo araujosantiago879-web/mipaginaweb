@@ -716,6 +716,10 @@
 
       /* 2 columnas en tablet/móvil */
       .products { grid-template-columns:repeat(2, 1fr); gap:12px; }
+      .card-hover-cta { transform:none; padding:12px 8px 8px; }
+      .card-fav { opacity:1; }
+      .cta-add { font-size:9px; padding:8px 6px; }
+      .cta-view { width:30px; height:30px; }
 
       .horarios { padding:0 16px 60px; grid-template-columns:1fr; }
       .hor-card { padding:28px 20px; }
@@ -769,6 +773,9 @@
     @media(max-width:360px) {
       .products { grid-template-columns:1fr; }
       .nav-links { display:none; }
+      #cart-btn span { font-size:9px; }
+      .btn-wa-nav { padding:6px 8px; }
+      .btn-wa-nav svg { width:14px; height:14px; }
     }
   </style>
 </head>
