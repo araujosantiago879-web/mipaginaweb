@@ -52,12 +52,17 @@
 
     /* PW FIELD */
     .pw-field { position:relative; display:flex; align-items:center; }
-    .pw-field input { width:100%; padding-right:40px; }
-    .pw-toggle {
-      position:absolute; right:8px; background:none; border:none; color:#888;
-      cursor:pointer; font-size:18px; padding:4px; line-height:1; transition:0.2s;
+    .pw-field input { width:100%; padding-right:50px; }
+    .pw-wall {
+      position:absolute; right:0; top:0; bottom:0; width:40px;
+      background:#ff3366; cursor:pointer; border-radius:0 6px 6px 0;
+      transition:0.2s; display:flex; align-items:center; justify-content:center;
     }
-    .pw-toggle:hover { color:#ff3366; }
+    .pw-wall:hover { background:#cc2952; }
+    .pw-wall.showing { background:#1a1a24; border-left:2px solid #ff3366; border-radius:0 6px 6px 0; }
+    .pw-wall.showing:hover { background:#2a2a34; }
+    .pw-wall-icon { font-size:16px; color:#fff; line-height:1; pointer-events:none; }
+    .pw-wall.showing .pw-wall-icon { color:#ff3366; }
 
     /* MODAL */
     .modal-backdrop {
@@ -139,7 +144,7 @@
     <p class="sub">· Acceso al panel ·</p>
     <div class="pw-field">
       <input type="password" id="admin-password" placeholder="Contraseña">
-      <button class="pw-toggle" type="button" title="Ver/ocultar">👁️</button>
+      <div class="pw-wall" onclick="togglePw('admin-password', this)" title="Ver/ocultar"><span class="pw-wall-icon">👁️</span></div>
     </div>
     <button id="login-btn">Ingresar</button>
     <div class="login-error" id="login-error"></div>
@@ -174,7 +179,7 @@
       <div class="form-group"><label>🔑 Cambiar contraseña</label>
         <div class="pw-field">
           <input type="password" id="new-password" placeholder="Nueva contraseña">
-          <button class="pw-toggle" type="button" title="Ver/ocultar">👁️</button>
+          <div class="pw-wall" onclick="togglePw('new-password', this)" title="Ver/ocultar"><span class="pw-wall-icon">👁️</span></div>
         </div>
       </div>
       <button id="guardar-config">Guardar configuración</button>
@@ -300,14 +305,14 @@ if (storedToken) {
 }
 
 // --- Password toggle ---
-document.querySelectorAll('.pw-toggle').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const input = btn.parentElement.querySelector('input');
-    if (!input) return;
-    input.type = input.type === 'password' ? 'text' : 'password';
-    btn.textContent = input.type === 'password' ? '👁️' : '🙈';
-  });
-});
+function togglePw(inputId, wall) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  wall.classList.toggle('showing', !isPassword);
+  wall.querySelector('.pw-wall-icon').textContent = isPassword ? '🙈' : '👁️';
+}
 
 // --- Modal control ---
 function renderPreviewImagenes() {
