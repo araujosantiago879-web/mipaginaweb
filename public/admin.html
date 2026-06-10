@@ -12,7 +12,7 @@
     .container { max-width:1400px; margin:0 auto; }
     h1 { font-family:'Cormorant Garamond',serif; font-size:3rem; margin-bottom:0.5rem; }
     h1 em { color:#ff3366; font-style:italic; }
-    .admin-panel { display:block; }
+    .admin-panel { display:none; }
     .tabs { display:flex; gap:1rem; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:2rem; flex-wrap:wrap; }
     .tab-btn { background:none; border:none; color:#aaa; padding:0.8rem 1.5rem; cursor:pointer; font-family:'Inconsolata'; font-size:0.9rem; transition:0.2s; }
     .tab-btn.active { color:#ff3366; border-bottom:2px solid #ff3366; }
@@ -41,6 +41,24 @@
     .toast-dot { width:8px; height:8px; background:#66ffcc; border-radius:50%; }
     .loading-spinner { text-align:center; padding:2rem; color:#aaa; }
 
+    /* LOGIN */
+    .login-box { max-width:400px; margin:10vh auto; background:#111118; border:1px solid rgba(255,255,255,0.05); padding:2rem; border-radius:12px; }
+    .login-box h2 { text-align:center; font-family:'Cormorant Garamond',serif; font-size:1.8rem; margin-bottom:0.25rem; }
+    .login-box h2 em { color:#ff3366; font-style:italic; }
+    .login-box p.sub { text-align:center; color:#888; font-size:0.85rem; margin-bottom:1.5rem; font-family:'Inconsolata'; }
+    .login-box input { width:100%; padding:12px; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); color:#fff; font-family:'Inconsolata'; border-radius:6px; }
+    .login-box button { width:100%; padding:12px; margin-top:1rem; }
+    .login-error { color:#ff3366; font-size:0.85rem; text-align:center; margin-top:0.75rem; min-height:1.2em; }
+
+    /* PW FIELD */
+    .pw-field { position:relative; display:flex; align-items:center; }
+    .pw-field input { width:100%; padding-right:40px; }
+    .pw-toggle {
+      position:absolute; right:8px; background:none; border:none; color:#888;
+      cursor:pointer; font-size:18px; padding:4px; line-height:1; transition:0.2s;
+    }
+    .pw-toggle:hover { color:#ff3366; }
+
     /* MODAL */
     .modal-backdrop {
       position: fixed; top:0; left:0; width:100%; height:100%;
@@ -63,317 +81,72 @@
 
     /* UPLOAD ZONE */
     .upload-zone {
-      position: relative;
-      border: 2px dashed rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 2rem 1rem;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: rgba(255,255,255,0.02);
+      position: relative; border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 12px; padding: 2rem 1rem; text-align: center; cursor: pointer;
+      transition: 0.2s; display: flex; flex-direction: column; align-items: center;
+      gap: 4px; background: rgba(255,255,255,0.02);
     }
-    .upload-zone:hover,
-    .upload-zone.drag-over {
-      border-color: #ff3366;
-      background: rgba(255,51,102,0.05);
-    }
-    .upload-zone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: #ff3366; background: rgba(255,51,102,0.05); }
+    .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
     .upload-zone .upload-icon { font-size: 2rem; }
     .upload-zone .upload-hint { font-size: 0.75rem; color: #888; }
 
     /* IMAGE ITEMS */
-    .img-item {
-      position: relative;
-      width: 90px;
-      height: 90px;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.1);
-      flex-shrink: 0;
-    }
-    .img-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .img-item { position:relative; width:90px; height:90px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); flex-shrink:0; }
+    .img-item img { width:100%; height:100%; object-fit:cover; }
     .img-item .img-remove {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 22px;
-      height: 22px;
-      background: rgba(0,0,0,0.7);
-      border: none;
-      color: #fff;
-      border-radius: 50%;
-      font-size: 14px;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
-      padding: 0;
+      position:absolute; top:4px; right:4px; width:22px; height:22px;
+      background:rgba(0,0,0,0.7); border:none; color:#fff; border-radius:50%;
+      font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center;
+      justify-content:center; transition:0.2s; padding:0;
     }
-    .img-item .img-remove:hover {
-      background: #ff3366;
-    }
-    .img-item.removing {
-      opacity: 0.3;
-      filter: grayscale(1);
-    }
+    .img-item .img-remove:hover { background:#ff3366; }
+    .img-item.removing { opacity:0.3; filter:grayscale(1); }
     .img-item.removing::after {
-      content: '✕';
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: #ff3366;
-      background: rgba(0,0,0,0.4);
+      content:'✕'; position:absolute; inset:0; display:flex; align-items:center;
+      justify-content:center; font-size:2rem; color:#ff3366; background:rgba(0,0,0,0.4);
     }
 
     /* CARD GALLERY */
-    .card-gallery { position: relative; }
-    .card-main-img {
-      width:100%; height:160px; object-fit:cover; border-radius:6px;
-      background:#0a0a10; display:block; transition: opacity 0.2s;
-    }
-    .card-thumbs {
-      display:flex; gap:4px; margin-top:6px; overflow-x:auto;
-      padding-bottom:2px;
-    }
+    .card-gallery { position:relative; }
+    .card-main-img { width:100%; height:160px; object-fit:cover; border-radius:6px; background:#0a0a10; display:block; transition:opacity 0.2s; }
+    .card-thumbs { display:flex; gap:4px; margin-top:6px; overflow-x:auto; padding-bottom:2px; }
     .card-thumbs img {
       width:40px; height:40px; object-fit:cover; border-radius:4px;
-      border:1px solid rgba(255,255,255,0.1); cursor:pointer;
-      flex-shrink:0; transition: 0.15s;
+      border:1px solid rgba(255,255,255,0.1); cursor:pointer; flex-shrink:0; transition:0.15s;
     }
     .card-thumbs img:hover { border-color:#ff3366; }
-    .card-thumbs img.active { border-color:#ff3366; box-shadow: 0 0 0 2px #ff3366; }
-    .card-img-count {
-      position: absolute; bottom:6px; right:6px;
-      background: rgba(0,0,0,0.75); color:#fff; font-size:11px;
-      padding:2px 8px; border-radius:20px; font-weight:600;
-      backdrop-filter: blur(4px);
-    }
+    .card-thumbs img.active { border-color:#ff3366; box-shadow:0 0 0 2px #ff3366; }
+    .card-img-count { position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,0.75); color:#fff; font-size:11px; padding:2px 8px; border-radius:20px; font-weight:600; backdrop-filter:blur(4px); }
 
-    /* PASSWORD TOGGLE */
-    .pw-field {
-      position: relative;
-      display: flex;
-      align-items: center;
+    /* ADMIN HEADER */
+    .admin-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem; }
+    .admin-header h1 { margin-bottom:0; }
+    .logout-btn {
+      background:none; border:1px solid rgba(255,255,255,0.15); color:#aaa;
+      padding:0.4rem 1rem; font-size:0.8rem; cursor:pointer; border-radius:6px;
+      transition:0.2s; font-family:'Inconsolata';
     }
-    .pw-field input {
-      width: 100%;
-      padding-right: 40px;
-    }
-    .pw-toggle {
-      position: absolute;
-      right: 8px;
-      background: none;
-      border: none;
-      color: #888;
-      cursor: pointer;
-      font-size: 18px;
-      padding: 4px;
-      line-height: 1;
-      transition: 0.2s;
-    }
-    .pw-toggle:hover { color: #ff3366; }
-
-
-  /* --- LOGIN SCREEN --- */
-  .login-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 80vh;
-  }
-  .login-box {
-    background: #111118;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 2.5rem 2rem;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-  }
-  .login-box h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 2.2rem;
-    text-align: center;
-    margin-bottom: 0.25rem;
-  }
-  .login-box h1 em { color: #ff3366; font-style: italic; }
-  .login-box p.sub {
-    text-align: center;
-    color: #888;
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
-    font-family: 'Inconsolata';
-  }
-  .login-box .form-group { margin-bottom: 1rem; }
-  .login-box .form-group label {
-    display: block;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.3rem;
-    color: #aaa;
-  }
-  .login-box .form-group input {
-    width: 100%;
-    padding: 10px;
-    background: #0a0a10;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #eef2f5;
-    font-family: 'Inconsolata';
-    border-radius: 6px;
-  }
-  .login-box button {
-    width: 100%;
-    margin-top: 0.5rem;
-  }
-  .login-error {
-    color: #ff3366;
-    font-size: 0.85rem;
-    text-align: center;
-    margin-top: 0.75rem;
-    min-height: 1.2em;
-  }
-  .login-recovery {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.8rem;
-  }
-  .login-recovery a {
-    color: #ff3366;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .login-recovery a:hover { text-decoration: underline; }
-  .logout-btn {
-    background: none;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #aaa;
-    padding: 0.4rem 1rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    border-radius: 6px;
-    transition: 0.2s;
-    font-family: 'Inconsolata';
-  }
-  .logout-btn:hover {
-    border-color: #ff3366;
-    color: #ff3366;
-    background: rgba(255,51,102,0.05);
-  }
-  .admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-  .admin-header h1 { margin-bottom: 0; }
-  .pw-field-login {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .pw-field-login input {
-    width: 100%;
-    padding-right: 40px;
-  }
-  .pw-field-login .pw-toggle {
-    position: absolute;
-    right: 8px;
-    background: none;
-    border: none;
-    color: #888;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 4px;
-    line-height: 1;
-    transition: 0.2s;
-  }
-  .pw-field-login .pw-toggle:hover { color: #ff3366; }
-</style>
+    .logout-btn:hover { border-color:#ff3366; color:#ff3366; background:rgba(255,51,102,0.05); }
+  </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- LOGIN SCREEN -->
-  <div class="login-screen" id="login-screen">
-    <div class="login-box">
-      <h1>El <em>Lado B</em></h1>
-      <p class="sub">· Acceso al panel ·</p>
-      <div class="form-group">
-        <label>🔑 Contraseña de acceso</label>
-        <div class="pw-field-login">
-          <input type="password" id="login-access" placeholder="Contraseña de acceso" autocomplete="off">
-          <button class="pw-toggle" type="button" onclick="toggleLoginPw('login-access', this)" title="Ver/ocultar">👁️</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>🔑 Contraseña de administrador</label>
-        <div class="pw-field-login">
-          <input type="password" id="login-admin" placeholder="Contraseña admin" autocomplete="off">
-          <button class="pw-toggle" type="button" onclick="toggleLoginPw('login-admin', this)" title="Ver/ocultar">👁️</button>
-        </div>
-      </div>
-      <button id="btn-login">Ingresar</button>
-      <div class="login-error" id="login-error"></div>
-      <div class="login-recovery">
-        <a id="btn-recovery">¿Olvidaste tus contraseñas?</a>
-      </div>
+  <!-- LOGIN -->
+  <div class="login-box" id="login-box">
+    <h2>El <em>Lado B</em></h2>
+    <p class="sub">· Acceso al panel ·</p>
+    <div class="pw-field">
+      <input type="password" id="admin-password" placeholder="Contraseña">
+      <button class="pw-toggle" type="button" title="Ver/ocultar">👁️</button>
     </div>
-  </div>
-
-  <!-- RECOVERY SCREEN -->
-  <div class="login-screen" id="recovery-screen" style="display:none;">
-    <div class="login-box">
-      <h1><em>Recuperar</em> acceso</h1>
-      <p class="sub">Respondé la pregunta de seguridad</p>
-      <div id="recovery-question" style="text-align:center;color:#eef2f5;font-size:1rem;margin-bottom:1rem;font-family:'Cormorant Garamond',serif;"></div>
-      <div class="form-group">
-        <label>🔐 Respuesta</label>
-        <input type="text" id="recovery-answer" placeholder="Tu respuesta" autocomplete="off">
-      </div>
-      <button id="btn-verify-recovery">Verificar</button>
-      <div id="recovery-error" class="login-error"></div>
-
-      <div id="recovery-reset" style="display:none;margin-top:1.5rem;">
-        <div class="form-group">
-          <label>Nueva contraseña de acceso</label>
-          <input type="text" id="recovery-new-access" placeholder="Nueva contraseña de acceso">
-        </div>
-        <div class="form-group">
-          <label>Nueva contraseña de administrador</label>
-          <input type="text" id="recovery-new-admin" placeholder="Nueva contraseña admin">
-        </div>
-        <button id="btn-reset-passwords">Restablecer contraseñas</button>
-      </div>
-
-      <div class="login-recovery">
-        <a id="btn-back-login">← Volver al inicio de sesión</a>
-      </div>
-    </div>
+    <button id="login-btn">Ingresar</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 
   <!-- ADMIN PANEL -->
-  <div class="admin-panel" id="admin-panel" style="display:none;">
+  <div class="admin-panel" id="admin-panel">
     <div class="admin-header">
       <h1>El <em>Lado B</em> · Admin</h1>
       <button class="logout-btn" id="btn-logout">✕ Salir</button>
@@ -398,24 +171,19 @@
       <div class="form-group"><label>🕘 Horario Domingos</label><input type="text" id="config-dom"></div>
       <div class="form-group"><label>🕘 Horario Feriados</label><input type="text" id="config-fer"></div>
       <div class="form-group"><label>📢 Ticker (separar por coma)</label><textarea id="config-ticker" rows="3"></textarea></div>
-      <div class="form-group"><label>🔑 Cambiar contraseña de acceso</label>
-        <input type="text" id="new-access-password" placeholder="Nueva contraseña de acceso" style="color:#fff; background:#0a0a10; border:1px solid rgba(255,255,255,0.1); padding:10px; width:100%; font-family:'Inconsolata'; border-radius:6px;">
-      </div>
-      <div class="form-group"><label>🔑 Cambiar contraseña admin</label>
+      <div class="form-group"><label>🔑 Cambiar contraseña</label>
         <div class="pw-field">
           <input type="password" id="new-password" placeholder="Nueva contraseña">
-          <button class="pw-toggle" id="toggle-new-pw" type="button" title="Ver/ocultar contraseña">👁️</button>
+          <button class="pw-toggle" type="button" title="Ver/ocultar">👁️</button>
         </div>
       </div>
-      <div class="form-group"><label>❓ Pregunta de seguridad (para recuperar contraseña)</label><input type="text" id="config-recovery-question" placeholder="ej: ¿Cuál es tu color favorito?"></div>
-      <div class="form-group"><label>🔐 Respuesta (sin mayúsculas ni espacios de más)</label><input type="text" id="config-recovery-answer" placeholder="ej: azul"></div>
       <button id="guardar-config">Guardar configuración</button>
       <div id="config-msg" class="error" style="margin-top:1rem;"></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL PARA PRODUCTO -->
+<!-- MODAL PRODUCTO -->
 <div id="productModal" class="modal-backdrop">
   <div class="modal-container">
     <h3><em>Producto</em></h3>
@@ -423,7 +191,7 @@
       <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre" required></div>
       <div class="form-group"><label>Categoría</label><input type="text" id="prod-categoria" required></div>
       <div class="form-group"><label>Precio (ej: $24.900)</label><input type="text" id="prod-precio" required></div>
-      <div class="form-group"><label>💰 Precio anterior (opcional — tachado)</label><input type="text" id="prod-precioAnterior" placeholder="ej: $34.900" style="border-color:#ff666644;"></div>
+      <div class="form-group"><label>💰 Precio anterior (opcional)</label><input type="text" id="prod-precioAnterior" placeholder="ej: $34.900" style="border-color:#ff666644;"></div>
       <div class="form-group"><label>Descripción corta</label><textarea id="prod-descripcion" rows="3" required></textarea></div>
       <div class="form-group">
         <label>Imágenes del producto</label>
@@ -448,7 +216,6 @@
 <div id="toast-admin" class="toast-admin"><span class="toast-dot"></span><span id="toast-msg-admin"></span></div>
 
 <script>
-// --- Toast ---
 function showToast(msg, isError = false) {
   const toast = document.getElementById('toast-admin');
   const span = document.getElementById('toast-msg-admin');
@@ -458,173 +225,94 @@ function showToast(msg, isError = false) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-// --- Variables globales ---
-let token = sessionStorage.getItem('adminToken') || '';
+let token = null;
 let productos = [];
-let editandoId = null; // null = crear nuevo, número = editar
-let imagenesExistentes = []; // urls de imágenes existentes al editar
-let imagenesARemover = []; // urls de imágenes existentes marcadas para eliminar
+let editandoId = null;
+let imagenesExistentes = [];
+let imagenesARemover = [];
 
-// --- Login / Logout ---
-function toggleLoginPw(inputId, btn) {
-  const input = document.getElementById(inputId);
-  if (input.type === 'password') {
-    input.type = 'text';
-    btn.textContent = '🙈';
-  } else {
-    input.type = 'password';
-    btn.textContent = '👁️';
-  }
-}
-
-document.getElementById('btn-login').addEventListener('click', async () => {
-  const accessPassword = document.getElementById('login-access').value.trim();
-  const adminPassword = document.getElementById('login-admin').value.trim();
-  const errorDiv = document.getElementById('login-error');
-  errorDiv.textContent = '';
-
-  if (!accessPassword || !adminPassword) {
-    errorDiv.textContent = 'Completá ambas contraseñas';
+// --- Login ---
+async function login() {
+  const password = document.getElementById('admin-password').value;
+  if (!password) {
+    document.getElementById('login-error').textContent = '❌ Escribí la contraseña';
     return;
   }
-
-  document.getElementById('btn-login').textContent = 'Ingresando...';
-  document.getElementById('btn-login').disabled = true;
-
+  document.getElementById('login-btn').textContent = 'Ingresando...';
+  document.getElementById('login-btn').disabled = true;
   try {
-    const res = await fetch('/api/verify-admin-access', {
+    const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessPassword, adminPassword })
+      body: JSON.stringify({ password })
     });
-    const data = await res.json();
-    if (data.success && data.token) {
+    if (res.ok) {
+      const data = await res.json();
       token = data.token;
-      sessionStorage.setItem('adminToken', token);
-      document.getElementById('login-screen').style.display = 'none';
+      localStorage.setItem('adminToken', token);
+      document.getElementById('login-box').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       cargarProductos();
       cargarConfig();
     } else {
-      errorDiv.textContent = '❌ Contraseña incorrecta';
+      document.getElementById('login-error').textContent = '❌ Contraseña incorrecta';
     }
   } catch (err) {
-    errorDiv.textContent = '❌ Error de conexión';
+    document.getElementById('login-error').textContent = '⚠️ Error de conexión';
   } finally {
-    document.getElementById('btn-login').textContent = 'Ingresar';
-    document.getElementById('btn-login').disabled = false;
+    document.getElementById('login-btn').textContent = 'Ingresar';
+    document.getElementById('login-btn').disabled = false;
   }
+}
+
+document.getElementById('login-btn').addEventListener('click', login);
+document.getElementById('admin-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
 });
 
+// --- Logout ---
 document.getElementById('btn-logout').addEventListener('click', () => {
-  token = '';
-  sessionStorage.removeItem('adminToken');
+  token = null;
+  localStorage.removeItem('adminToken');
   document.getElementById('admin-panel').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('login-access').value = '';
-  document.getElementById('login-admin').value = '';
+  document.getElementById('login-box').style.display = 'block';
+  document.getElementById('admin-password').value = '';
   document.getElementById('login-error').textContent = '';
 });
 
-// Enter key triggers login
-document.getElementById('login-admin').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') document.getElementById('btn-login').click();
-});
-document.getElementById('login-access').addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') document.getElementById('btn-login').click();
-});
-
-// --- Recuperación de contraseña ---
-document.getElementById('btn-recovery').addEventListener('click', async () => {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('recovery-screen').style.display = 'flex';
-  document.getElementById('recovery-reset').style.display = 'none';
-  document.getElementById('recovery-error').textContent = '';
-  document.getElementById('recovery-answer').value = '';
-  try {
-    const res = await fetch('/api/recovery-question');
-    const data = await res.json();
-    document.getElementById('recovery-question').textContent = data.question || '❌ No hay pregunta de seguridad configurada.';
-  } catch (err) {
-    document.getElementById('recovery-question').textContent = '❌ Error al cargar pregunta';
-  }
-});
-
-document.getElementById('btn-back-login').addEventListener('click', () => {
-  document.getElementById('recovery-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('recovery-error').textContent = '';
-  document.getElementById('recovery-answer').value = '';
-  document.getElementById('recovery-new-access').value = '';
-  document.getElementById('recovery-new-admin').value = '';
-  document.getElementById('recovery-reset').style.display = 'none';
-});
-
-document.getElementById('btn-verify-recovery').addEventListener('click', async () => {
-  const answer = document.getElementById('recovery-answer').value.trim();
-  const errorDiv = document.getElementById('recovery-error');
-  if (!answer) { errorDiv.textContent = 'Escribí tu respuesta'; return; }
-  errorDiv.textContent = '';
-  document.getElementById('btn-verify-recovery').textContent = 'Verificando...';
-  document.getElementById('btn-verify-recovery').disabled = true;
-  try {
-    const res = await fetch('/api/recover-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answer })
+// --- Auto-login ---
+const storedToken = localStorage.getItem('adminToken');
+if (storedToken) {
+  token = storedToken;
+  fetch('/api/admin/config', { headers: { 'Authorization': token } })
+    .then(res => {
+      if (!res.ok) throw new Error();
+      document.getElementById('login-box').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      cargarProductos();
+      cargarConfig();
+    })
+    .catch(() => {
+      localStorage.removeItem('adminToken');
+      token = null;
+      location.reload();
     });
-    const data = await res.json();
-    if (data.verified) {
-      document.getElementById('recovery-reset').style.display = 'block';
-      document.getElementById('recovery-question').textContent = '✅ Respuesta correcta. Establecé nuevas contraseñas:';
-      document.getElementById('btn-verify-recovery').style.display = 'none';
-    } else {
-      errorDiv.textContent = '❌ Respuesta incorrecta';
-    }
-  } catch (err) {
-    errorDiv.textContent = '❌ Error de conexión';
-  } finally {
-    document.getElementById('btn-verify-recovery').textContent = 'Verificar';
-    document.getElementById('btn-verify-recovery').disabled = false;
-  }
-});
+}
 
-document.getElementById('btn-reset-passwords').addEventListener('click', async () => {
-  const newAccess = document.getElementById('recovery-new-access').value.trim();
-  const newAdmin = document.getElementById('recovery-new-admin').value.trim();
-  const answer = document.getElementById('recovery-answer').value.trim();
-  const errorDiv = document.getElementById('recovery-error');
-  if (!newAccess || !newAdmin) { errorDiv.textContent = 'Completá ambas contraseñas'; return; }
-  errorDiv.textContent = '';
-  document.getElementById('btn-reset-passwords').textContent = 'Guardando...';
-  document.getElementById('btn-reset-passwords').disabled = true;
-  try {
-    const res = await fetch('/api/reset-passwords', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answer, newAccessPassword: newAccess, newAdminPassword: newAdmin })
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert('✅ Contraseñas restablecidas. Iniciá sesión con las nuevas.');
-      document.getElementById('btn-back-login').click();
-    } else {
-      errorDiv.textContent = '❌ Error al restablecer';
-    }
-  } catch (err) {
-    errorDiv.textContent = '❌ Error de conexión';
-  } finally {
-    document.getElementById('btn-reset-passwords').textContent = 'Restablecer contraseñas';
-    document.getElementById('btn-reset-passwords').disabled = false;
-  }
+// --- Password toggle ---
+document.querySelectorAll('.pw-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = btn.parentElement.querySelector('input');
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+  });
 });
 
 // --- Modal control ---
 function renderPreviewImagenes() {
   const container = document.getElementById('preview-imagenes');
   const nuevasContainer = document.getElementById('preview-nuevas');
-
-  // Mostrar imágenes existentes (no removidas) con botón de eliminar
   container.innerHTML = imagenesExistentes
     .filter(url => !imagenesARemover.includes(url))
     .map((url, i) => `
@@ -633,25 +321,16 @@ function renderPreviewImagenes() {
         <button class="img-remove" data-url="${url}" onclick="marcarRemover(this)" title="Eliminar">✕</button>
       </div>
     `).join('') || '<span style="color:#666;font-size:13px;">Sin imágenes guardadas</span>';
-
-  // Mostrar nuevas imágenes seleccionadas (desde el input file)
   const fileInput = document.getElementById('prod-imagenes');
   nuevasContainer.innerHTML = Array.from(fileInput.files).map((file, i) => {
     const url = URL.createObjectURL(file);
-    return `
-      <div class="img-item">
-        <img src="${url}">
-        <button class="img-remove" onclick="quitarNuevaImagen(${i})" title="Quitar">✕</button>
-      </div>
-    `;
+    return `<div class="img-item"><img src="${url}"><button class="img-remove" onclick="quitarNuevaImagen(${i})" title="Quitar">✕</button></div>`;
   }).join('');
 }
 
 function marcarRemover(btn) {
   const url = btn.dataset.url;
-  if (url && !imagenesARemover.includes(url)) {
-    imagenesARemover.push(url);
-  }
+  if (url && !imagenesARemover.includes(url)) imagenesARemover.push(url);
   renderPreviewImagenes();
 }
 
@@ -667,10 +346,8 @@ function quitarNuevaImagen(index) {
 
 function openModal(producto = null) {
   const modal = document.getElementById('productModal');
-  const fileInput = document.getElementById('prod-imagenes');
-  fileInput.value = '';
+  document.getElementById('prod-imagenes').value = '';
   imagenesARemover = [];
-
   if (producto) {
     editandoId = producto.id;
     document.getElementById('prod-nombre').value = producto.nombre || '';
@@ -679,60 +356,37 @@ function openModal(producto = null) {
     document.getElementById('prod-precioAnterior').value = producto.precioAnterior || '';
     document.getElementById('prod-descripcion').value = producto.descripcion || '';
     document.getElementById('prod-badge').value = producto.badge || '';
-    imagenesExistentes = producto.imagenes && producto.imagenes.length
-      ? [...producto.imagenes]
-      : (producto.imagen ? [producto.imagen] : []);
+    imagenesExistentes = producto.imagenes && producto.imagenes.length ? [...producto.imagenes] : (producto.imagen ? [producto.imagen] : []);
   } else {
     editandoId = null;
-    document.getElementById('prod-nombre').value = '';
-    document.getElementById('prod-categoria').value = '';
-    document.getElementById('prod-precio').value = '';
-    document.getElementById('prod-precioAnterior').value = '';
-    document.getElementById('prod-descripcion').value = '';
-    document.getElementById('prod-badge').value = '';
+    ['prod-nombre','prod-categoria','prod-precio','prod-precioAnterior','prod-descripcion','prod-badge'].forEach(id => document.getElementById(id).value = '');
     imagenesExistentes = [];
   }
   renderPreviewImagenes();
   modal.classList.add('active');
 }
 
-// Preview al seleccionar archivos
-document.getElementById('prod-imagenes').addEventListener('change', function() {
-  renderPreviewImagenes();
-});
+document.getElementById('prod-imagenes').addEventListener('change', renderPreviewImagenes);
 
-// Drag & drop visual feedback
 const uploadZone = document.getElementById('upload-zone');
-uploadZone.addEventListener('dragover', (e) => {
-  e.preventDefault();
-  uploadZone.classList.add('drag-over');
-});
-uploadZone.addEventListener('dragleave', () => {
-  uploadZone.classList.remove('drag-over');
-});
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
 uploadZone.addEventListener('drop', (e) => {
   e.preventDefault();
   uploadZone.classList.remove('drag-over');
   const files = e.dataTransfer.files;
   if (files.length) {
     const input = document.getElementById('prod-imagenes');
-    // Combinar archivos existentes con los nuevos
     const dt = new DataTransfer();
     for (const f of input.files) dt.items.add(f);
-    for (const f of files) {
-      if (f.type.startsWith('image/')) dt.items.add(f);
-    }
+    for (const f of files) { if (f.type.startsWith('image/')) dt.items.add(f); }
     input.files = dt.files;
     renderPreviewImagenes();
   }
 });
 
-function closeModal() {
-  document.getElementById('productModal').classList.remove('active');
-  editandoId = null;
-}
+function closeModal() { document.getElementById('productModal').classList.remove('active'); editandoId = null; }
 
-// Envío del formulario (crear o editar)
 document.getElementById('productForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = document.getElementById('prod-nombre').value.trim();
@@ -742,12 +396,7 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const descripcion = document.getElementById('prod-descripcion').value.trim();
   const badge = document.getElementById('prod-badge').value.trim();
   const fileInput = document.getElementById('prod-imagenes');
-
-  if (!nombre || !categoria || !precio || !descripcion) {
-    showToast('Completá todos los campos obligatorios', true);
-    return;
-  }
-
+  if (!nombre || !categoria || !precio || !descripcion) { showToast('Completá todos los campos obligatorios', true); return; }
   const formData = new FormData();
   formData.append('nombre', nombre);
   formData.append('categoria', categoria);
@@ -755,55 +404,24 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   if (precioAnterior) formData.append('precioAnterior', precioAnterior);
   formData.append('descripcion', descripcion);
   if (badge) formData.append('badge', badge);
-  for (const file of fileInput.files) {
-    formData.append('imagenes', file);
-  }
-  // Enviar qué imágenes existentes conservar y cuáles eliminar
+  for (const file of fileInput.files) formData.append('imagenes', file);
   if (editandoId) {
     const conservar = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
     formData.append('imagenesConservar', JSON.stringify(conservar));
-    if (imagenesARemover.length) {
-      formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
-    }
+    if (imagenesARemover.length) formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
   }
-
   try {
     let url = '/api/products';
     let method = 'POST';
-    if (editandoId) {
-      url = `/api/products/${editandoId}`;
-      method = 'PUT';
-    }
-    const res = await fetch(url, {
-      method: method,
-      headers: { 'Authorization': token },
-      body: formData
-    });
-    if (res.ok) {
-      showToast(editandoId ? '✅ Producto actualizado' : '✅ Producto creado');
-      closeModal();
-      await cargarProductos();
-    } else {
-      showToast('❌ Error al guardar', true);
-    }
-  } catch (err) {
-    showToast('Error de red', true);
-  }
+    if (editandoId) { url = `/api/products/${editandoId}`; method = 'PUT'; }
+    const res = await fetch(url, { method, headers: { 'Authorization': token }, body: formData });
+    if (res.ok) { showToast(editandoId ? '✅ Producto actualizado' : '✅ Producto creado'); closeModal(); cargarProductos(); }
+    else showToast('❌ Error al guardar', true);
+  } catch (err) { showToast('Error de red', true); }
 });
 
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
-// Cerrar modal si se clickea fuera del contenido
-document.getElementById('productModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('productModal')) closeModal();
-});
-
-// --- Inicialización ---
-if (token) {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('admin-panel').style.display = 'block';
-  cargarProductos();
-  cargarConfig();
-}
+document.getElementById('productModal').addEventListener('click', (e) => { if (e.target === document.getElementById('productModal')) closeModal(); });
 
 // --- Productos ---
 async function cargarProductos() {
@@ -826,38 +444,25 @@ async function cargarProductos() {
 
 function escapeHtml(str) {
   if (!str) return '';
-  return str.replace(/[&<>]/g, function(m) {
-    if (m === '&') return '&amp;';
-    if (m === '<') return '&lt;';
-    if (m === '>') return '&gt;';
-    return m;
-  });
+  return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
 
 function renderProductos() {
   const container = document.getElementById('productos-list');
-  if (!productos.length) {
-    container.innerHTML = '<p style="text-align:center; grid-column:1/-1;">📭 No hay productos aún. Creá uno nuevo.</p>';
-    return;
-  }
+  if (!productos.length) { container.innerHTML = '<p style="text-align:center; grid-column:1/-1;">📭 No hay productos aún. Creá uno nuevo.</p>'; return; }
   container.innerHTML = productos.map((p, idx) => {
     const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
     const idSafe = (p.id || '').toString().replace(/[^a-zA-Z0-9]/g, '');
-    const idxGlobal = idx;
     return `
     <div class="producto-card">
       <div class="card-gallery">
         ${imgs.length ? `
           <div style="position:relative;">
-            <img class="card-main-img" id="mainimg-${idSafe}" src="${imgs[0]}" onerror="this.style.display='none'" data-idx="${idxGlobal}">
+            <img class="card-main-img" id="mainimg-${idSafe}" src="${imgs[0]}" onerror="this.style.display='none'" data-idx="${idx}">
             ${imgs.length > 1 ? `<span class="card-img-count">${imgs.length} fotos</span>` : ''}
           </div>
-        ` : `<div style="width:100%;height:150px;background:#0a0a10;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#666;">Sin imagen</div>`}
-        ${imgs.length > 1 ? `
-        <div class="card-thumbs">${imgs.map((url, i) =>
-          `<img src="${url}" onerror="this.style.display='none'" onclick="cambiarMainImg(${idxGlobal}, ${i})" class="${i === 0 ? 'active' : ''}">`
-        ).join('')}</div>
-        ` : ''}
+        ` : '<div style="width:100%;height:150px;background:#0a0a10;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#666;">Sin imagen</div>'}
+        ${imgs.length > 1 ? `<div class="card-thumbs">${imgs.map((url, i) => `<img src="${url}" onerror="this.style.display='none'" onclick="cambiarMainImg(${idx}, ${i})" class="${i === 0 ? 'active' : ''}">`).join('')}</div>` : ''}
       </div>
       <h3 style="margin-top:8px;">${escapeHtml(p.nombre)}</h3>
       <p><strong style="font-size:1.1rem;">${p.precio}</strong> ${p.precioAnterior ? `<span class="precio-anterior">${p.precioAnterior}</span>` : ''}</p>
@@ -871,7 +476,6 @@ function renderProductos() {
   }).join('');
 }
 
-// Mini-galería en tarjetas del admin
 function cambiarMainImg(idx, index) {
   const prod = productos[idx];
   if (!prod) return;
@@ -883,38 +487,20 @@ function cambiarMainImg(idx, index) {
   mainImg.style.display = '';
   const parent = mainImg.closest('.card-gallery');
   if (!parent) return;
-  parent.querySelectorAll('.card-thumbs img').forEach((img, i) => {
-    img.classList.toggle('active', i === index);
-  });
+  parent.querySelectorAll('.card-thumbs img').forEach((img, i) => img.classList.toggle('active', i === index));
 }
 
 async function eliminarProducto(id) {
   if (!confirm('¿Eliminar este producto permanentemente?')) return;
   try {
-    const res = await fetch(`/api/products/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': token }
-    });
-    if (res.ok) {
-      showToast('✅ Producto eliminado');
-      await cargarProductos();
-    } else {
-      showToast('❌ Error al eliminar', true);
-    }
-  } catch (err) {
-    showToast('Error de red', true);
-  }
+    const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { 'Authorization': token } });
+    if (res.ok) { showToast('✅ Producto eliminado'); cargarProductos(); }
+    else showToast('❌ Error al eliminar', true);
+  } catch (err) { showToast('Error de red', true); }
 }
 
-function editarProducto(id) {
-  const prod = productos.find(p => p.id === id);
-  if (prod) openModal(prod);
-}
-
-// Nuevo producto: abrir modal vacío
-document.getElementById('btn-nuevo-producto').addEventListener('click', () => {
-  openModal();
-});
+function editarProducto(id) { const prod = productos.find(p => p.id === id); if (prod) openModal(prod); }
+document.getElementById('btn-nuevo-producto').addEventListener('click', () => openModal());
 
 // --- Configuración ---
 async function cargarConfig() {
@@ -928,11 +514,7 @@ async function cargarConfig() {
     document.getElementById('config-dom').value = cfg.horarios?.domingos || '';
     document.getElementById('config-fer').value = cfg.horarios?.feriados || '';
     document.getElementById('config-ticker').value = (cfg.tickerItems || []).join(', ');
-    document.getElementById('config-recovery-question').value = cfg.recoveryQuestion || '';
-    document.getElementById('config-recovery-answer').value = cfg.recoveryAnswer || '';
-  } catch (err) {
-    showToast('Error al cargar configuración', true);
-  }
+  } catch (err) { showToast('Error al cargar configuración', true); }
 }
 
 document.getElementById('guardar-config').addEventListener('click', async () => {
@@ -944,15 +526,10 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
       domingos: document.getElementById('config-dom').value,
       feriados: document.getElementById('config-fer').value
     },
-    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s),
-    recoveryQuestion: document.getElementById('config-recovery-question').value.trim(),
-    recoveryAnswer: document.getElementById('config-recovery-answer').value.trim()
+    tickerItems: document.getElementById('config-ticker').value.split(',').map(s => s.trim()).filter(s => s)
   };
-  const newAccessPw = document.getElementById('new-access-password').value;
-  if (newAccessPw) newConfig.pageAccessPassword = newAccessPw;
   const newPassword = document.getElementById('new-password').value;
   if (newPassword) newConfig.adminPassword = newPassword;
-
   try {
     const res = await fetch('/api/admin/config', {
       method: 'PUT',
@@ -965,10 +542,7 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
       msgDiv.textContent = '✅ Configuración guardada correctamente';
       setTimeout(() => msgDiv.textContent = '', 3000);
       showToast('Configuración actualizada');
-      if (newAccessPw || newPassword) {
-        alert('Contraseña(s) cambiada(s). Reiniciá sesión.');
-        location.reload();
-      }
+      if (newPassword) { alert('Contraseña cambiada. Reiniciá sesión.'); location.reload(); }
     } else throw new Error();
   } catch (err) {
     document.getElementById('config-msg').className = 'error';
@@ -986,7 +560,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
   });
 });
-
 </script>
 </body>
 </html>
