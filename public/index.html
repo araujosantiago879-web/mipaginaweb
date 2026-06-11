@@ -581,18 +581,29 @@
     .cart-total { display:flex; justify-content:space-between; font-family:'Inconsolata',monospace; font-size:16px; color:var(--lime); }
     .cart-checkout { width:100%; padding:14px; background:var(--wa); color:var(--ink); font-weight:800; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:background .2s; display:flex; align-items:center; justify-content:center; gap:8px; border-radius:1px; }
     .cart-checkout:hover { background:var(--wa-d); }
-    .cart-payment { display:flex; flex-direction:column; gap:8px; padding:12px 0; border-top:1px solid var(--edge); }
-    .cp-title { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
-    .cp-btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; border-radius:1px; transition:all .2s; text-decoration:none; }
-    .cp-mp { background:rgba(0,156,222,.12); color:#009cde; border:1px solid rgba(0,156,222,.25); }
-    .cp-mp:hover { background:rgba(0,156,222,.25); }
-    .cp-bank { background:var(--ink-3); border:1px solid var(--edge); padding:12px; display:flex; flex-direction:column; gap:6px; }
-    .cp-bank-title { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
-    .cp-bank-row { display:flex; justify-content:space-between; font-family:'Inconsolata',monospace; font-size:10px; color:var(--muted); }
-    .cp-bank-row span:first-child { color:var(--muted-2); }
-    .cp-mono { font-family:'Inconsolata',monospace; color:var(--lime); font-size:10px; word-break:break-all; text-align:right; max-width:200px; }
-    .cp-copy { font-size:9px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--rose); background:none; border:1px solid rgba(255,51,102,.2); padding:6px; cursor:pointer; transition:all .2s; border-radius:1px; }
-    .cp-copy:hover { background:rgba(255,51,102,.1); border-color:var(--rose); }
+    .cart-payment { display:flex; flex-direction:column; gap:6px; padding:12px 0; border-top:1px solid var(--edge); }
+    .cp-title { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .pm { background:var(--ink-3); border:1px solid var(--edge); padding:10px 12px; display:flex; flex-direction:column; gap:4px; transition:border-color .2s; }
+    .pm-header { display:flex; align-items:center; gap:8px; }
+    .pm-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+    .pm-icon.mp { background:rgba(0,156,222,.15); }
+    .pm-icon.bank { background:rgba(102,255,204,.1); }
+    .pm-icon.cash { background:rgba(255,170,51,.1); }
+    .pm-icon.card { background:rgba(102,102,255,.1); }
+    .pm-icon.other { background:rgba(200,215,230,.08); }
+    .pm-body { flex:1; }
+    .pm-name { font-size:11px; font-weight:600; letter-spacing:.5px; color:var(--paper); }
+    .pm-desc { font-size:10px; color:var(--muted); margin-top:1px; }
+    .pm-btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; border-radius:1px; transition:all .2s; text-decoration:none; margin-top:2px; }
+    .pm-btn.mp { background:rgba(0,156,222,.12); color:#009cde; border:1px solid rgba(0,156,222,.25); }
+    .pm-btn.mp:hover { background:rgba(0,156,222,.25); }
+    .pm-details { display:grid; grid-template-columns:1fr 1fr; gap:3px 12px; margin-top:4px; }
+    .pm-dl { display:flex; flex-direction:column; gap:1px; }
+    .pm-dt { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--muted-2); }
+    .pm-dd { font-family:'Inconsolata',monospace; font-size:10px; color:var(--paper); word-break:break-all; }
+    .pm-dd.mono { color:var(--lime); font-size:9px; }
+    .pm-copy { font-size:8px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--rose); background:none; border:1px solid rgba(255,51,102,.2); padding:5px 8px; cursor:pointer; transition:all .2s; border-radius:1px; display:inline-flex; align-items:center; gap:4px; margin-top:4px; width:fit-content; }
+    .pm-copy:hover { background:rgba(255,51,102,.1); border-color:var(--rose); }
     .cart-empty { padding:40px 20px; text-align:center; color:var(--muted); font-family:'Inconsolata',monospace; font-size:11px; }
     .cart-list { }
 
@@ -849,35 +860,58 @@
   <div class="cart-footer" id="cart-footer" style="display:none;">
     <div class="cart-total" id="cart-total"></div>
     <div class="cart-payment" id="cart-payment" style="display:none;">
-      <div class="cp-title">Opciones de pago</div>
-      <a href="#" target="_blank" class="cp-btn cp-mp" id="cp-mp" style="display:none;">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-        Pagar con Mercado Pago
-      </a>
-      <div class="cp-bank" id="cp-bank" style="display:none;">
-        <div class="cp-bank-title">Transferencia bancaria</div>
-        <div class="cp-bank-row"><span>Banco</span><span id="cp-banco"></span></div>
-        <div class="cp-bank-row"><span>Titular</span><span id="cp-titular"></span></div>
-        <div class="cp-bank-row"><span>CBU</span><span id="cp-cbu" class="cp-mono"></span></div>
-        <div class="cp-bank-row"><span>Alias</span><span id="cp-alias" class="cp-mono"></span></div>
-        <button class="cp-copy" id="cp-copy-cbu" onclick="copyText(document.getElementById('cp-cbu').textContent)">📋 Copiar CBU</button>
+      <div class="cp-title">Medios de pago</div>
+      <div class="pm" id="pm-mp" style="display:none;">
+        <div class="pm-header">
+          <div class="pm-icon mp">⬡</div>
+          <div class="pm-body">
+            <div class="pm-name">Mercado Pago</div>
+            <div class="pm-desc">Pagá con tu cuenta de Mercado Pago</div>
+          </div>
+        </div>
+        <a href="#" target="_blank" class="pm-btn mp" id="cp-mp">Pagar con Mercado Pago →</a>
       </div>
-      <div class="cp-efectivo" id="cp-efectivo" style="display:none;">
-        <div class="cp-bank">
-          <div class="cp-bank-title">💵 Efectivo</div>
-          <div class="cp-bank-row" id="cp-efectivo-texto" style="color:var(--paper);"></div>
+      <div class="pm" id="pm-bank" style="display:none;">
+        <div class="pm-header">
+          <div class="pm-icon bank">🏦</div>
+          <div class="pm-body">
+            <div class="pm-name">Transferencia bancaria</div>
+            <div class="pm-desc" id="cp-banco-desc">Datos para transferir</div>
+          </div>
+        </div>
+        <div class="pm-details">
+          <div class="pm-dl"><span class="pm-dt">Banco</span><span class="pm-dd" id="cp-banco"></span></div>
+          <div class="pm-dl"><span class="pm-dt">Titular</span><span class="pm-dd" id="cp-titular"></span></div>
+          <div class="pm-dl"><span class="pm-dt">CBU</span><span class="pm-dd mono" id="cp-cbu"></span></div>
+          <div class="pm-dl"><span class="pm-dt">Alias</span><span class="pm-dd mono" id="cp-alias"></span></div>
+        </div>
+        <button class="pm-copy" id="cp-copy-cbu" onclick="copyText(document.getElementById('cp-cbu').textContent)">📋 Copiar CBU</button>
+      </div>
+      <div class="pm" id="pm-efectivo" style="display:none;">
+        <div class="pm-header">
+          <div class="pm-icon cash">💵</div>
+          <div class="pm-body">
+            <div class="pm-name">Efectivo</div>
+            <div class="pm-desc" id="cp-efectivo-texto"></div>
+          </div>
         </div>
       </div>
-      <div class="cp-tarjetas" id="cp-tarjetas" style="display:none;">
-        <div class="cp-bank">
-          <div class="cp-bank-title">💳 Tarjetas crédito/débito</div>
-          <div class="cp-bank-row" id="cp-tarjetas-texto" style="color:var(--paper);"></div>
+      <div class="pm" id="pm-tarjetas" style="display:none;">
+        <div class="pm-header">
+          <div class="pm-icon card">💳</div>
+          <div class="pm-body">
+            <div class="pm-name">Tarjetas crédito/débito</div>
+            <div class="pm-desc" id="cp-tarjetas-texto"></div>
+          </div>
         </div>
       </div>
-      <div class="cp-otro" id="cp-otro" style="display:none;">
-        <div class="cp-bank">
-          <div class="cp-bank-title" id="cp-otro-titulo">🔄 Otro</div>
-          <div class="cp-bank-row" id="cp-otro-texto" style="color:var(--paper);"></div>
+      <div class="pm" id="pm-otro" style="display:none;">
+        <div class="pm-header">
+          <div class="pm-icon other">🔄</div>
+          <div class="pm-body">
+            <div class="pm-name" id="cp-otro-titulo">Otro método de pago</div>
+            <div class="pm-desc" id="cp-otro-texto"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1546,47 +1580,49 @@ function renderCart() {
   // Payment options
   const payDiv = document.getElementById('cart-payment');
   const mpLink = document.getElementById('cp-mp');
-  const bankDiv = document.getElementById('cp-bank');
+  const mpBlock = document.getElementById('pm-mp');
+  const bankBlock = document.getElementById('pm-bank');
   if (payDiv) {
     const pc = window.paymentConfig || {};
     let hasPayment = false;
-    if (pc.mercadoPagoLink && mpLink) {
+    if (pc.mercadoPagoLink && mpLink && mpBlock) {
       mpLink.href = pc.mercadoPagoLink;
-      mpLink.style.display = 'flex';
+      mpBlock.style.display = 'flex';
       hasPayment = true;
-    } else if (mpLink) { mpLink.style.display = 'none'; }
+    } else if (mpBlock) { mpBlock.style.display = 'none'; }
     if (pc.cbu || pc.alias) {
-      if (bankDiv) {
-        bankDiv.style.display = 'flex';
+      if (bankBlock) {
+        bankBlock.style.display = 'flex';
         document.getElementById('cp-banco').textContent = pc.banco || '—';
         document.getElementById('cp-titular').textContent = pc.titular || '—';
         document.getElementById('cp-cbu').textContent = pc.cbu || '—';
         document.getElementById('cp-alias').textContent = pc.alias || '—';
+        document.getElementById('cp-banco-desc').textContent = pc.banco ? `Transferí a ${pc.banco}` : 'Datos para transferir';
       }
       hasPayment = true;
-    } else if (bankDiv) { bankDiv.style.display = 'none'; }
+    } else if (bankBlock) { bankBlock.style.display = 'none'; }
     // Efectivo
-    const efecDiv = document.getElementById('cp-efectivo');
-    if (pc.efectivoHabilitado && efecDiv) {
-      efecDiv.style.display = 'flex';
+    const efecBlock = document.getElementById('pm-efectivo');
+    if (pc.efectivoHabilitado && efecBlock) {
+      efecBlock.style.display = 'flex';
       document.getElementById('cp-efectivo-texto').textContent = pc.efectivoTexto || 'Pagá en efectivo al recibir tu pedido';
       hasPayment = true;
-    } else if (efecDiv) { efecDiv.style.display = 'none'; }
+    } else if (efecBlock) { efecBlock.style.display = 'none'; }
     // Tarjetas
-    const tarjDiv = document.getElementById('cp-tarjetas');
-    if (pc.tarjetasHabilitado && tarjDiv) {
-      tarjDiv.style.display = 'flex';
+    const tarjBlock = document.getElementById('pm-tarjetas');
+    if (pc.tarjetasHabilitado && tarjBlock) {
+      tarjBlock.style.display = 'flex';
       document.getElementById('cp-tarjetas-texto').textContent = pc.tarjetasTexto || 'Aceptamos todas las tarjetas de crédito y débito';
       hasPayment = true;
-    } else if (tarjDiv) { tarjDiv.style.display = 'none'; }
+    } else if (tarjBlock) { tarjBlock.style.display = 'none'; }
     // Otro
-    const otroDiv = document.getElementById('cp-otro');
-    if (pc.otroHabilitado && otroDiv) {
-      otroDiv.style.display = 'flex';
-      document.getElementById('cp-otro-titulo').textContent = pc.otroTitulo || '🔄 Otro método de pago';
+    const otroBlock = document.getElementById('pm-otro');
+    if (pc.otroHabilitado && otroBlock) {
+      otroBlock.style.display = 'flex';
+      document.getElementById('cp-otro-titulo').textContent = pc.otroTitulo || 'Otro método de pago';
       document.getElementById('cp-otro-texto').textContent = pc.otroTexto || '';
       hasPayment = true;
-    } else if (otroDiv) { otroDiv.style.display = 'none'; }
+    } else if (otroBlock) { otroBlock.style.display = 'none'; }
     payDiv.style.display = hasPayment ? 'flex' : 'none';
   }
 }
