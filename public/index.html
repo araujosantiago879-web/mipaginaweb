@@ -941,7 +941,7 @@
         </div>
         <a href="#" target="_blank" class="pm-btn mp" id="cp-mp">Pagar con Mercado Pago →</a>
       </div>
-      <div class="pm clickable" id="pm-bank" style="display:none;">
+      <div class="pm clickable" id="pm-bank" style="display:none;" onclick="openBankModal()">
         <div class="pm-header">
           <div class="pm-icon bank">🏦</div>
           <div class="pm-body">
@@ -1788,10 +1788,6 @@ function renderCart() {
     if (pc.cbu || pc.alias) {
       if (bankBlock) {
         bankBlock.style.display = 'flex';
-        document.getElementById('cp-banco').textContent = pc.banco || '—';
-        document.getElementById('cp-titular').textContent = pc.titular || '—';
-        document.getElementById('cp-cbu').textContent = pc.cbu || '—';
-        document.getElementById('cp-alias').textContent = pc.alias || '—';
         document.getElementById('cp-banco-desc').textContent = pc.banco ? `Transferí a ${pc.banco}` : 'Datos para transferir';
       }
       hasPayment = true;
@@ -1867,7 +1863,7 @@ function closeCC() {
 }
 
 // ── Bank transfer modal ──
-document.getElementById('pm-bank')?.addEventListener('click', () => {
+function openBankModal() {
   const pc = window.paymentConfig || {};
   document.getElementById('bank-modal-banco').textContent = pc.banco || '—';
   document.getElementById('bank-modal-titular').textContent = pc.titular || '—';
@@ -1879,7 +1875,7 @@ document.getElementById('pm-bank')?.addEventListener('click', () => {
   document.getElementById('bank-preview-alias').textContent = pc.alias || '—';
   document.getElementById('bank-bg')?.classList.add('open');
   document.body.style.overflow = 'hidden';
-});
+}
 document.getElementById('bank-close')?.addEventListener('click', closeBank);
 document.getElementById('bank-bg')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeBank(); });
 function closeBank() {
