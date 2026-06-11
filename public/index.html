@@ -583,7 +583,8 @@
     .cart-checkout:hover { background:var(--wa-d); }
     .cart-payment { display:flex; flex-direction:column; gap:6px; padding:12px 0; border-top:1px solid var(--edge); }
     .cp-title { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
-    .pm { background:var(--ink-3); border:1px solid var(--edge); padding:10px 12px; display:flex; flex-direction:column; gap:4px; transition:border-color .2s; }
+    .pm { background:var(--ink-3); border:1px solid var(--edge); padding:10px 12px; display:flex; flex-direction:column; gap:4px; transition:border-color .2s, background .2s; }
+    .pm:hover { border-color:rgba(255,255,255,.1); }
     .pm-header { display:flex; align-items:center; gap:8px; }
     .pm-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
     .pm-icon.mp { background:rgba(0,156,222,.15); }
@@ -597,12 +598,13 @@
     .pm-btn { display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; border-radius:1px; transition:all .2s; text-decoration:none; margin-top:2px; }
     .pm-btn.mp { background:rgba(0,156,222,.12); color:#009cde; border:1px solid rgba(0,156,222,.25); }
     .pm-btn.mp:hover { background:rgba(0,156,222,.25); }
-    .pm-details { display:grid; grid-template-columns:1fr 1fr; gap:3px 12px; margin-top:4px; }
+    .pm-details { display:flex; flex-direction:column; gap:4px; margin-top:4px; }
     .pm-dl { display:flex; flex-direction:column; gap:1px; }
-    .pm-dt { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--muted-2); }
+    .pm-dt { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
     .pm-dd { font-family:'Inconsolata',monospace; font-size:10px; color:var(--paper); word-break:break-all; }
-    .pm-dd.mono { color:var(--lime); font-size:9px; }
-    .pm-copy { font-size:8px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--rose); background:none; border:1px solid rgba(255,51,102,.2); padding:5px 8px; cursor:pointer; transition:all .2s; border-radius:1px; display:inline-flex; align-items:center; gap:4px; margin-top:4px; width:fit-content; }
+    .pm-dd.mono { color:var(--lime); font-size:9px; letter-spacing:.3px; }
+    .pm-copy-row { display:flex; gap:6px; margin-top:4px; }
+    .pm-copy { font-size:8px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--rose); background:none; border:1px solid rgba(255,51,102,.2); padding:5px 8px; cursor:pointer; transition:all .2s; border-radius:1px; display:inline-flex; align-items:center; gap:4px; flex:1; justify-content:center; }
     .pm-copy:hover { background:rgba(255,51,102,.1); border-color:var(--rose); }
     .cart-empty { padding:40px 20px; text-align:center; color:var(--muted); font-family:'Inconsolata',monospace; font-size:11px; }
     .cart-list { }
@@ -882,10 +884,13 @@
         <div class="pm-details">
           <div class="pm-dl"><span class="pm-dt">Banco</span><span class="pm-dd" id="cp-banco"></span></div>
           <div class="pm-dl"><span class="pm-dt">Titular</span><span class="pm-dd" id="cp-titular"></span></div>
-          <div class="pm-dl"><span class="pm-dt">CBU</span><span class="pm-dd mono" id="cp-cbu"></span></div>
+          <div class="pm-dl"><span class="pm-dt">CBU</span><span class="pm-dd mono" id="cp-cbu" style="font-size:11px;"></span></div>
           <div class="pm-dl"><span class="pm-dt">Alias</span><span class="pm-dd mono" id="cp-alias"></span></div>
         </div>
-        <button class="pm-copy" id="cp-copy-cbu" onclick="copyText(document.getElementById('cp-cbu').textContent)">📋 Copiar CBU</button>
+        <div class="pm-copy-row">
+          <button class="pm-copy" onclick="copyText(document.getElementById('cp-cbu').textContent)">📋 Copiar CBU</button>
+          <button class="pm-copy" onclick="copyText(document.getElementById('cp-alias').textContent)">📋 Copiar Alias</button>
+        </div>
       </div>
       <div class="pm" id="pm-efectivo" style="display:none;">
         <div class="pm-header">
