@@ -1794,18 +1794,18 @@ function renderCart() {
     } else if (bankBlock) { bankBlock.style.display = 'none'; }
     // Efectivo
     const efecBlock = document.getElementById('pm-efectivo');
-    if (pc.efectivoHabilitado && efecBlock) {
+    if (efecBlock && pc.efectivoHabilitado) {
       efecBlock.style.display = 'flex';
       document.getElementById('cp-efectivo-texto').textContent = pc.efectivoTexto || 'Pagá en efectivo al recibir tu pedido';
       hasPayment = true;
     } else if (efecBlock) { efecBlock.style.display = 'none'; }
     // Tarjetas
     const tarjBlock = document.getElementById('pm-tarjetas');
-    if (pc.tarjetasHabilitado && tarjBlock) {
+    if (tarjBlock) {
       tarjBlock.style.display = 'flex';
       document.getElementById('cp-tarjetas-texto').textContent = pc.tarjetasTexto || 'Aceptamos todas las tarjetas de crédito y débito';
       hasPayment = true;
-    } else if (tarjBlock) { tarjBlock.style.display = 'none'; }
+    }
     // Otro
     const otroBlock = document.getElementById('pm-otro');
     if (pc.otroHabilitado && otroBlock) {
