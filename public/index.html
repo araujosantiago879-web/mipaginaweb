@@ -614,39 +614,49 @@
     .cart-list { }
 
     /* ── Card payment modal ── */
-    .cc-bg { position:fixed; inset:0; z-index:999; background:rgba(5,5,8,.85); backdrop-filter:blur(10px); display:none; align-items:center; justify-content:center; padding:20px; }
+    .cc-bg { position:fixed; inset:0; z-index:999; background:rgba(5,5,8,.88); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:20px; }
     .cc-bg.open { display:flex; }
-    .cc-modal { background:linear-gradient(160deg, #0c070a, #0a0a10, #0c070a); border:1px solid rgba(255,51,102,.12); width:100%; max-width:440px; padding:28px; animation:fadein .25s ease; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 0 40px rgba(255,51,102,.04), 0 0 80px rgba(255,51,102,.02); }
-    .cc-modal::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--rose),transparent); opacity:.7; box-shadow:0 0 12px rgba(255,51,102,.3); }
-    .cc-close { position:absolute; top:16px; right:16px; width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; z-index:1; }
-    .cc-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; box-shadow:0 0 16px rgba(255,51,102,.3); }
-    .cc-head { text-align:center; margin-bottom:20px; }
-    .cc-head-icon { font-size:28px; margin-bottom:6px; display:block; filter:drop-shadow(0 0 8px rgba(255,51,102,.3)); }
-    .cc-head h3 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; }
-    .cc-head h3 em { color:var(--rose); font-style:italic; text-shadow:0 0 20px rgba(255,51,102,.3); }
-    .cc-head p { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
-    .cc-card-preview { background:linear-gradient(135deg,#1a0510,#0d0515,#1a0510); border-radius:8px; padding:20px 22px; margin-bottom:20px; min-height:112px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid rgba(255,51,102,.12); position:relative; overflow:hidden; box-shadow:0 0 24px rgba(255,51,102,.06), inset 0 0 40px rgba(255,51,102,.03); }
-    .cc-card-preview::before { content:''; position:absolute; top:-40%; right:-20%; width:100px; height:100px; border-radius:50%; background:rgba(255,51,102,.04); pointer-events:none; }
-    .cc-card-preview::after { content:''; position:absolute; bottom:-20%; left:-10%; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.015); pointer-events:none; }
+    .cc-modal { background:linear-gradient(160deg, #0c070a, #0a0a10 50%, #0c070a); border:1px solid rgba(255,51,102,.12); width:100%; max-width:440px; padding:32px 28px 28px; animation:fadein .25s ease; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 0 60px rgba(255,51,102,.05), 0 0 120px rgba(255,51,102,.025); }
+    .cc-modal::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--rose),transparent); opacity:.8; box-shadow:0 0 20px rgba(255,51,102,.4), 0 0 40px rgba(255,51,102,.15); }
+    .cc-modal-dots { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:1; }
+    .cc-modal-dots span { width:4px; height:4px; border-radius:50%; background:rgba(255,51,102,.15); box-shadow:0 0 6px rgba(255,51,102,.1); }
+    .cc-close { position:absolute; top:16px; right:16px; width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .25s; z-index:2; }
+    .cc-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; box-shadow:0 0 20px rgba(255,51,102,.35); transform:rotate(90deg); }
+    .cc-head { text-align:center; margin-bottom:22px; position:relative; }
+    .cc-head-icon { font-size:30px; margin-bottom:8px; display:block; filter:drop-shadow(0 0 12px rgba(255,51,102,.35)); }
+    .cc-head h3 { font-family:'Cormorant Garamond',serif; font-size:23px; font-weight:700; letter-spacing:.5px; }
+    .cc-head h3 em { color:var(--rose); font-style:italic; text-shadow:0 0 20px rgba(255,51,102,.35), 0 0 40px rgba(255,51,102,.12); }
+    .cc-head p { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,51,102,.4); margin-top:6px; text-shadow:0 0 8px rgba(255,51,102,.1); }
+    .cc-card-preview { background:linear-gradient(135deg,#1a0510,#0d0515,#1a0510); border-radius:8px; padding:20px 22px; margin-bottom:24px; min-height:112px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid rgba(255,51,102,.12); position:relative; overflow:hidden; box-shadow:0 0 30px rgba(255,51,102,.08), inset 0 0 50px rgba(255,51,102,.03); animation:cardGlow 4s ease-in-out infinite; }
+    @keyframes cardGlow { 0%,100%{box-shadow:0 0 30px rgba(255,51,102,.08),inset 0 0 50px rgba(255,51,102,.03)} 50%{box-shadow:0 0 40px rgba(255,51,102,.14),inset 0 0 60px rgba(255,51,102,.05)} }
+    .cc-card-preview::before { content:''; position:absolute; top:-50%; right:-25%; width:120px; height:120px; border-radius:50%; background:rgba(255,51,102,.05); pointer-events:none; }
+    .cc-card-preview::after { content:''; position:absolute; bottom:-25%; left:-15%; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,.015); pointer-events:none; }
     .cc-card-preview-top { display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:1; }
     .cc-card-brand { display:flex; align-items:center; gap:6px; }
     .cc-card-brand svg { width:40px; height:auto; }
-    .cc-card-chip { width:30px; height:22px; background:linear-gradient(135deg,#d4af37,#f5d76e); border-radius:2px; opacity:.6; flex-shrink:0; box-shadow:0 0 8px rgba(212,175,55,.15); }
-    .cc-card-number { font-family:'Inconsolata',monospace; font-size:17px; letter-spacing:3px; color:#fff; margin-top:12px; position:relative; z-index:1; text-shadow:0 0 12px rgba(255,255,255,.05); }
-    .cc-card-bottom { display:flex; justify-content:space-between; margin-top:12px; align-items:flex-end; position:relative; z-index:1; }
-    .cc-card-label { font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.3); }
-    .cc-card-value { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; color:rgba(255,255,255,.85); }
-    .cc-field { margin-bottom:14px; }
-    .cc-field label { display:block; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
-    .cc-field input { width:100%; font-family:'Archivo',sans-serif; font-size:14px; background:rgba(255,51,102,.03); border:1px solid rgba(255,51,102,.08); color:var(--paper); padding:12px 14px; outline:none; transition:all .25s; border-radius:2px; }
-    .cc-field input::placeholder { color:var(--muted-2); font-size:12px; }
-    .cc-field input:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(255,51,102,.06), 0 0 20px rgba(255,51,102,.04); background:rgba(255,51,102,.05); }
-    .cc-field-row { display:flex; gap:12px; }
+    .cc-card-chip { width:32px; height:24px; background:linear-gradient(135deg,#d4af37,#f5d76e); border-radius:2px; opacity:.65; flex-shrink:0; box-shadow:0 0 12px rgba(212,175,55,.2), inset 0 0 6px rgba(255,255,255,.2); }
+    .cc-card-number { font-family:'Inconsolata',monospace; font-size:18px; letter-spacing:3.5px; color:#fff; margin-top:14px; position:relative; z-index:1; text-shadow:0 0 16px rgba(255,255,255,.06); }
+    .cc-card-bottom { display:flex; justify-content:space-between; margin-top:14px; align-items:flex-end; position:relative; z-index:1; }
+    .cc-card-label { font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.25); text-shadow:0 0 4px rgba(255,255,255,.05); }
+    .cc-card-value { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; color:rgba(255,255,255,.88); text-shadow:0 0 8px rgba(255,255,255,.03); }
+    .cc-divider { height:1px; background:linear-gradient(90deg,transparent,rgba(255,51,102,.1),transparent); margin:0 0 18px; }
+    .cc-field { margin-bottom:16px; }
+    .cc-field label { display:block; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,51,102,.45); margin-bottom:5px; text-shadow:0 0 6px rgba(255,51,102,.08); transition:color .2s; }
+    .cc-field:focus-within label { color:var(--rose); text-shadow:0 0 12px rgba(255,51,102,.2); }
+    .cc-field input { width:100%; font-family:'Archivo',sans-serif; font-size:14px; background:rgba(255,51,102,.03); border:1px solid rgba(255,51,102,.08); color:var(--paper); padding:13px 14px; outline:none; transition:all .25s; border-radius:3px; }
+    .cc-field input::placeholder { color:rgba(200,215,230,.18); font-size:12px; transition:color .2s; }
+    .cc-field input:focus::placeholder { color:rgba(255,51,102,.2); }
+    .cc-field input:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(255,51,102,.06), 0 0 24px rgba(255,51,102,.06); background:rgba(255,51,102,.06); }
+    .cc-field-row { display:flex; gap:10px; }
     .cc-field-row .cc-field { flex:1; }
-    .cc-submit { width:100%; padding:14px; background:var(--rose); color:#fff; font-weight:800; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:all .3s; border-radius:2px; margin-top:6px; box-shadow:0 0 20px rgba(255,51,102,.15); position:relative; overflow:hidden; animation:neonPulse 3s ease-in-out infinite; }
-    .cc-submit:hover { background:var(--rose-d); box-shadow:0 0 40px rgba(255,51,102,.35); transform:translateY(-1px); animation:none; }
+    .cc-field-row .cc-field input { text-align:center; }
+    .cc-submit { width:100%; padding:15px; background:var(--rose); color:#fff; font-weight:800; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:all .3s; border-radius:3px; margin-top:8px; box-shadow:0 0 24px rgba(255,51,102,.15), 0 0 0 1px rgba(255,51,102,.2); position:relative; overflow:hidden; animation:neonPulse 3s ease-in-out infinite; }
+    .cc-submit::after { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%); animation:shimmer 4s ease-in-out infinite; pointer-events:none; }
+    @keyframes shimmer { 0%{transform:translateX(-100%) translateY(-100%)} 100%{transform:translateX(100%) translateY(100%)} }
+    .cc-submit:hover { background:var(--rose-d); box-shadow:0 0 40px rgba(255,51,102,.3), 0 0 60px rgba(255,51,102,.12); transform:translateY(-1px); animation:none; }
+    .cc-submit:hover::after { display:none; }
     .cc-submit:active { transform:translateY(0); }
-    .cc-secure { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1px; color:rgba(255,51,102,.35); text-align:center; margin-top:14px; display:flex; align-items:center; justify-content:center; gap:4px; }
+    .cc-secure { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1px; color:rgba(255,51,102,.3); text-align:center; margin-top:16px; display:flex; align-items:center; justify-content:center; gap:5px; text-shadow:0 0 6px rgba(255,51,102,.08); }
 
     /* ── Card hover CTA ── */
     .card-hover-cta {
@@ -971,6 +981,7 @@
 <div class="cc-bg" id="cc-bg">
   <div class="cc-modal">
     <button class="cc-close" id="cc-close">✕</button>
+    <div class="cc-modal-dots"><span></span><span></span><span></span></div>
     <div class="cc-head">
       <span class="cc-head-icon">💳</span>
       <h3>Pago con <em>tarjeta</em></h3>
@@ -1006,6 +1017,7 @@
         <div style="text-align:right;"><div class="cc-card-label">Vence</div><div class="cc-card-value" id="cc-preview-expiry">MM/AA</div></div>
       </div>
     </div>
+    <div class="cc-divider"></div>
     <form id="cc-form" autocomplete="off">
       <div class="cc-field">
         <label>Titular de la tarjeta</label>
