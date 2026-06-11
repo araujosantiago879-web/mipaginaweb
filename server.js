@@ -54,7 +54,14 @@ async function connectDB() {
         '🔒 Compra 100% privada'
       ],
       adminPassword: 'admin123',
-      pageAccessPassword: 'admin123'
+      pageAccessPassword: 'admin123',
+      efectivoHabilitado: false,
+      efectivoTexto: '',
+      tarjetasHabilitado: false,
+      tarjetasTexto: '',
+      otroHabilitado: false,
+      otroTitulo: '',
+      otroTexto: ''
     });
     console.log('✅ Config creada por defecto');
   } else {

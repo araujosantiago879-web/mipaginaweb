@@ -862,6 +862,24 @@
         <div class="cp-bank-row"><span>Alias</span><span id="cp-alias" class="cp-mono"></span></div>
         <button class="cp-copy" id="cp-copy-cbu" onclick="copyText(document.getElementById('cp-cbu').textContent)">📋 Copiar CBU</button>
       </div>
+      <div class="cp-efectivo" id="cp-efectivo" style="display:none;">
+        <div class="cp-bank">
+          <div class="cp-bank-title">💵 Efectivo</div>
+          <div class="cp-bank-row" id="cp-efectivo-texto" style="color:var(--paper);"></div>
+        </div>
+      </div>
+      <div class="cp-tarjetas" id="cp-tarjetas" style="display:none;">
+        <div class="cp-bank">
+          <div class="cp-bank-title">💳 Tarjetas crédito/débito</div>
+          <div class="cp-bank-row" id="cp-tarjetas-texto" style="color:var(--paper);"></div>
+        </div>
+      </div>
+      <div class="cp-otro" id="cp-otro" style="display:none;">
+        <div class="cp-bank">
+          <div class="cp-bank-title" id="cp-otro-titulo">🔄 Otro</div>
+          <div class="cp-bank-row" id="cp-otro-texto" style="color:var(--paper);"></div>
+        </div>
+      </div>
     </div>
     <button class="cart-checkout" id="cart-checkout">
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
@@ -1248,7 +1266,14 @@ async function loadConfig() {
       banco: config.banco || '',
       cbu: config.cbu || '',
       alias: config.alias || '',
-      titular: config.titular || ''
+      titular: config.titular || '',
+      efectivoHabilitado: config.efectivoHabilitado || false,
+      efectivoTexto: config.efectivoTexto || '',
+      tarjetasHabilitado: config.tarjetasHabilitado || false,
+      tarjetasTexto: config.tarjetasTexto || '',
+      otroHabilitado: config.otroHabilitado || false,
+      otroTitulo: config.otroTitulo || '',
+      otroTexto: config.otroTexto || ''
     };
     // Horarios
     const rowsDiv = document.getElementById('horarios-rows');
@@ -1540,6 +1565,28 @@ function renderCart() {
       }
       hasPayment = true;
     } else if (bankDiv) { bankDiv.style.display = 'none'; }
+    // Efectivo
+    const efecDiv = document.getElementById('cp-efectivo');
+    if (pc.efectivoHabilitado && efecDiv) {
+      efecDiv.style.display = 'flex';
+      document.getElementById('cp-efectivo-texto').textContent = pc.efectivoTexto || 'Pagá en efectivo al recibir tu pedido';
+      hasPayment = true;
+    } else if (efecDiv) { efecDiv.style.display = 'none'; }
+    // Tarjetas
+    const tarjDiv = document.getElementById('cp-tarjetas');
+    if (pc.tarjetasHabilitado && tarjDiv) {
+      tarjDiv.style.display = 'flex';
+      document.getElementById('cp-tarjetas-texto').textContent = pc.tarjetasTexto || 'Aceptamos todas las tarjetas de crédito y débito';
+      hasPayment = true;
+    } else if (tarjDiv) { tarjDiv.style.display = 'none'; }
+    // Otro
+    const otroDiv = document.getElementById('cp-otro');
+    if (pc.otroHabilitado && otroDiv) {
+      otroDiv.style.display = 'flex';
+      document.getElementById('cp-otro-titulo').textContent = pc.otroTitulo || '🔄 Otro método de pago';
+      document.getElementById('cp-otro-texto').textContent = pc.otroTexto || '';
+      hasPayment = true;
+    } else if (otroDiv) { otroDiv.style.display = 'none'; }
     payDiv.style.display = hasPayment ? 'flex' : 'none';
   }
 }
