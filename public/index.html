@@ -602,6 +602,47 @@
     .f-legal a { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-2); }
     .f-legal a:hover { color:var(--rose); }
 
+    /* ── Admin config ── */
+    .admin-bg { position:fixed; inset:0; z-index:999; background:rgba(5,5,8,.9); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:20px; }
+    .admin-bg.open { display:flex; }
+    .admin-modal { background:linear-gradient(160deg, #0c070a, #0a0a10 50%, #0c070a); border:1px solid rgba(255,51,102,.12); width:100%; max-width:560px; padding:28px 24px; animation:fadein .25s ease; max-height:90vh; overflow-y:auto; box-shadow:0 0 60px rgba(255,51,102,.05); }
+    .admin-modal::-webkit-scrollbar { width:4px; }
+    .admin-modal::-webkit-scrollbar-thumb { background:var(--ink-4); border-radius:2px; }
+    .admin-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+    .admin-title { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; }
+    .admin-title em { font-style:italic; color:var(--rose); }
+    .admin-close { width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .25s; }
+    .admin-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; }
+    .admin-pillar { border:1px solid var(--edge); border-radius:4px; padding:14px 16px; margin-bottom:10px; background:var(--ink-3); }
+    .admin-pillar-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+    .admin-pillar-input { flex:1; background:var(--ink-4); border:1px solid var(--edge); color:var(--paper); font-family:'Archivo',sans-serif; font-size:13px; font-weight:600; padding:6px 10px; border-radius:2px; outline:none; transition:border-color .2s; }
+    .admin-pillar-input:focus { border-color:var(--rose); }
+    .admin-btn-sm { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1px; text-transform:uppercase; padding:5px 10px; border-radius:2px; border:1px solid var(--edge); background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; white-space:nowrap; flex-shrink:0; }
+    .admin-btn-sm:hover { border-color:var(--rose); color:var(--rose); }
+    .admin-btn-sm.danger:hover { border-color:#ff4444; color:#ff4444; background:rgba(255,68,68,.06); }
+    .admin-subs { display:flex; flex-direction:column; gap:4px; margin-left:8px; }
+    .admin-sub { display:flex; align-items:center; gap:6px; }
+    .admin-sub-input { flex:1; background:var(--ink-4); border:1px solid transparent; color:var(--muted); font-family:'Archivo',sans-serif; font-size:12px; padding:4px 8px; border-radius:2px; outline:none; transition:all .2s; }
+    .admin-sub-input:focus { border-color:var(--rose); color:var(--paper); background:var(--ink-4); }
+    .admin-sub-remove { width:20px; height:20px; border-radius:50%; border:none; background:transparent; color:var(--muted-2); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+    .admin-sub-remove:hover { background:rgba(255,68,68,.15); color:#ff4444; }
+    .admin-add-sub { display:flex; align-items:center; gap:6px; margin-top:6px; margin-left:8px; }
+    .admin-add-sub input { flex:1; background:var(--ink-4); border:1px dashed var(--edge); color:var(--muted); font-family:'Archivo',sans-serif; font-size:12px; padding:5px 8px; border-radius:2px; outline:none; transition:border-color .2s; }
+    .admin-add-sub input:focus { border-color:var(--rose); color:var(--paper); }
+    .admin-add-sub input::placeholder { color:var(--muted-2); font-size:11px; }
+    .admin-add-pillar { display:flex; gap:8px; margin-bottom:16px; }
+    .admin-add-pillar input { flex:1; background:var(--ink-4); border:1px dashed var(--edge); color:var(--paper); font-family:'Archivo',sans-serif; font-size:13px; padding:8px 12px; border-radius:2px; outline:none; transition:border-color .2s; }
+    .admin-add-pillar input:focus { border-color:var(--rose); }
+    .admin-add-pillar input::placeholder { color:var(--muted-2); }
+    .admin-footer { display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:12px; flex-wrap:wrap; }
+    .admin-btn { font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; padding:10px 20px; border-radius:2px; cursor:pointer; transition:all .25s; }
+    .admin-btn.primary { background:var(--rose); color:#fff; border:none; }
+    .admin-btn.primary:hover { background:var(--rose-d); }
+    .admin-btn.ghost { background:transparent; color:var(--muted); border:1px solid var(--edge); }
+    .admin-btn.ghost:hover { border-color:#ff4444; color:#ff4444; }
+    .admin-toast { position:fixed; bottom:70px; right:24px; z-index:9999; background:var(--ink-3); border:1px solid var(--lime); padding:12px 18px; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; transform:translateY(80px); opacity:0; transition:all .35s ease; pointer-events:none; }
+    .admin-toast.show { transform:none; opacity:1; }
+
     /* ── Cart button ── */
     #cart-btn {
       display:none; align-items:center; gap:6px;
@@ -1426,6 +1467,26 @@
 
 <div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg"></span></div>
 
+<!-- ── Admin config modal ── -->
+<div class="admin-bg" id="admin-bg">
+  <div class="admin-modal" id="admin-modal" onclick="event.stopPropagation()">
+    <div class="admin-head">
+      <div class="admin-title">Configurar <em>secciones</em></div>
+      <button class="admin-close" id="admin-close">✕</button>
+    </div>
+    <div class="admin-add-pillar">
+      <input type="text" id="admin-new-pillar" placeholder="Nuevo pilar…">
+      <button class="admin-btn-sm" id="admin-add-pillar-btn">Agregar</button>
+    </div>
+    <div id="admin-list"></div>
+    <div class="admin-footer">
+      <button class="admin-btn ghost" id="admin-reset">Restablecer valores</button>
+      <button class="admin-btn primary" id="admin-save">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+<div class="admin-toast" id="admin-toast"><span class="toast-dot"></span><span id="admin-toast-msg"></span></div>
+
 <!-- Modal producto -->
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
   <button class="modal-close-btn" id="modal-close">✕</button>
@@ -1604,13 +1665,24 @@ activateTab('tienda');
 let productos = [];
 let categoriasUnicas = [];
 let filtroActual = 'all';
-const categoryTree = [
+const DEFAULT_TREE = [
   { name: 'Vibradores', subs: ['Parejas', 'Punto G', 'Rabbits', 'Realísticos', 'Wand'] },
   { name: 'Anal', subs: ['Beads', 'Cola de Zorra', 'Duchas Anales', 'Plugs Anales', 'Prostático', 'Vibradores Anales'] },
   { name: 'Anillos & Arnéses', subs: ['Anillos', 'Bolas Chinas', 'Arnéses y Prótesis', 'Consoladores / Dildos', 'Doble Penetración', 'Extensores / Potenciadores'] },
   { name: 'Clítoris & Punto G', subs: ['Bala Vibradora', 'Succión Clitoris', 'Huevos Vibradores', 'Vibradores Clitoris', 'Pump / Bomba Vaginal'] },
   { name: 'Masturbadores & Más', subs: ['Vaginas', 'Anos', 'Bocas', 'Torsos', 'Texturados', 'Automáticos', 'Máquinas Sexuales', 'Muñecas y Muñecos', 'Chascos y Diversión'] },
 ];
+function loadCategoryTree() {
+  try {
+    const saved = localStorage.getItem('categoryTree');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
+}
+function saveCategoryTree() {
+  localStorage.setItem('categoryTree', JSON.stringify(categoryTree));
+}
+let categoryTree = loadCategoryTree();
 let ordenActual = 'default';
 let busquedaActual = '';
 
@@ -2346,6 +2418,128 @@ const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
 }, { threshold: .08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── Admin config ──
+function adminToast(msg) {
+  const el = document.getElementById('admin-toast');
+  document.getElementById('admin-toast-msg').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+function renderAdmin() {
+  const list = document.getElementById('admin-list');
+  list.innerHTML = categoryTree.map((p, pi) => `
+    <div class="admin-pillar">
+      <div class="admin-pillar-head">
+        <input class="admin-pillar-input" value="${p.name.replace(/"/g,'&quot;')}" data-pi="${pi}" data-field="name">
+        <button class="admin-btn-sm danger" data-remove-pillar="${pi}">Eliminar</button>
+      </div>
+      <div class="admin-subs">
+        ${p.subs.map((s, si) => `
+          <div class="admin-sub">
+            <input class="admin-sub-input" value="${s.replace(/"/g,'&quot;')}" data-pi="${pi}" data-si="${si}">
+            <button class="admin-sub-remove" data-remove-sub="${pi},${si}">✕</button>
+          </div>
+        `).join('')}
+      </div>
+      <div class="admin-add-sub">
+        <input type="text" placeholder="Nueva subcategoría…" data-add-sub="${pi}">
+        <button class="admin-btn-sm" data-add-sub-btn="${pi}">+</button>
+      </div>
+    </div>
+  `).join('');
+}
+function syncAdminToTree() {
+  document.querySelectorAll('.admin-pillar').forEach(pillarEl => {
+    const pi = parseInt(pillarEl.querySelector('.admin-pillar-input').dataset.pi);
+    if (isNaN(pi)) return;
+    const nameInput = pillarEl.querySelector('.admin-pillar-input');
+    categoryTree[pi].name = nameInput.value.trim() || categoryTree[pi].name;
+    pillarEl.querySelectorAll('.admin-sub-input').forEach(inp => {
+      const si = parseInt(inp.dataset.si);
+      if (!isNaN(si) && categoryTree[pi].subs[si] !== undefined) {
+        categoryTree[pi].subs[si] = inp.value.trim() || categoryTree[pi].subs[si];
+      }
+    });
+  });
+  saveCategoryTree();
+}
+let adminClicks = 0;
+let adminClickTimer = null;
+document.querySelector('.logo')?.addEventListener('click', (e) => {
+  adminClicks++;
+  if (adminClickTimer) clearTimeout(adminClickTimer);
+  adminClickTimer = setTimeout(() => { adminClicks = 0; }, 1500);
+  if (adminClicks >= 5) {
+    adminClicks = 0;
+    renderAdmin();
+    document.getElementById('admin-bg').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+});
+if (window.location.hash === '#admin') {
+  setTimeout(() => {
+    renderAdmin();
+    document.getElementById('admin-bg').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }, 1000);
+}
+document.getElementById('admin-close')?.addEventListener('click', () => {
+  document.getElementById('admin-bg').classList.remove('open');
+  document.body.style.overflow = '';
+});
+document.getElementById('admin-bg')?.addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) {
+    document.getElementById('admin-bg').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+document.getElementById('admin-save')?.addEventListener('click', () => {
+  syncAdminToTree();
+  loadProducts();
+  document.getElementById('admin-bg').classList.remove('open');
+  document.body.style.overflow = '';
+  adminToast('Secciones guardadas ✓');
+});
+document.getElementById('admin-reset')?.addEventListener('click', () => {
+  if (!confirm('¿Restablecer secciones a los valores originales?')) return;
+  categoryTree = DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
+  saveCategoryTree();
+  renderAdmin();
+  loadProducts();
+  adminToast('Valores restablecidos');
+});
+document.getElementById('admin-add-pillar-btn')?.addEventListener('click', () => {
+  const inp = document.getElementById('admin-new-pillar');
+  const name = inp.value.trim();
+  if (!name) return;
+  categoryTree.push({ name, subs: [] });
+  saveCategoryTree();
+  inp.value = '';
+  renderAdmin();
+});
+document.getElementById('admin-list')?.addEventListener('click', e => {
+  const removePillar = e.target.closest('[data-remove-pillar]');
+  if (removePillar) {
+    const pi = parseInt(removePillar.dataset.removePillar);
+    if (!isNaN(pi)) { categoryTree.splice(pi, 1); saveCategoryTree(); renderAdmin(); }
+    return;
+  }
+  const removeSub = e.target.closest('[data-remove-sub]');
+  if (removeSub) {
+    const [pi, si] = removeSub.dataset.removeSub.split(',').map(Number);
+    if (!isNaN(pi) && !isNaN(si) && categoryTree[pi]) { categoryTree[pi].subs.splice(si, 1); saveCategoryTree(); renderAdmin(); }
+    return;
+  }
+  const addBtn = e.target.closest('[data-add-sub-btn]');
+  if (addBtn) {
+    const pi = parseInt(addBtn.dataset.addSubBtn);
+    const inp = addBtn.parentElement.querySelector('input');
+    const val = inp.value.trim();
+    if (!isNaN(pi) && val) { categoryTree[pi].subs.push(val); saveCategoryTree(); inp.value = ''; renderAdmin(); }
+    return;
+  }
+});
 
 // ── Inicializar ──
 loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
