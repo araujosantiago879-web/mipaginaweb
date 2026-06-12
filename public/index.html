@@ -608,6 +608,20 @@
     .admin-modal { background:linear-gradient(160deg, #0c070a, #0a0a10 50%, #0c070a); border:1px solid rgba(255,51,102,.12); width:100%; max-width:560px; padding:28px 24px; animation:fadein .25s ease; max-height:90vh; overflow-y:auto; box-shadow:0 0 60px rgba(255,51,102,.05); }
     .admin-modal::-webkit-scrollbar { width:4px; }
     .admin-modal::-webkit-scrollbar-thumb { background:var(--ink-4); border-radius:2px; }
+    .admin-tabs { display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid var(--edge); }
+    .admin-tab { padding:8px 16px; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted-2); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:all .2s; }
+    .admin-tab.on { color:var(--rose); border-bottom-color:var(--rose); }
+    .admin-tab:hover { color:var(--rose); }
+    .admin-section { display:none; }
+    .admin-section.open { display:block; }
+    .admin-prod { display:flex; align-items:center; gap:10px; padding:8px 8px; border-bottom:1px solid var(--edge); font-size:12px; }
+    .admin-prod:hover { background:rgba(255,51,102,.03); }
+    .admin-prod img { width:28px; height:28px; object-fit:cover; border-radius:2px; flex-shrink:0; }
+    .admin-prod-info { flex:1; min-width:0; }
+    .admin-prod-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#ddd; }
+    .admin-prod-name small { color:var(--muted-2); font-size:10px; }
+    .admin-prod select { background:var(--ink-4); color:#ccc; border:1px solid var(--edge); padding:3px 6px; font-size:11px; border-radius:2px; cursor:pointer; max-width:160px; }
+    .admin-prod select option { background:#18181b; color:#ccc; }
     .admin-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
     .admin-title { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; }
     .admin-title em { font-style:italic; color:var(--rose); }
@@ -1471,17 +1485,30 @@
 <div class="admin-bg" id="admin-bg">
   <div class="admin-modal" id="admin-modal" onclick="event.stopPropagation()">
     <div class="admin-head">
-      <div class="admin-title">Configurar <em>secciones</em></div>
+      <div class="admin-title">Panel de <em>administración</em></div>
       <button class="admin-close" id="admin-close">✕</button>
     </div>
-    <div class="admin-add-pillar">
-      <input type="text" id="admin-new-pillar" placeholder="Nuevo pilar…">
-      <button class="admin-btn-sm" id="admin-add-pillar-btn">Agregar</button>
+    <div class="admin-tabs">
+      <button class="admin-tab on" data-admin-tab="secciones">Secciones</button>
+      <button class="admin-tab" data-admin-tab="productos">Productos</button>
     </div>
-    <div id="admin-list"></div>
-    <div class="admin-footer">
-      <button class="admin-btn ghost" id="admin-reset">Restablecer valores</button>
-      <button class="admin-btn primary" id="admin-save">Guardar cambios</button>
+    <div class="admin-section open" id="admin-secciones">
+      <div class="admin-add-pillar">
+        <input type="text" id="admin-new-pillar" placeholder="Nuevo pilar…">
+        <button class="admin-btn-sm" id="admin-add-pillar-btn">Agregar</button>
+      </div>
+      <div id="admin-list"></div>
+      <div class="admin-footer">
+        <button class="admin-btn ghost" id="admin-reset">Restablecer valores</button>
+        <button class="admin-btn primary" id="admin-save">Guardar cambios</button>
+      </div>
+    </div>
+    <div class="admin-section" id="admin-productos">
+      <div style="margin-bottom:12px;font-size:11px;color:var(--muted-2);">Asigná cada producto a una subcategoría</div>
+      <div id="admin-prod-list"></div>
+      <div class="admin-footer">
+        <button class="admin-btn primary" id="admin-prod-save">Guardar cambios</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1693,7 +1720,7 @@ async function loadProducts() {
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error('Respuesta inválida');
     productos = data;
-    categoriasUnicas = ['Todo', ...new Set(productos.map(p => p.categoria))];
+    categoriasUnicas = ['Todo', ...new Set(productos.map(p => getEffectiveCategory(p)))];
     renderPillars();
     renderTabs();
     renderProducts();
@@ -1720,9 +1747,9 @@ function renderPillars() {
   if (!container) return;
   container.innerHTML = categoryTree.map(p => {
     const subsHtml = p.subs.map(s => {
-      const sc = productos.filter(pr => pr.categoria === s).length;
+      const sc = productos.filter(pr => getEffectiveCategory(pr) === s).length;
       const label = s === 'Arnéses y Prótesis' ? 'Arnéses' : s;
-      const prods = productos.filter(pr => pr.categoria === s).slice(0, 6);
+      const prods = productos.filter(pr => getEffectiveCategory(pr) === s).slice(0, 6);
       const prodThumbs = prods.length ? `<div class="pillar-products">${prods.map(pr => {
         const src = pr.imagenes?.[0] || pr.imagen || '';
         const pid = pr.id ?? productos.indexOf(pr);
@@ -1740,7 +1767,7 @@ function renderPillars() {
       el.classList.add('on');
       document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
       const sub = el.dataset.sub;
-      const prods = productos.filter(pr => pr.categoria === sub);
+      const prods = productos.filter(pr => getEffectiveCategory(pr) === sub);
       if (prods.length) {
         const grid = document.createElement('div');
         grid.className = 'pillar-sub-grid';
@@ -1750,7 +1777,7 @@ function renderPillars() {
           return `<div class="pillar-sub-card" onclick="event.stopPropagation();openModal('${pr.id ?? ''}')">
             <img src="${src}" alt="${(pr.nombre||'').replace(/"/g,'&quot;')}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%232a2a2f%22 width=%22120%22 height=%22120%22/></svg>'">
             <div class="pillar-sub-card-body">
-              <div class="pillar-sub-card-cat">${pr.categoria||''}</div>
+              <div class="pillar-sub-card-cat">${getEffectiveCategory(pr)}</div>
               <div class="pillar-sub-card-name">${pr.nombre||''}</div>
               <div class="pillar-sub-card-price">${pr.precio||''} ${oldPrice}</div>
             </div>
@@ -1791,7 +1818,7 @@ function renderPillars() {
 function renderTabs() {
   const bar = document.getElementById('tabs-bar');
   bar.innerHTML = categoriasUnicas.map(cat => {
-    const count = cat === 'Todo' ? productos.length : productos.filter(p => p.categoria === cat).length;
+    const count = cat === 'Todo' ? productos.length : productos.filter(p => getEffectiveCategory(p) === cat).length;
     return `<button class="tab ${cat === 'Todo' ? 'on' : ''}" data-categoria="${cat}">${cat} <span class="tab-badge">${count}</span></button>`;
   }).join('');
   document.querySelectorAll('.tab').forEach(btn => {
@@ -1812,7 +1839,7 @@ function renderTabs() {
 const WA_SVG = `<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.557 4.126 1.533 5.861L.057 23.197a.75.75 0 00.921.91l5.42-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.695 9.695 0 01-4.956-1.358l-.356-.213-3.686.994.989-3.604-.234-.373A9.692 9.692 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>`;
 
 function renderProducts(categoria = null) {
-  let filtered = categoria ? productos.filter(p => p.categoria === categoria) : [...productos];
+  let filtered = categoria ? productos.filter(p => getEffectiveCategory(p) === categoria) : [...productos];
   if (filtroActual === 'new') filtered = filtered.filter(p => p.badge === 'new');
   else if (filtroActual === 'hot') filtered = filtered.filter(p => p.badge === 'hot');
   else if (filtroActual === 'sale') filtered = filtered.filter(p => p.badge === 'sale');
@@ -1825,7 +1852,7 @@ function renderProducts(categoria = null) {
     filtered = filtered.filter(p =>
       p.nombre?.toLowerCase().includes(q) ||
       p.descripcion?.toLowerCase().includes(q) ||
-      p.categoria?.toLowerCase().includes(q)
+      getEffectiveCategory(p)?.toLowerCase().includes(q)
     );
   }
 
@@ -1868,7 +1895,7 @@ function renderProducts(categoria = null) {
           </div>
         </div>
         <div class="card-body" onclick="openModal('${p.id || i}')">
-          <div class="card-cat">${p.categoria}</div>
+          <div class="card-cat">${getEffectiveCategory(p)}</div>
           <div class="card-name">${p.nombre}</div>
           <div class="card-desc">${p.descripcion.substring(0, 65)}${p.descripcion.length > 65 ? '…' : ''}</div>
           <div class="card-foot">
@@ -2162,7 +2189,7 @@ function openModal(id) {
     gallery.style.display = 'none';
   }
 
-  if (cat) cat.textContent = p.categoria || '';
+  if (cat) cat.textContent = getEffectiveCategory(p) || '';
   if (nameEl) nameEl.textContent = p.nombre || '';
   if (price) price.textContent = p.precio || '';
   if (oldPrice) {
@@ -2255,7 +2282,7 @@ async function handleSearch(val) {
             </div>
           </div>
           <div class="card-body" onclick="openModal('${p.id}')">
-            <div class="card-cat">${p.categoria}</div>
+            <div class="card-cat">${getEffectiveCategory(p)}</div>
             <div class="card-name">${p.nombre}</div>
             <div class="card-desc">${(p.descripcion || '').substring(0, 65)}${p.descripcion && p.descripcion.length > 65 ? '…' : ''}</div>
             <div class="card-foot">
@@ -2344,7 +2371,7 @@ function renderDrawer(items) {
       <div class="drawer-item-info">
         <div class="drawer-item-name">${p.nombre}</div>
         <div class="drawer-item-price">${p.precio}</div>
-        <div class="drawer-item-cat">${p.categoria}</div>
+        <div class="drawer-item-cat">${getEffectiveCategory(p)}</div>
       </div>
     </div>
   `).join('');
@@ -2382,7 +2409,7 @@ document.getElementById('drawerSearch').addEventListener('input', e => {
   renderDrawer(productos.filter(p =>
     p.nombre?.toLowerCase().includes(q) ||
     p.descripcion?.toLowerCase().includes(q) ||
-    p.categoria?.toLowerCase().includes(q)
+    getEffectiveCategory(p)?.toLowerCase().includes(q)
   ));
 });
 // Escape cierra el drawer
@@ -2419,6 +2446,18 @@ const obs = new IntersectionObserver(entries => {
 }, { threshold: .08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
+// ── Product category overrides ──
+let productCatOverrides = {};
+function loadProductCatOverrides() {
+  try { productCatOverrides = JSON.parse(localStorage.getItem('productCatOverrides') || '{}'); } catch {}
+}
+function saveProductCatOverrides() {
+  localStorage.setItem('productCatOverrides', JSON.stringify(productCatOverrides));
+}
+function getEffectiveCategory(p) {
+  const key = String(p.id ?? '');
+  return productCatOverrides[key] || p.categoria || '';
+}
 // ── Admin config ──
 function adminToast(msg) {
   const el = document.getElementById('admin-toast');
@@ -2464,6 +2503,38 @@ function syncAdminToTree() {
   });
   saveCategoryTree();
 }
+function renderAdminProductos() {
+  const container = document.getElementById('admin-prod-list');
+  if (!container) return;
+  const allSubs = categoryTree.flatMap(p => p.subs);
+  container.innerHTML = productos.map(p => {
+    const key = String(p.id ?? '');
+    const current = getEffectiveCategory(p);
+    const src = p.imagenes?.[0] || p.imagen || '';
+    return `<div class="admin-prod">
+      <img src="${src}" alt="${(p.nombre||'').replace(/"/g,'&quot;')}" onerror="this.style.display='none'">
+      <div class="admin-prod-info">
+        <div class="admin-prod-name">${(p.nombre||'').replace(/"/g,'&quot;')} <small>#${key}</small></div>
+      </div>
+      <select data-prod-key="${key}">
+        <option value="">— Sin asignar —</option>
+        ${allSubs.map(s => `<option value="${s.replace(/"/g,'&quot;')}"${current === s ? ' selected' : ''}>${s}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+}
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
+    tab.classList.add('on');
+    const target = document.getElementById('admin-' + tab.dataset.adminTab);
+    if (target) {
+      target.classList.add('open');
+      if (tab.dataset.adminTab === 'productos') renderAdminProductos();
+    }
+  });
+});
 let adminClicks = 0;
 let adminClickTimer = null;
 document.querySelector('.logo')?.addEventListener('click', (e) => {
@@ -2473,6 +2544,11 @@ document.querySelector('.logo')?.addEventListener('click', (e) => {
   if (adminClicks >= 5) {
     adminClicks = 0;
     renderAdmin();
+    loadProductCatOverrides();
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
+    document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
+    document.getElementById('admin-secciones')?.classList.add('open');
     document.getElementById('admin-bg').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
@@ -2480,6 +2556,11 @@ document.querySelector('.logo')?.addEventListener('click', (e) => {
 if (window.location.hash === '#admin') {
   setTimeout(() => {
     renderAdmin();
+    loadProductCatOverrides();
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
+    document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
+    document.getElementById('admin-secciones')?.classList.add('open');
     document.getElementById('admin-bg').classList.add('open');
     document.body.style.overflow = 'hidden';
   }, 1000);
@@ -2518,6 +2599,21 @@ document.getElementById('admin-add-pillar-btn')?.addEventListener('click', () =>
   inp.value = '';
   renderAdmin();
 });
+document.getElementById('admin-prod-save')?.addEventListener('click', () => {
+  const selects = document.querySelectorAll('#admin-prod-list select[data-prod-key]');
+  const newOverrides = {};
+  selects.forEach(sel => {
+    const key = sel.dataset.prodKey;
+    const val = sel.value.trim();
+    if (val) newOverrides[key] = val;
+  });
+  productCatOverrides = newOverrides;
+  saveProductCatOverrides();
+  document.getElementById('admin-bg').classList.remove('open');
+  document.body.style.overflow = '';
+  loadProducts();
+  adminToast('Productos actualizados ✓');
+});
 document.getElementById('admin-list')?.addEventListener('click', e => {
   const removePillar = e.target.closest('[data-remove-pillar]');
   if (removePillar) {
@@ -2542,7 +2638,7 @@ document.getElementById('admin-list')?.addEventListener('click', e => {
 });
 
 // ── Inicializar ──
-loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
+loadProductCatOverrides(); loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
 </script>
 </body>
 </html>
