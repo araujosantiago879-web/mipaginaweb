@@ -74,6 +74,14 @@
     .hamburger-btn.active span:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
     .hamburger-btn.active span:nth-child(2) { opacity:0; }
     .hamburger-btn.active span:nth-child(3) { transform:rotate(-45deg) translate(4px,-4px); }
+    .search-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:36px; height:36px;
+      background:rgba(255,51,102,.08); color:var(--muted);
+      border:1px solid rgba(255,51,102,.12); cursor:pointer;
+      border-radius:2px; transition:all .25s;
+    }
+    .search-btn:hover { background:rgba(255,51,102,.2); border-color:var(--rose); color:var(--rose); }
 
     /* ── Drawer ── */
     .drawer-bg { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:600; opacity:0; pointer-events:none; transition:opacity .3s; }
@@ -150,33 +158,85 @@
     .section-h2 { font-family:'Cormorant Garamond',serif; font-size:clamp(42px,5vw,68px); font-weight:700; line-height:.9; letter-spacing:-1.5px; }
     .section-h2 em { font-style:italic; color:var(--rose); }
     /* ── Buscador ── */
-    .search-wrap {
-      position:relative; margin-bottom:28px;
+    /* ── Search overlay ── */
+    .search-overlay {
+      position:fixed; inset:0; z-index:900;
+      background:rgba(5,5,8,.97);
+      display:none; flex-direction:column; align-items:center;
+      padding-top:120px; pointer-events:none;
+      opacity:0; transition:opacity .35s;
     }
-    .search-wrap .search-icon {
-      position:absolute; left:16px; top:50%; transform:translateY(-50%);
-      color:var(--muted); pointer-events:none; transition:color .25s;
+    .search-overlay.open { display:flex; pointer-events:auto; opacity:1; }
+    .search-overlay-close {
+      position:absolute; top:28px; right:32px;
+      color:var(--muted); font-size:28px; line-height:1;
+      transition:color .25s; background:none; border:none; cursor:pointer;
     }
-    .search-wrap:focus-within .search-icon { color:var(--rose); }
-    .search-input {
+    .search-overlay-close:hover { color:var(--rose); }
+    .search-overlay-wrap {
+      position:relative; width:100%; max-width:640px;
+      margin-bottom:40px;
+    }
+    .search-overlay-wrap .search-icon {
+      position:absolute; left:20px; top:50%; transform:translateY(-50%);
+      color:var(--muted); pointer-events:none; transition:color .35s;
+    }
+    .search-overlay-wrap:focus-within .search-icon { color:var(--rose); }
+    .search-overlay-input {
       width:100%;
-      font-family:'Archivo',sans-serif; font-size:14px;
-      background:var(--ink-3); border:1px solid var(--edge);
-      color:var(--paper); padding:14px 44px 14px 46px;
-      outline:none; transition:border-color .25s, box-shadow .25s;
+      font-family:'Archivo',sans-serif; font-size:24px; font-weight:500;
+      background:transparent; border:none; border-bottom:2px solid rgba(255,51,102,.15);
+      color:var(--paper); padding:16px 48px 16px 56px;
+      outline:none; transition:border-color .35s;
     }
-    .search-input::placeholder { color:var(--muted); font-size:13px; }
-    .search-input:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(255,51,102,.08); }
-    .search-clear {
-      position:absolute; right:14px; top:50%; transform:translateY(-50%);
-      width:24px; height:24px; border-radius:50%;
-      background:var(--ink-4); border:1px solid var(--edge);
-      color:var(--muted); font-size:12px;
+    .search-overlay-input::placeholder { color:rgba(200,215,230,.2); font-size:20px; }
+    .search-overlay-input:focus { border-bottom-color:var(--rose); }
+    .search-overlay-clear {
+      position:absolute; right:6px; top:50%; transform:translateY(-50%);
+      width:32px; height:32px; border-radius:50%;
+      background:transparent; border:1px solid transparent;
+      color:var(--muted); font-size:16px;
       display:none; align-items:center; justify-content:center;
-      transition:all .2s;
+      transition:all .25s;
     }
-    .search-clear.visible { display:flex; }
-    .search-clear:hover { background:var(--rose); border-color:var(--rose); color:#fff; }
+    .search-overlay-clear.visible { display:flex; }
+    .search-overlay-clear:hover { background:var(--rose); border-color:var(--rose); color:#fff; }
+    .search-overlay-results {
+      width:100%; max-width:640px; max-height:calc(100vh - 300px);
+      overflow-y:auto;
+    }
+    .search-overlay-results::-webkit-scrollbar { width:3px; }
+    .search-overlay-results::-webkit-scrollbar-track { background:transparent; }
+    .search-overlay-results::-webkit-scrollbar-thumb { background:rgba(255,51,102,.15); border-radius:3px; }
+    .search-overlay-count {
+      font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px;
+      text-transform:uppercase; color:var(--muted); margin-bottom:16px;
+      min-height:16px;
+    }
+    .search-overlay-count em { color:var(--rose); font-style:normal; font-weight:700; }
+    .search-overlay-item {
+      display:flex; align-items:center; gap:16px;
+      padding:14px 20px; border-radius:4px;
+      cursor:pointer; transition:background .2s;
+    }
+    .search-overlay-item:hover { background:rgba(255,51,102,.06); }
+    .search-overlay-item-img {
+      width:48px; height:48px; object-fit:cover; border-radius:4px;
+      background:var(--ink-4); flex-shrink:0;
+    }
+    .search-overlay-item-info { flex:1; min-width:0; }
+    .search-overlay-item-name { font-size:14px; font-weight:600; color:var(--paper); }
+    .search-overlay-item-cat { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-2); }
+    .search-overlay-item-price { font-family:'Inconsolata',monospace; font-size:13px; color:var(--lime); white-space:nowrap; }
+    .search-overlay-empty {
+      display:none; flex-direction:column; align-items:center;
+      gap:12px; padding:48px 20px; text-align:center;
+    }
+    .search-overlay-empty.visible { display:flex; }
+    .search-overlay-empty-icon { font-size:36px; opacity:.3; }
+    .search-overlay-empty h3 { font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--muted); }
+    .search-overlay-empty p { font-family:'Inconsolata',monospace; font-size:11px; color:var(--muted-2); }
+
     .search-results-count {
       font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px;
       text-transform:uppercase; color:var(--muted); margin-bottom:24px;
@@ -849,6 +909,13 @@
 
     /* Móvil pequeño */
     @media(max-width:480px) {
+      .search-overlay { padding-top:80px; }
+      .search-overlay-wrap { max-width:90%; }
+      .search-overlay-input { font-size:18px; padding:14px 40px 14px 48px; }
+      .search-overlay-input::placeholder { font-size:16px; }
+      .search-overlay-results { max-width:90%; }
+      .search-overlay-close { top:16px; right:16px; font-size:24px; }
+
       .hero-l { padding:48px 16px 40px; }
       .hero-h1 { font-size:52px; letter-spacing:-1.5px; }
       .hero-btns { gap:10px; }
@@ -902,8 +969,11 @@
   </ul>
   <div class="nav-actions">
     <span class="tag-online">Abierto ahora</span>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buscar productos">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menú">
       <span></span><span></span><span></span>
+    </button>
+    <button class="search-btn" id="searchBtn" aria-label="Buscar" onclick="openSearchOverlay()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
     </button>
     <button id="cart-btn">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
@@ -1156,21 +1226,7 @@
       </div>
       <div class="section-label" style="font-family:'Inconsolata',monospace;font-size:10px;color:var(--muted);">Productos certificados · Envío discreto garantizado</div>
     </div>
-    <!-- Buscador -->
-    <div class="search-wrap reveal">
-      <svg class="search-icon" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-      </svg>
-      <input
-        class="search-input"
-        id="search-input"
-        type="search"
-        autocomplete="off"
-        placeholder="Buscar producto, categoría…"
-        oninput="handleSearch(this.value)"
-      >
-      <button class="search-clear" id="search-clear" onclick="clearSearch()" title="Limpiar búsqueda">✕</button>
-    </div>
+    <!-- Buscador inline (se usa cuando el overlay no está disponible) -->
     <div class="search-results-count" id="search-results-count"></div>
 
     <div class="tabs-bar" id="tabs-bar"></div>
@@ -1193,7 +1249,7 @@
         <div class="search-empty-icon">🔍</div>
         <h3>Sin resultados</h3>
         <p id="search-empty-msg">No encontramos productos para tu búsqueda.</p>
-        <button class="search-empty-clear" onclick="clearSearch()">Limpiar búsqueda</button>
+        <button class="search-empty-clear" onclick="clearSearchInline()">Limpiar búsqueda</button>
       </div>
     </div>
   </section>
@@ -1338,6 +1394,33 @@
 </div>
 
 <div class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+
+<!-- ── Search overlay ── -->
+<div class="search-overlay" id="searchOverlay">
+  <button class="search-overlay-close" onclick="closeSearchOverlay()">✕</button>
+  <div class="search-overlay-wrap">
+    <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
+    <input
+      class="search-overlay-input"
+      id="search-overlay-input"
+      type="search"
+      autocomplete="off"
+      placeholder="Buscá productos, marcas…"
+      oninput="handleSearchOverlay(this.value)"
+    >
+    <button class="search-overlay-clear" id="search-overlay-clear" onclick="clearSearchOverlay()" title="Limpiar">✕</button>
+  </div>
+  <div class="search-overlay-count" id="search-overlay-count"></div>
+  <div class="search-overlay-results" id="search-overlay-results"></div>
+  <div class="search-overlay-empty" id="search-overlay-empty">
+    <div class="search-overlay-empty-icon">🔍</div>
+    <h3>Sin resultados</h3>
+    <p id="search-overlay-empty-msg">Probá con otro término.</p>
+  </div>
+</div>
+
 <footer>
   <div class="footer-grid">
     <div>
@@ -2011,90 +2094,107 @@ document.getElementById('modal-close').addEventListener('click', () => {
 
 // handleNL eliminado — reemplazado por canal de WhatsApp
 
-// ── Buscador (backend) ──
-async function handleSearch(val) {
-  const value = val.trim();
-  busquedaActual = value;
-  const clearBtn = document.getElementById('search-clear');
-  const resultsCount = document.getElementById('search-results-count');
-  const emptyEl = document.getElementById('search-empty');
+// ── Buscador inline (legacy) ──
+function clearSearchInline() {
+  busquedaActual = '';
+  document.getElementById('search-empty').classList.remove('visible');
+  document.getElementById('search-results-count').innerHTML = '';
+  document.getElementById('tabs-bar').style.display = 'flex';
+  loadProducts();
+}
 
+// ── Search overlay ──
+function openSearchOverlay() {
+  const overlay = document.getElementById('searchOverlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    const inp = document.getElementById('search-overlay-input');
+    if (inp) { inp.focus(); inp.select(); }
+  }, 100);
+}
+function closeSearchOverlay() {
+  const overlay = document.getElementById('searchOverlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('search-overlay-input').value = '';
+  document.getElementById('search-overlay-results').innerHTML = '';
+  document.getElementById('search-overlay-count').innerHTML = '';
+  document.getElementById('search-overlay-empty').classList.remove('visible');
+  document.getElementById('search-overlay-clear').classList.remove('visible');
+}
+function clearSearchOverlay() {
+  const inp = document.getElementById('search-overlay-input');
+  inp.value = '';
+  inp.focus();
+  document.getElementById('search-overlay-results').innerHTML = '';
+  document.getElementById('search-overlay-count').innerHTML = '';
+  document.getElementById('search-overlay-empty').classList.remove('visible');
+  document.getElementById('search-overlay-clear').classList.remove('visible');
+}
+let searchOverlayTimer;
+async function handleSearchOverlay(val) {
+  const value = val.trim();
+  const clearBtn = document.getElementById('search-overlay-clear');
+  const countEl = document.getElementById('search-overlay-count');
+  const resultsEl = document.getElementById('search-overlay-results');
+  const emptyEl = document.getElementById('search-overlay-empty');
+  clearTimeout(searchOverlayTimer);
   if (!value || value.length < 2) {
-    if (clearBtn) clearBtn.classList.remove('visible');
-    if (resultsCount) resultsCount.innerHTML = '';
-    if (emptyEl) emptyEl.classList.remove('visible');
-    document.getElementById('tabs-bar').style.display = 'flex';
-    busquedaActual = '';
-    loadProducts();
+    clearBtn.classList.remove('visible');
+    countEl.innerHTML = '';
+    resultsEl.innerHTML = '';
+    emptyEl.classList.remove('visible');
     return;
   }
-
-  if (clearBtn) clearBtn.classList.add('visible');
-  document.getElementById('tabs-bar').style.display = 'none';
-
-  try {
-    const res = await fetch(`/api/products?search=${encodeURIComponent(value)}`);
-    const results = await res.json();
-    productos = results;
-    if (resultsCount) {
-      resultsCount.innerHTML = results.length > 0
-        ? `<em>${results.length}</em> producto${results.length !== 1 ? 's' : ''} encontrado${results.length !== 1 ? 's' : ''} para «${value}»`
-        : '';
-    }
-    const container = document.getElementById('products-container');
-    if (results.length === 0) {
-      container.innerHTML = '';
-      if (emptyEl) {
-        document.getElementById('search-empty-msg').textContent = `No encontramos productos para «${value}». Probá con otra palabra.`;
+  clearBtn.classList.add('visible');
+  searchOverlayTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/products?search=${encodeURIComponent(value)}`);
+      const results = await res.json();
+      if (results.length === 0) {
+        resultsEl.innerHTML = '';
+        countEl.innerHTML = '';
+        document.getElementById('search-overlay-empty-msg').textContent = `No encontramos «${value}». Probá con otra palabra.`;
         emptyEl.classList.add('visible');
+      } else {
+        emptyEl.classList.remove('visible');
+        countEl.innerHTML = `<em>${results.length}</em> resultado${results.length !== 1 ? 's' : ''} para «${value}»`;
+        resultsEl.innerHTML = results.map(p => {
+          const thumbSrc = p.imagenes?.[0] || p.imagen || '';
+          return `<div class="search-overlay-item" onclick="closeSearchOverlay(); openModal('${p.id}')">
+            <img class="search-overlay-item-img" src="${thumbSrc}" alt="${p.nombre}" loading="lazy">
+            <div class="search-overlay-item-info">
+              <div class="search-overlay-item-name">${p.nombre}</div>
+              <div class="search-overlay-item-cat">${p.categoria || ''}</div>
+            </div>
+            <div class="search-overlay-item-price">${p.precio}</div>
+          </div>`;
+        }).join('');
       }
-    } else {
-      if (emptyEl) emptyEl.classList.remove('visible');
-      container.innerHTML = results.map(p => {
-        const thumbSrc = p.imagenes?.[0] || p.imagen || '';
-        return `<div class="card" data-id="${p.id}">
-          <div class="card-thumb" onclick="openModal('${p.id}')">
-            <img src="${thumbSrc}" alt="${p.nombre}" loading="lazy">
-            ${p.badge ? `<span class="card-badge b-${p.badge}">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : 'Oferta'}</span>` : ''}
-            <div class="card-hover-cta">
-              <button class="cta-add" onclick="event.stopPropagation(); addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">Agregar al carrito</button>
-              <button class="cta-view" onclick="event.stopPropagation(); openModal('${p.id}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
-            </div>
-          </div>
-          <div class="card-body" onclick="openModal('${p.id}')">
-            <div class="card-cat">${p.categoria}</div>
-            <div class="card-name">${p.nombre}</div>
-            <div class="card-desc">${(p.descripcion || '').substring(0, 65)}${p.descripcion && p.descripcion.length > 65 ? '…' : ''}</div>
-            <div class="card-foot">
-              <div class="card-price">${p.precio}${p.precioAnterior ? `<del>${p.precioAnterior}</del>` : ''}</div>
-              <div class="stars">${'★'.repeat(Math.floor(p.rating || 4.5))}${(p.rating || 4.5) % 1 ? '½' : ''}<span class="star-n">${p.rating || 4.5}</span></div>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
+    } catch (err) {
+      showToast('Error en la búsqueda', true);
     }
-  } catch (err) {
-    showToast('Error en la búsqueda', true);
-  }
+  }, 200);
 }
 
-function clearSearch() {
-  const inp = document.getElementById('search-input');
-  if (inp) { inp.value = ''; inp.dispatchEvent(new Event('input')); }
-}
+// Overlay click outside to close
+document.getElementById('searchOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeSearchOverlay();
+});
 
-// Atajo de teclado: / abre el buscador, Escape limpia
+// Atajo de teclado: / abre el overlay, Escape lo cierra
 document.addEventListener('keydown', e => {
-  const inp = document.getElementById('search-input');
-  if (!inp) return;
-  if (e.key === '/' && document.activeElement !== inp && document.activeElement.tagName !== 'INPUT') {
+  const overlay = document.getElementById('searchOverlay');
+  if (e.key === '/' && !overlay.classList.contains('open') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
     e.preventDefault();
-    activateTab('tienda');
-    setTimeout(() => { inp.focus(); inp.select(); }, 50);
+    openSearchOverlay();
   }
-  if (e.key === 'Escape' && document.activeElement === inp) {
-    clearSearch();
-    inp.blur();
+  if (e.key === 'Escape') {
+    if (overlay.classList.contains('open')) {
+      e.preventDefault();
+      closeSearchOverlay();
+    }
   }
 });
 
