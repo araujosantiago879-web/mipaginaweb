@@ -200,10 +200,19 @@
 
     .tabs-bar { display:flex; gap:0; border-bottom:1px solid var(--edge); margin-bottom:40px; overflow-x:auto; scrollbar-width:none; }
     .tabs-bar::-webkit-scrollbar { display:none; }
-    .tab { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); padding:13px 24px; border-bottom:2px solid transparent; white-space:nowrap; transition:all .25s; display:flex; align-items:center; gap:8px; }
+    .tab { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); padding:13px 24px; border-bottom:2px solid transparent; white-space:nowrap; transition:all .25s; display:flex; align-items:center; gap:8px; cursor:pointer; }
     .tab.on { color:var(--paper); border-bottom-color:var(--rose); }
     .tab-badge { font-size:9px; padding:2px 6px; border-radius:20px; background:var(--ink-3); border:1px solid var(--edge); color:var(--muted); }
     .tab.on .tab-badge { background:var(--rose); border-color:var(--rose); color:#fff; }
+    .pillars { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; margin-bottom:40px; background:var(--edge); border:1px solid var(--edge); }
+    .pillar { background:var(--ink-3); padding:20px 16px 12px; display:flex; flex-direction:column; gap:2px; }
+    .pillar-h { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); margin-bottom:8px; font-weight:700; }
+    .pillar-l { font-family:'Archivo',sans-serif; font-size:12px; color:var(--muted); padding:4px 0; cursor:pointer; transition:color .2s; }
+    .pillar-l:hover { color:var(--paper); }
+    .pillar-l.on { color:var(--rose); }
+    .pillar-l.sub { padding-left:12px; font-size:11px; color:var(--muted-2); }
+    .pillar-l.sub:hover { color:var(--paper); }
+    .pillar-l.sub.on { color:var(--rose); }
     .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; gap:16px; flex-wrap:wrap; }
     .filters { display:flex; gap:8px; flex-wrap:wrap; }
     .filter-btn { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:6px 14px; border:1px solid var(--edge); color:var(--muted); transition:all .25s; }
@@ -867,6 +876,8 @@
 
       .tabs-bar { margin-bottom:24px; }
       .tab { padding:10px 14px; font-size:10px; }
+      .pillars { grid-template-columns:repeat(2,1fr); }
+      .pillar { padding:16px 12px 8px; }
 
       .toolbar { flex-direction:column; align-items:flex-start; gap:10px; }
       .filters { gap:6px; }
@@ -1177,6 +1188,7 @@
     </div>
     <div class="search-results-count" id="search-results-count"></div>
 
+    <div class="pillars" id="pillars-container"></div>
     <div class="tabs-bar" id="tabs-bar"></div>
     <div class="toolbar reveal">
       <div class="filters" id="filters-bar">
@@ -1571,6 +1583,13 @@ activateTab('tienda');
 let productos = [];
 let categoriasUnicas = [];
 let filtroActual = 'all';
+const categoryTree = [
+  { name: 'Vibradores', subs: ['Parejas', 'Punto G', 'Rabbits', 'Realísticos', 'Wand'] },
+  { name: 'Anal', subs: ['Beads', 'Cola de Zorra', 'Duchas Anales', 'Plugs Anales', 'Prostático', 'Vibradores Anales'] },
+  { name: 'Anillos & Arnéses', subs: ['Anillos', 'Bolas Chinas', 'Arnéses y Prótesis', 'Consoladores / Dildos', 'Doble Penetración', 'Extensores / Potenciadores'] },
+  { name: 'Clítoris & Punto G', subs: ['Bala Vibradora', 'Succión Clitoris', 'Huevos Vibradores', 'Vibradores Clitoris', 'Pump / Bomba Vaginal'] },
+  { name: 'Masturbadores & Más', subs: ['Vaginas', 'Anos', 'Bocas', 'Torsos', 'Texturados', 'Automáticos', 'Máquinas Sexuales', 'Muñecas y Muñecos', 'Chascos y Diversión'] },
+];
 let ordenActual = 'default';
 let busquedaActual = '';
 
@@ -1582,6 +1601,7 @@ async function loadProducts() {
     if (!Array.isArray(data)) throw new Error('Respuesta inválida');
     productos = data;
     categoriasUnicas = ['Todo', ...new Set(productos.map(p => p.categoria))];
+    renderPillars();
     renderTabs();
     renderProducts();
   } catch (err) {
@@ -1602,6 +1622,34 @@ async function loadProducts() {
   }
 }
 
+function renderPillars() {
+  const container = document.getElementById('pillars-container');
+  if (!container) return;
+  container.innerHTML = categoryTree.map(p => {
+    const subsHtml = p.subs.map(s => {
+      const sc = productos.filter(pr => pr.categoria === s).length;
+      const label = s === 'Arnéses y Prótesis' ? 'Arnéses' : s;
+      return `<span class="pillar-l${sc ? '' : ' sub'}" data-sub="${s}">${label}${sc ? `<span class="tab-badge">${sc}</span>` : ''}</span>`;
+    }).join('');
+    const extra = p.name === 'Anillos & Arnéses' ? '<span class="pillar-l sub" style="cursor:default;color:var(--muted-2);font-size:10px;">Prótesis · Fundas</span>' : '';
+    return `<div class="pillar"><div class="pillar-h">${p.name}</div>${subsHtml}${extra}</div>`;
+  }).join('');
+  container.querySelectorAll('.pillar-l[data-sub]').forEach(el => {
+    el.addEventListener('click', () => {
+      container.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
+      el.classList.add('on');
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+      document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
+      filtroActual = 'all';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+      document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('on');
+      document.getElementById('search-input').value = '';
+      busquedaActual = '';
+      renderProducts(el.dataset.sub);
+    });
+  });
+}
+
 function renderTabs() {
   const bar = document.getElementById('tabs-bar');
   bar.innerHTML = categoriasUnicas.map(cat => {
@@ -1613,6 +1661,7 @@ function renderTabs() {
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
       const cat = btn.dataset.categoria;
+      document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
       filtroActual = 'all';
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
       document.querySelector('.filter-btn[data-filter="all"]').classList.add('on');
@@ -2086,6 +2135,7 @@ async function handleSearch(val) {
 function clearSearch() {
   const inp = document.getElementById('search-input');
   if (inp) { inp.value = ''; inp.dispatchEvent(new Event('input')); }
+  document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
 }
 
 // Atajo de teclado: / enfoca el buscador, Escape limpia
@@ -2108,6 +2158,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
+    document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
     filtroActual = btn.dataset.filter;
     renderProducts(document.querySelector('.tab.on')?.dataset.categoria === 'Todo' ? null : document.querySelector('.tab.on')?.dataset.categoria || null);
   });
