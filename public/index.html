@@ -204,9 +204,13 @@
     .tab-badge { font-size:9px; padding:2px 6px; border-radius:20px; background:var(--ink-3); border:1px solid var(--edge); color:var(--muted); }
     .tab.on .tab-badge { background:var(--rose); border-color:var(--rose); color:#fff; }
     .pillars { display:grid; grid-template-columns:repeat(5,1fr); gap:0; margin-bottom:40px; }
-    .pillar { background:var(--ink); padding:20px 0 12px 16px; display:flex; flex-direction:column; gap:2px; }
-    .pillar-h { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); margin-bottom:8px; font-weight:700; }
-    .pillar-l { font-family:'Archivo',sans-serif; font-size:12px; color:var(--muted); padding:4px 0; cursor:pointer; transition:color .2s; }
+    .pillar { background:var(--ink); padding:20px 0 12px 16px; display:flex; flex-direction:column; gap:0; }
+    .pillar-h { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); margin-bottom:0; font-weight:700; cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; padding-right:16px; }
+    .pillar-h::after { content:'+'; font-size:11px; color:var(--muted-2); transition:transform .3s; }
+    .pillar.open .pillar-h::after { content:'−'; }
+    .pillar-body { max-height:0; overflow:hidden; transition:max-height .4s ease; display:flex; flex-direction:column; gap:2px; }
+    .pillar.open .pillar-body { max-height:500px; }
+    .pillar-l { font-family:'Archivo',sans-serif; font-size:12px; color:var(--muted); padding:4px 0; cursor:pointer; transition:color .2s; margin-top:6px; }
     .pillar-l:hover { color:var(--paper); }
     .pillar-l.on { color:var(--rose); }
     .pillar-l.sub { padding-left:12px; font-size:11px; color:var(--muted-2); }
@@ -877,6 +881,9 @@
       .tab { padding:10px 14px; font-size:10px; }
       .pillars { grid-template-columns:repeat(2,1fr); }
       .pillar { padding:16px 0 8px 12px; }
+      .pillar-body { max-height:800px; }
+      .pillar-h { cursor:default; }
+      .pillar-h::after { display:none; }
 
       .toolbar { flex-direction:column; align-items:flex-start; gap:10px; }
       .filters { gap:6px; }
@@ -1628,11 +1635,12 @@ function renderPillars() {
       return `<span class="pillar-l${sc ? '' : ' sub'}" data-sub="${s}">${label}${sc ? `<span class="tab-badge">${sc}</span>` : ''}</span>`;
     }).join('');
     const extra = p.name === 'Anillos & Arnéses' ? '<span class="pillar-l sub" style="cursor:default;color:var(--muted-2);font-size:10px;">Prótesis · Fundas</span>' : '';
-    return `<div class="pillar"><div class="pillar-h">${p.name}</div>${subsHtml}${extra}</div>`;
+    return `<div class="pillar"><div class="pillar-h">${p.name}</div><div class="pillar-body">${subsHtml}${extra}</div></div>`;
   }).join('');
   container.querySelectorAll('.pillar-l[data-sub]').forEach(el => {
     el.addEventListener('click', () => {
       container.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
+      document.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
       el.classList.add('on');
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
@@ -1642,6 +1650,14 @@ function renderPillars() {
       document.getElementById('search-input').value = '';
       busquedaActual = '';
       renderProducts(el.dataset.sub);
+    });
+  });
+  container.querySelectorAll('.pillar-h').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const parent = hdr.parentElement;
+      const isOpen = parent.classList.contains('open');
+      container.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
+      if (!isOpen) parent.classList.add('open');
     });
   });
 }
@@ -1656,6 +1672,7 @@ function renderTabs() {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
+      document.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
       const cat = btn.dataset.categoria;
       document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
       filtroActual = 'all';
