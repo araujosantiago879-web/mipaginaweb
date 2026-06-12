@@ -210,7 +210,7 @@
     .pillar-h::after { content:''; width:8px; height:8px; border-right:2px solid var(--muted-2); border-bottom:2px solid var(--muted-2); transform:rotate(45deg); transition:transform .35s ease; flex-shrink:0; }
     .pillar.open .pillar-h::after { transform:rotate(-135deg); }
     .pillar-body { max-height:0; overflow:hidden; transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .3s ease; display:flex; flex-direction:column; gap:6px; padding-top:4px; opacity:.6; }
-    .pillar.open .pillar-body { max-height:800px; opacity:1; }
+    .pillar.open .pillar-body { max-height:2000px; opacity:1; }
     .pillar-l { font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); padding:6px 0 6px 2px; cursor:pointer; transition:color .2s, padding-left .2s, background .2s; margin-top:0; border-radius:2px; }
     .pillar-l:hover { padding-left:8px; color:var(--paper); background:rgba(255,255,255,.02); }
     .pillar-l.on { color:var(--rose); }
@@ -222,6 +222,15 @@
     .pillar-product img[src=""], .pillar-product img[style*="display:none"] { display:none; }
     .pillar-product-name { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
     .pillar-product:hover .pillar-product-name { color:var(--paper); }
+    .pillar-sub-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:10px 4px 6px 2px; margin:2px 0 6px 0; border-top:1px solid var(--edge); }
+    .pillar-sub-card { display:flex; flex-direction:column; background:var(--ink-3); border:1px solid var(--edge); border-radius:4px; overflow:hidden; cursor:pointer; transition:all .25s; }
+    .pillar-sub-card:hover { border-color:var(--rose); transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:2; }
+    .pillar-sub-card img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; background:var(--ink-4); }
+    .pillar-sub-card-body { padding:8px 10px 10px; display:flex; flex-direction:column; gap:4px; }
+    .pillar-sub-card-name { font-size:12px; font-weight:600; color:var(--paper); line-height:1.25; }
+    .pillar-sub-card-price { font-family:'Inconsolata',monospace; font-size:13px; color:var(--lime); }
+    .pillar-sub-card-price del { font-size:10px; color:#ff6666; margin-left:4px; text-decoration:line-through; }
+    .pillar-sub-card-cat { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-2); }
     .pillar-l.sub:hover { color:var(--paper); }
     .pillar-l.sub.on { color:var(--rose); }
     .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; gap:16px; flex-wrap:wrap; }
@@ -889,7 +898,8 @@
       .tab { padding:10px 14px; font-size:10px; }
       .pillars { grid-template-columns:repeat(2,1fr); }
       .pillar { padding:16px 0 8px 12px; }
-      .pillar-body { max-height:800px; }
+      .pillar-body { max-height:none; }
+      .pillar-sub-grid { grid-template-columns:repeat(2,1fr); }
       .pillar-h { cursor:default; }
       .pillar-h::after { display:none; }
 
@@ -1656,6 +1666,26 @@ function renderPillars() {
     el.addEventListener('click', () => {
       container.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
       el.classList.add('on');
+      document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
+      const sub = el.dataset.sub;
+      const prods = productos.filter(pr => pr.categoria === sub);
+      if (prods.length) {
+        const grid = document.createElement('div');
+        grid.className = 'pillar-sub-grid';
+        grid.innerHTML = prods.map(pr => {
+          const src = pr.imagenes?.[0] || pr.imagen || '';
+          const oldPrice = pr.precioAnterior ? `<del>${pr.precioAnterior}</del>` : '';
+          return `<div class="pillar-sub-card" onclick="event.stopPropagation();openModal('${pr.id ?? ''}')">
+            <img src="${src}" alt="${(pr.nombre||'').replace(/"/g,'&quot;')}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%232a2a2f%22 width=%22120%22 height=%22120%22/></svg>'">
+            <div class="pillar-sub-card-body">
+              <div class="pillar-sub-card-cat">${pr.categoria||''}</div>
+              <div class="pillar-sub-card-name">${pr.nombre||''}</div>
+              <div class="pillar-sub-card-price">${pr.precio||''} ${oldPrice}</div>
+            </div>
+          </div>`;
+        }).join('');
+        el.after(grid);
+      }
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
       filtroActual = 'all';
@@ -1663,7 +1693,7 @@ function renderPillars() {
       document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('on');
       document.getElementById('search-input').value = '';
       busquedaActual = '';
-      renderProducts(el.dataset.sub);
+      renderProducts(sub);
     });
   });
   container.querySelectorAll('.pillar-h').forEach(hdr => {
@@ -1671,6 +1701,7 @@ function renderPillars() {
       const parent = hdr.parentElement;
       const isOpen = parent.classList.contains('open');
       container.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
       if (!isOpen) parent.classList.add('open');
     });
   });
