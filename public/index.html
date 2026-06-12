@@ -215,6 +215,10 @@
     .pillar-l:hover { padding-left:8px; color:var(--paper); background:rgba(255,255,255,.02); }
     .pillar-l.on { color:var(--rose); }
     .pillar-l.sub { padding-left:14px; font-size:13px; color:var(--muted-2); }
+    .pillar-products { display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 8px 2px; }
+    .pillar-product { width:44px; height:44px; border-radius:3px; overflow:hidden; cursor:pointer; border:1px solid var(--edge); transition:all .25s; flex-shrink:0; background:var(--ink-3); }
+    .pillar-product:hover { border-color:var(--rose); transform:scale(1.12); box-shadow:0 0 16px rgba(255,51,102,.2); z-index:2; }
+    .pillar-product img { width:100%; height:100%; object-fit:cover; display:block; }
     .pillar-l.sub:hover { color:var(--paper); }
     .pillar-l.sub.on { color:var(--rose); }
     .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; gap:16px; flex-wrap:wrap; }
@@ -1633,7 +1637,13 @@ function renderPillars() {
     const subsHtml = p.subs.map(s => {
       const sc = productos.filter(pr => pr.categoria === s).length;
       const label = s === 'Arnéses y Prótesis' ? 'Arnéses' : s;
-      return `<span class="pillar-l${sc ? '' : ' sub'}" data-sub="${s}">${label}${sc ? `<span class="tab-badge">${sc}</span>` : ''}</span>`;
+      const prods = productos.filter(pr => pr.categoria === s).slice(0, 6);
+      const prodThumbs = prods.length ? `<div class="pillar-products">${prods.map(pr => {
+        const src = pr.imagenes?.[0] || pr.imagen || '';
+        const id = pr.id || '';
+        return `<div class="pillar-product" onclick="event.stopPropagation();openModal('${id}')"><img src="${src}" alt="${pr.nombre}" loading="lazy"></div>`;
+      }).join('')}</div>` : '';
+      return `<span class="pillar-l${sc ? '' : ' sub'}" data-sub="${s}">${label}${sc ? `<span class="tab-badge">${sc}</span>` : ''}</span>${prodThumbs}`;
     }).join('');
     const extra = p.name === 'Anillos & Arnéses' ? '<span class="pillar-l sub" style="cursor:default;color:var(--muted-2);font-size:10px;">Prótesis · Fundas</span>' : '';
     return `<div class="pillar"><div class="pillar-h">${p.name}</div><div class="pillar-body">${subsHtml}${extra}</div></div>`;
