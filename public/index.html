@@ -1640,8 +1640,8 @@ function renderPillars() {
       const prods = productos.filter(pr => pr.categoria === s).slice(0, 6);
       const prodThumbs = prods.length ? `<div class="pillar-products">${prods.map(pr => {
         const src = pr.imagenes?.[0] || pr.imagen || '';
-        const id = pr.id || '';
-        return `<div class="pillar-product" onclick="event.stopPropagation();openModal('${id}')"><img src="${src}" alt="${pr.nombre}" loading="lazy"></div>`;
+        const pid = pr.id ?? productos.indexOf(pr);
+        return `<div class="pillar-product" data-pid="${pid}"><img src="${src}" alt="${pr.nombre}" loading="lazy"></div>`;
       }).join('')}</div>` : '';
       return `<span class="pillar-l${sc ? '' : ' sub'}" data-sub="${s}">${label}${sc ? `<span class="tab-badge">${sc}</span>` : ''}</span>${prodThumbs}`;
     }).join('');
@@ -1651,7 +1651,6 @@ function renderPillars() {
   container.querySelectorAll('.pillar-l[data-sub]').forEach(el => {
     el.addEventListener('click', () => {
       container.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
-      document.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
       el.classList.add('on');
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
@@ -1670,6 +1669,15 @@ function renderPillars() {
       container.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
       if (!isOpen) parent.classList.add('open');
     });
+  });
+  container.addEventListener('click', e => {
+    const prod = e.target.closest('.pillar-product');
+    if (prod) {
+      e.stopPropagation();
+      const pid = prod.dataset.pid;
+      const p = productos.find(pr => String(pr.id ?? '') === pid) ?? productos[parseInt(pid)];
+      if (p) openModal(p.id ?? pid);
+    }
   });
 }
 
