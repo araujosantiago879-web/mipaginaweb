@@ -622,6 +622,9 @@
     .admin-prod-name small { color:var(--muted-2); font-size:10px; }
     .admin-prod select { background:var(--ink-4); color:#ccc; border:1px solid var(--edge); padding:3px 6px; font-size:11px; border-radius:2px; cursor:pointer; max-width:160px; }
     .admin-prod select option { background:#18181b; color:#ccc; }
+    .admin-prod-field { background:var(--ink-4); color:#ccc; border:1px solid var(--edge); padding:4px 6px; font-size:11px; border-radius:2px; outline:none; transition:border-color .2s; }
+    .admin-prod-field:focus { border-color:var(--rose); }
+    .admin-prod-field::placeholder { color:var(--muted-3); }
     .admin-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
     .admin-title { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; }
     .admin-title em { font-style:italic; color:var(--rose); }
@@ -1750,9 +1753,10 @@ function renderPillars() {
       const sc = productos.filter(pr => getEffectiveCategory(pr) === s).length;
       const label = s === 'Arnéses y Prótesis' ? 'Arnéses' : s;
       const prods = productos.filter(pr => getEffectiveCategory(pr) === s).slice(0, 6);
-      const prodThumbs = prods.length ? `<div class="pillar-products">${prods.map(pr => {
+      const prodThumbs = prods.length ? `<div class="pillar-products">${prods.map(pr_ => {
+        const pr = getEffectiveProduct(pr_);
         const src = pr.imagenes?.[0] || pr.imagen || '';
-        const pid = pr.id ?? productos.indexOf(pr);
+        const pid = pr.id ?? productos.indexOf(pr_);
         const name = pr.nombre?.replace(/"/g,'&quot;') || '';
         return `<div class="pillar-product" data-pid="${pid}" title="${name}"><img src="${src}" alt="${name}" onerror="this.style.display='none'"><span class="pillar-product-name">${name}</span></div>`;
       }).join('')}</div>` : '';
@@ -1771,13 +1775,14 @@ function renderPillars() {
       if (prods.length) {
         const grid = document.createElement('div');
         grid.className = 'pillar-sub-grid';
-        grid.innerHTML = prods.map(pr => {
+        grid.innerHTML = prods.map(pr_ => {
+          const pr = getEffectiveProduct(pr_);
           const src = pr.imagenes?.[0] || pr.imagen || '';
           const oldPrice = pr.precioAnterior ? `<del>${pr.precioAnterior}</del>` : '';
           return `<div class="pillar-sub-card" onclick="event.stopPropagation();openModal('${pr.id ?? ''}')">
             <img src="${src}" alt="${(pr.nombre||'').replace(/"/g,'&quot;')}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%232a2a2f%22 width=%22120%22 height=%22120%22/></svg>'">
             <div class="pillar-sub-card-body">
-              <div class="pillar-sub-card-cat">${getEffectiveCategory(pr)}</div>
+              <div class="pillar-sub-card-cat">${pr.categoria}</div>
               <div class="pillar-sub-card-name">${pr.nombre||''}</div>
               <div class="pillar-sub-card-price">${pr.precio||''} ${oldPrice}</div>
             </div>
@@ -1881,7 +1886,8 @@ function renderProducts(categoria = null) {
       countEl.innerHTML = '';
     }
   }
-  container.innerHTML = filtered.map((p, i) => {
+  container.innerHTML = filtered.map((p_, i) => {
+    const p = getEffectiveProduct(p_);
     const thumbSrc = p.imagenes?.[0] || p.imagen || '';
     return `
       <div class="card" data-id="${p.id || i}">
@@ -1895,7 +1901,7 @@ function renderProducts(categoria = null) {
           </div>
         </div>
         <div class="card-body" onclick="openModal('${p.id || i}')">
-          <div class="card-cat">${getEffectiveCategory(p)}</div>
+          <div class="card-cat">${p.categoria}</div>
           <div class="card-name">${p.nombre}</div>
           <div class="card-desc">${p.descripcion.substring(0, 65)}${p.descripcion.length > 65 ? '…' : ''}</div>
           <div class="card-foot">
@@ -2174,6 +2180,7 @@ function openModal(id) {
     showToast('Error al cargar producto', true);
     return;
   }
+  p = getEffectiveProduct(p);
 
   const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
   photo.src = imgs[0] || '';
@@ -2270,7 +2277,8 @@ async function handleSearch(val) {
       }
     } else {
       if (emptyEl) emptyEl.classList.remove('visible');
-      container.innerHTML = results.map(p => {
+      container.innerHTML = results.map(p_ => {
+        const p = getEffectiveProduct(p_);
         const thumbSrc = p.imagenes?.[0] || p.imagen || '';
         return `<div class="card" data-id="${p.id}">
           <div class="card-thumb" onclick="openModal('${p.id}')">
@@ -2282,7 +2290,7 @@ async function handleSearch(val) {
             </div>
           </div>
           <div class="card-body" onclick="openModal('${p.id}')">
-            <div class="card-cat">${getEffectiveCategory(p)}</div>
+            <div class="card-cat">${p.categoria}</div>
             <div class="card-name">${p.nombre}</div>
             <div class="card-desc">${(p.descripcion || '').substring(0, 65)}${p.descripcion && p.descripcion.length > 65 ? '…' : ''}</div>
             <div class="card-foot">
@@ -2365,16 +2373,17 @@ document.addEventListener('click', e => {
 function renderDrawer(items) {
   const list = document.getElementById('drawerList');
   if (!items.length) { list.innerHTML = '<div class="drawer-empty">No se encontraron productos</div>'; return; }
-  list.innerHTML = items.map(p => `
-    <div class="drawer-item" data-p="${encodeURIComponent(JSON.stringify(p))}">
+  list.innerHTML = items.map(p_ => {
+    const p = getEffectiveProduct(p_);
+    return `<div class="drawer-item" data-p="${encodeURIComponent(JSON.stringify(p))}">
       <img class="drawer-item-img" src="${p.imagenes?.[0] || p.imagen || ''}" alt="${p.nombre}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2244%22 height=%2244%22><rect fill=%22%232a2a2f%22 width=%2244%22 height=%2244%22/></svg>'">
       <div class="drawer-item-info">
         <div class="drawer-item-name">${p.nombre}</div>
         <div class="drawer-item-price">${p.precio}</div>
-        <div class="drawer-item-cat">${getEffectiveCategory(p)}</div>
+        <div class="drawer-item-cat">${p.categoria}</div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
   list.querySelectorAll('.drawer-item').forEach(el => {
     el.addEventListener('click', () => {
       const p = JSON.parse(decodeURIComponent(el.dataset.p));
@@ -2446,17 +2455,35 @@ const obs = new IntersectionObserver(entries => {
 }, { threshold: .08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-// ── Product category overrides ──
-let productCatOverrides = {};
-function loadProductCatOverrides() {
-  try { productCatOverrides = JSON.parse(localStorage.getItem('productCatOverrides') || '{}'); } catch {}
+// ── Product data overrides (imagen, nombre, precio, categoria) ──
+let productOverrides = {};
+function loadProductOverrides() {
+  try { productOverrides = JSON.parse(localStorage.getItem('productOverrides') || '{}'); } catch {}
 }
-function saveProductCatOverrides() {
-  localStorage.setItem('productCatOverrides', JSON.stringify(productCatOverrides));
+function saveProductOverrides() {
+  localStorage.setItem('productOverrides', JSON.stringify(productOverrides));
+}
+function getOverride(key, field, fallback) {
+  const o = productOverrides[key];
+  if (o && o[field] !== undefined && o[field] !== '') return o[field];
+  return fallback;
 }
 function getEffectiveCategory(p) {
+  return getOverride(String(p.id ?? ''), 'categoria', p.categoria || '');
+}
+function getEffectiveProduct(p) {
   const key = String(p.id ?? '');
-  return productCatOverrides[key] || p.categoria || '';
+  const o = productOverrides[key] || {};
+  return {
+    ...p,
+    categoria: o.categoria || p.categoria || '',
+    nombre: o.nombre || p.nombre || '',
+    precio: o.precio || p.precio || '',
+    imagen: o.imagen || p.imagen || '',
+    imagenes: o.imagen ? [o.imagen] : (p.imagenes || []),
+    descripcion: o.descripcion || p.descripcion || '',
+    precioAnterior: o.precioAnterior || p.precioAnterior || ''
+  };
 }
 // ── Admin config ──
 function adminToast(msg) {
@@ -2507,19 +2534,26 @@ function renderAdminProductos() {
   const container = document.getElementById('admin-prod-list');
   if (!container) return;
   const allSubs = categoryTree.flatMap(p => p.subs);
-  container.innerHTML = productos.map(p => {
+  container.innerHTML = productos.map(p_ => {
+    const p = getEffectiveProduct(p_);
     const key = String(p.id ?? '');
-    const current = getEffectiveCategory(p);
     const src = p.imagenes?.[0] || p.imagen || '';
+    const o = productOverrides[key] || {};
     return `<div class="admin-prod">
       <img src="${src}" alt="${(p.nombre||'').replace(/"/g,'&quot;')}" onerror="this.style.display='none'">
       <div class="admin-prod-info">
         <div class="admin-prod-name">${(p.nombre||'').replace(/"/g,'&quot;')} <small>#${key}</small></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;">
+          <input class="admin-prod-field" data-field="imagen" data-key="${key}" type="text" placeholder="URL de imagen" value="${(o.imagen||'').replace(/"/g,'&quot;')}" style="flex:2;min-width:120px;">
+          <input class="admin-prod-field" data-field="nombre" data-key="${key}" type="text" placeholder="Nombre" value="${(o.nombre||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:80px;">
+          <input class="admin-prod-field" data-field="precio" data-key="${key}" type="text" placeholder="$ Precio" value="${(o.precio||'').replace(/"/g,'&quot;')}" style="width:80px;">
+          <input class="admin-prod-field" data-field="descripcion" data-key="${key}" type="text" placeholder="Descripción" value="${(o.descripcion||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px;">
+        </div>
+        <select data-prod-key="${key}" style="margin-top:4px;">
+          <option value="">— Sin asignar —</option>
+          ${allSubs.map(s => `<option value="${s.replace(/"/g,'&quot;')}"${p.categoria === s ? ' selected' : ''}>${s}</option>`).join('')}
+        </select>
       </div>
-      <select data-prod-key="${key}">
-        <option value="">— Sin asignar —</option>
-        ${allSubs.map(s => `<option value="${s.replace(/"/g,'&quot;')}"${current === s ? ' selected' : ''}>${s}</option>`).join('')}
-      </select>
     </div>`;
   }).join('');
 }
@@ -2544,7 +2578,7 @@ document.querySelector('.logo')?.addEventListener('click', (e) => {
   if (adminClicks >= 5) {
     adminClicks = 0;
     renderAdmin();
-    loadProductCatOverrides();
+    loadProductOverrides();
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
     document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
@@ -2556,7 +2590,7 @@ document.querySelector('.logo')?.addEventListener('click', (e) => {
 if (window.location.hash === '#admin') {
   setTimeout(() => {
     renderAdmin();
-    loadProductCatOverrides();
+    loadProductOverrides();
     document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
     document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
     document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
@@ -2600,15 +2634,30 @@ document.getElementById('admin-add-pillar-btn')?.addEventListener('click', () =>
   renderAdmin();
 });
 document.getElementById('admin-prod-save')?.addEventListener('click', () => {
-  const selects = document.querySelectorAll('#admin-prod-list select[data-prod-key]');
+  const fields = document.querySelectorAll('#admin-prod-list .admin-prod-field');
   const newOverrides = {};
+  fields.forEach(inp => {
+    const key = inp.dataset.key;
+    const field = inp.dataset.field;
+    if (!key) return;
+    if (!newOverrides[key]) newOverrides[key] = {};
+    newOverrides[key][field] = inp.value.trim();
+  });
+  const selects = document.querySelectorAll('#admin-prod-list select[data-prod-key]');
   selects.forEach(sel => {
     const key = sel.dataset.prodKey;
     const val = sel.value.trim();
-    if (val) newOverrides[key] = val;
+    if (!key) return;
+    if (!newOverrides[key]) newOverrides[key] = {};
+    if (val) newOverrides[key].categoria = val;
+    else delete newOverrides[key].categoria;
   });
-  productCatOverrides = newOverrides;
-  saveProductCatOverrides();
+  Object.keys(newOverrides).forEach(k => {
+    const empty = Object.values(newOverrides[k]).every(v => !v);
+    if (empty) delete newOverrides[k];
+  });
+  productOverrides = newOverrides;
+  saveProductOverrides();
   document.getElementById('admin-bg').classList.remove('open');
   document.body.style.overflow = '';
   loadProducts();
@@ -2638,7 +2687,7 @@ document.getElementById('admin-list')?.addEventListener('click', e => {
 });
 
 // ── Inicializar ──
-loadProductCatOverrides(); loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
+loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
 </script>
 </body>
 </html>
