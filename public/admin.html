@@ -432,7 +432,7 @@
     <div class="modal-body">
       <form id="productForm">
         <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre" class="form-input" required></div>
-        <div class="form-group"><label>Categoría</label><select id="prod-categoria" class="form-input" required></select></div>
+        <div class="form-group"><label>Categoría</label><input type="text" id="prod-categoria" class="form-input" list="cat-sugerencias" required><datalist id="cat-sugerencias"></datalist></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
           <div class="form-group"><label>Precio</label><input type="text" id="prod-precio" class="form-input" required></div>
           <div class="form-group"><label>Precio anterior</label><input type="text" id="prod-precioAnterior" class="form-input" placeholder="opcional"></div>
@@ -490,8 +490,8 @@ const CATEGORIAS = [
   'Lencería', 'Lubricantes', 'Bondage'
 ];
 function populateCategorias() {
-  const sel = document.getElementById('prod-categoria');
-  sel.innerHTML = '<option value="">— Seleccionar —</option>' + CATEGORIAS.map(c => `<option value="${c}">${c}</option>`).join('');
+  const dl = document.getElementById('cat-sugerencias');
+  dl.innerHTML = CATEGORIAS.map(c => `<option value="${c}">`).join('');
 }
 populateCategorias();
 
