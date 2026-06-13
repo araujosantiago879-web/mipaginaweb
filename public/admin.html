@@ -198,18 +198,6 @@
     .modal-actions { display:flex; gap:10px; margin-top:1.5rem; justify-content:flex-end; }
     .modal-actions .btn { border-radius:0; }
 
-    /* UPLOAD ZONE */
-    .upload-zone {
-      position:relative; border:2px dashed var(--edge); padding:2rem 1rem;
-      text-align:center; cursor:pointer; transition:0.2s;
-      display:flex; flex-direction:column; align-items:center; gap:4px;
-      background:rgba(255,255,255,0.02);
-    }
-    .upload-zone:hover, .upload-zone.drag-over { border-color:var(--rose); background:rgba(255,51,102,.05); }
-    .upload-zone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; }
-    .upload-zone .upload-icon { font-size:2rem; }
-    .upload-zone .upload-hint { font-family:'Inconsolata',monospace; font-size:11px; color:var(--muted); }
-
     /* IMAGE ITEMS */
     .img-item { position:relative; width:80px; height:80px; overflow:hidden; border:1px solid var(--edge); flex-shrink:0; background:var(--ink-2); }
     .img-item img { width:100%; height:100%; object-fit:cover; }
@@ -459,16 +447,14 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Imágenes</label>
-          <div class="upload-zone" id="upload-zone">
-            <span class="upload-icon">📸</span>
-            <span>Hacé clic o arrastrá imágenes acá</span>
-            <span class="upload-hint">Podés seleccionar varias a la vez</span>
-            <input type="file" id="prod-imagenes" accept="image/*" multiple>
+          <input type="file" id="prod-imagenes" accept="image/*" multiple style="display:none">
+          <label>URL de imagen</label>
+          <div style="display:flex; gap:6px;">
+            <input type="text" id="prod-imagen-url" class="form-input" placeholder="https://ejemplo.com/imagen.jpg" style="flex:1;">
+            <button type="button" class="btn btn-sm" id="btn-agregar-url" style="background:var(--ink-4);color:var(--paper);padding:8px 14px;border-radius:4px;font-size:12px;white-space:nowrap;">+ Agregar</button>
           </div>
         </div>
-        <div id="preview-imagenes" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:8px;"></div>
-        <div id="preview-nuevas" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;"></div>
+        <div id="preview-imagenes" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;"></div>
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancelar</button>
           <button type="submit" class="btn btn-primary" id="modal-save">Guardar producto</button>
@@ -581,6 +567,19 @@ function marcarRemover(btn) {
   renderPreviewImagenes();
 }
 
+document.getElementById('btn-agregar-url').addEventListener('click', () => {
+  const inp = document.getElementById('prod-imagen-url');
+  const url = inp.value.trim();
+  if (!url) return;
+  if (!imagenesExistentes.includes(url)) {
+    imagenesExistentes.push(url);
+    renderPreviewImagenes();
+  }
+  inp.value = '';
+});
+document.getElementById('prod-imagen-url').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-agregar-url').click(); }
+});
 function quitarNuevaImagen(index) {
   const dt = new DataTransfer();
   const files = document.getElementById('prod-imagenes').files;
@@ -612,22 +611,6 @@ function openModal(producto = null) {
 }
 
 document.getElementById('prod-imagenes').addEventListener('change', renderPreviewImagenes);
-
-const uploadZone = document.getElementById('upload-zone');
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault(); uploadZone.classList.remove('drag-over');
-  const files = e.dataTransfer.files;
-  if (files.length) {
-    const input = document.getElementById('prod-imagenes');
-    const dt = new DataTransfer();
-    for (const f of input.files) dt.items.add(f);
-    for (const f of files) { if (f.type.startsWith('image/')) dt.items.add(f); }
-    input.files = dt.files;
-    renderPreviewImagenes();
-  }
-});
 
 function closeModal() { document.getElementById('productModal').classList.remove('active'); editandoId = null; }
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
