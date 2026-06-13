@@ -549,16 +549,11 @@ if (storedToken) {
 
 function renderPreviewImagenes() {
   const container = document.getElementById('preview-imagenes');
-  const nuevasContainer = document.getElementById('preview-nuevas');
-  container.innerHTML = imagenesExistentes
-    .filter(url => !imagenesARemover.includes(url))
-    .map((url, i) => `<div class="img-item"><img src="${url}"><button class="img-remove" data-url="${url}" onclick="marcarRemover(this)" title="Eliminar">✕</button></div>`).join('')
-    || '<span style="color:var(--muted);font-size:12px;">Sin imágenes guardadas</span>';
-  const fileInput = document.getElementById('prod-imagenes');
-  nuevasContainer.innerHTML = Array.from(fileInput.files).map((file, i) => {
-    const url = URL.createObjectURL(file);
-    return `<div class="img-item"><img src="${url}"><button class="img-remove" onclick="quitarNuevaImagen(${i})" title="Quitar">✕</button></div>`;
-  }).join('');
+  if (!container) return;
+  const urls = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
+  container.innerHTML = urls.length
+    ? urls.map(url => `<div class="img-item"><img src="${url}"><button class="img-remove" data-url="${url}" onclick="marcarRemover(this)" title="Eliminar">✕</button></div>`).join('')
+    : '<span style="color:var(--muted);font-size:12px;">Sin imágenes</span>';
 }
 
 function marcarRemover(btn) {
@@ -580,17 +575,8 @@ document.getElementById('btn-agregar-url').addEventListener('click', () => {
 document.getElementById('prod-imagen-url').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-agregar-url').click(); }
 });
-function quitarNuevaImagen(index) {
-  const dt = new DataTransfer();
-  const files = document.getElementById('prod-imagenes').files;
-  for (let i = 0; i < files.length; i++) { if (i !== index) dt.items.add(files[i]); }
-  document.getElementById('prod-imagenes').files = dt.files;
-  renderPreviewImagenes();
-}
-
 function openModal(producto = null) {
   const modal = document.getElementById('productModal');
-  document.getElementById('prod-imagenes').value = '';
   imagenesARemover = [];
   if (producto) {
     editandoId = producto.id;
@@ -609,8 +595,6 @@ function openModal(producto = null) {
   renderPreviewImagenes();
   modal.classList.add('active');
 }
-
-document.getElementById('prod-imagenes').addEventListener('change', renderPreviewImagenes);
 
 function closeModal() { document.getElementById('productModal').classList.remove('active'); editandoId = null; }
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
