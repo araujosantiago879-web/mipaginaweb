@@ -702,7 +702,7 @@ async function eliminarProducto(id) {
   } catch (err) { showToast('Error de red', true); }
 }
 
-function editarProducto(id) { const prod = productos.find(p => p.id === id); if (prod) openModal(prod); }
+function editarProducto(id) { const prod = productos.find(p => String(p.id) === id); if (prod) openModal(prod); }
 document.getElementById('btn-nuevo-producto').addEventListener('click', () => openModal());
 
 async function cargarConfig() {
