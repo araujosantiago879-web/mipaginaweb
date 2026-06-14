@@ -24,7 +24,7 @@
       --crimson-dark:  #6B0F1F;
       --black:         #0D0D0D;
       --black-soft:    #1A1A1A;
-      --off-white:     #F7F4F0;
+      --warm-charcoal: #1C1714;
       --white:         #FFFFFF;
       /* semantic aliases */
       --color-text-light: var(--white);
@@ -32,7 +32,7 @@
       --color-muted:      rgba(255,255,255,0.5);
       --color-muted-2:    rgba(255,255,255,0.15);
       --color-edge:       rgba(255,255,255,0.08);
-      --color-bg-warm:    var(--off-white);
+      --color-bg-warm:    var(--warm-charcoal);
       --color-base:       var(--black);
       --color-accent:     var(--crimson);
       --color-accent-mid: var(--crimson-light);
@@ -229,11 +229,10 @@
     /* ── Trust strip / Benefit cards ── */
     .trust-strip {
       display:grid; grid-template-columns:repeat(4,1fr);
-      gap:2px; background: var(--off-white); padding: 0;
+      gap:2px; background: var(--warm-charcoal); padding: 0;
     }
     .ts-item {
-      background: var(--white);
-      border-left: 3px solid var(--crimson);
+      background: var(--black-soft);
       padding: 2rem 1.5rem;
       display: flex;
       flex-direction: column;
@@ -540,10 +539,10 @@
     .ib-link:hover { gap:14px; }
 
     /* ── Discreción ── */
-    .discrecion { display:grid; grid-template-columns:1fr 1fr; background: var(--off-white); }
+    .discrecion { display:grid; grid-template-columns:1fr 1fr; background: var(--warm-charcoal); }
     .disc-img { position:relative; min-height:420px; overflow:hidden; }
     .disc-img img { width:100%; height:100%; object-fit:cover; }
-    .disc-img-veil { position:absolute; inset:0; background:linear-gradient(to right,transparent 50%,var(--off-white)); }
+    .disc-img-veil { position:absolute; inset:0; background:linear-gradient(to right,transparent 50%,var(--warm-charcoal)); }
     .disc-content { padding:72px 60px; display:flex; flex-direction:column; justify-content:center; gap:22px; }
     .disc-eyebrow { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:4px; text-transform:uppercase; color:var(--crimson); display:flex; align-items:center; gap:10px; }
     .disc-eyebrow::before { content:''; width:22px; height:1px; background:var(--crimson); }
@@ -554,7 +553,7 @@
     .check { width:22px; height:22px; background:rgba(155,27,48,.08); border:1px solid rgba(155,27,48,.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--crimson); flex-shrink:0; }
 
     /* ── Horarios ── */
-    .horarios { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:0 48px 96px; background: var(--off-white); }
+    .horarios { display:grid; grid-template-columns:1fr 1fr; gap:2px; padding:0 48px 96px; background: var(--warm-charcoal); }
     .hor-card { background:var(--white); border:1px solid rgba(155,27,48,0.12); border-radius:8px; padding:44px; display:flex; flex-direction:column; gap:22px; }
     .hor-icon { width:48px; height:48px; background:rgba(155,27,48,0.08); border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--crimson); }
     .hor-card h3 { font-size:20px; font-weight:600; color: var(--black); }
@@ -565,7 +564,7 @@
     .hor-row span:last-child { color:var(--crimson); font-weight:600; }
 
     /* ── Testimonios ── */
-    .testimonios { padding:0 48px 96px; background:var(--off-white); }
+    .testimonios { padding:0 48px 96px; background:var(--warm-charcoal); }
     .testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:48px; }
     .testi { background: var(--white); border:1px solid rgba(155,27,48,0.12); border-radius:8px; padding:1.25rem; display:flex; flex-direction:column; gap:16px; }
     .testi-stars { display:flex; gap:2px; }
