@@ -242,6 +242,46 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// Seed automático: si no hay productos, cargar desde data/products.json
+async function autoSeed() {
+  try {
+    const col = await getProducts();
+    const count = await col.countDocuments();
+    if (count === 0) {
+      const products = require('./data/products.json');
+      const prepared = products.map(({ id, ...p }) => ({
+        ...p,
+        creadoEn: new Date()
+      }));
+      await col.insertMany(prepared);
+      console.log(`✅ Seed automático: ${prepared.length} productos cargados`);
+    } else {
+      console.log(`ℹ️  Seed: ya hay ${count} productos en la DB`);
+    }
+  } catch (err) {
+    console.error('Error en autoSeed:', err.message);
+  }
+}
+autoSeed();
+
+// POST /api/seed (manual)
+app.post('/api/seed', async (req, res) => {
+  try {
+    const col = await getProducts();
+    await col.deleteMany({});
+    const products = require('./data/products.json');
+    const prepared = products.map(({ id, ...p }) => ({
+      ...p,
+      creadoEn: new Date()
+    }));
+    await col.insertMany(prepared);
+    res.json({ success: true, count: prepared.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al seedear' });
+  }
+});
+
 // GET /api/products/:id
 app.get('/api/products/:id', async (req, res) => {
   try {

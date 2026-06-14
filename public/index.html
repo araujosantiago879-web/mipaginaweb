@@ -3,6 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sex shop online en Tandil. Envíos discretos a domicilio. Pagá con Mercado Pago, tarjeta o efectivo. Atención por WhatsApp 9 a 23 hs.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="El Lado B · Sex Shop Tandil">
+  <meta property="og:title" content="El Lado B · Sex Shop Tandil">
+  <meta property="og:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
+  <meta property="og:image" content="https://ladobsex.vercel.app/uploads/og-image.jpg">
+  <meta property="og:locale" content="es_AR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="El Lado B · Sex Shop Tandil">
+  <meta name="twitter:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
   <title>El Lado B · Sex Shop Tandil</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Archivo:wght@400;500;600;700;900&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
@@ -627,6 +637,38 @@
     .f-legal { display:flex; gap:20px; }
     .f-legal a { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-2); }
     .f-legal a:hover { color:var(--rose); }
+
+    /* ── Info sections (FAQ, cambios, etc.) ── */
+    .info-overlay {
+      position:fixed; inset:0; z-index:900;
+      background:rgba(5,5,8,.85); backdrop-filter:blur(12px);
+      display:none; align-items:center; justify-content:center;
+      padding:20px; overflow-y:auto;
+    }
+    .info-overlay.open { display:flex; }
+    .info-modal {
+      background:linear-gradient(160deg,#0c070a,#0a0a10 50%,#0c070a);
+      border:1px solid rgba(255,51,102,.12);
+      width:100%; max-width:640px;
+      padding:40px 36px; border-radius:8px;
+      max-height:85vh; overflow-y:auto;
+      animation:fadein .25s ease;
+    }
+    .info-modal::-webkit-scrollbar { width:4px; }
+    .info-modal::-webkit-scrollbar-thumb { background:var(--ink-4); border-radius:2px; }
+    .info-close {
+      float:right; width:28px; height:28px;
+      background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1);
+      color:var(--muted); font-size:14px; border-radius:50%;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+    }
+    .info-close:hover { background:var(--rose); color:#fff; }
+    .info-modal h2 { font-family:'Cormorant Garamond',serif; font-size:28px; margin-bottom:24px; }
+    .info-modal h2 em { font-style:italic; color:var(--rose); }
+    .info-modal h3 { font-size:14px; font-weight:700; margin-top:24px; margin-bottom:8px; color:var(--rose); }
+    .info-modal p, .info-modal li { font-size:14px; line-height:1.8; color:var(--muted); margin-bottom:12px; }
+    .info-modal ul { padding-left:20px; }
+    .info-modal strong { color:var(--paper); }
 
     /* ── Admin config ── */
     .admin-bg { position:fixed; inset:0; z-index:999; background:rgba(5,5,8,.9); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:20px; }
@@ -1260,7 +1302,7 @@
   </div>
   <div class="hero-r">
     <div class="hero-r-bg-gradient"></div>
-    <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=900&q=80" alt="Personas mirándose" class="hero-people-blur">
+    <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=900&q=80" alt="Ambiente íntimo" class="hero-people-blur">
     <div class="hero-r-blend"></div>
     <div class="hero-r-veil"></div>
     <div class="hero-big-b">B</div>
@@ -1475,8 +1517,8 @@
       <div class="f-brand">El <em>Lado B</em></div>
       <p class="f-desc">La tienda de adultos más discreta de Tandil. Packaging neutro, entrega el mismo día, atención real de personas.</p>
       <div class="f-socials">
-        <a href="#" class="fsoc">IG</a>
-        <a href="#" class="fsoc">TK</a>
+        <a href="https://www.instagram.com/ladobsex.tandil" target="_blank" rel="noopener" class="fsoc">IG</a>
+        <a href="https://www.tiktok.com/@ladobsex" target="_blank" rel="noopener" class="fsoc">TK</a>
         <a href="#" class="fsoc" id="footer-wa">WA</a>
       </div>
     </div>
@@ -1487,22 +1529,20 @@
     <div>
       <div class="f-col-title">Info</div>
       <ul class="f-links">
-        <li><a data-tab="discrecion">Cómo funciona</a></li>
+        <li><a href="#" onclick="showSection('como-funciona')">Cómo funciona</a></li>
         <li><a data-tab="contacto">Envíos y entregas</a></li>
-        <li><a href="#" data-tab="discrecion">Cómo funciona</a></li>
-        <li><a href="#" data-tab="contacto">Envíos y entregas</a></li>
-        <li><a href="#">Cambios y devoluciones</a></li>
-        <li><a href="#">Medios de pago</a></li>
-        <li><a href="#">Preguntas frecuentes</a></li>
+        <li><a href="#" onclick="showSection('cambios')">Cambios y devoluciones</a></li>
+        <li><a data-tab="contacto">Medios de pago</a></li>
+        <li><a href="#" onclick="showSection('faq')">Preguntas frecuentes</a></li>
       </ul>
     </div>
     <div>
       <div class="f-col-title">Contacto</div>
       <ul class="f-links">
         <li><a href="#" id="footer-wa-link">WhatsApp</a></li>
-        <li><a href="#">Instagram</a></li>
-        <li><a href="#">TikTok</a></li>
-        <li><a href="#">Email</a></li>
+        <li><a href="https://www.instagram.com/ladobsex.tandil" target="_blank" rel="noopener">Instagram</a></li>
+        <li><a href="https://www.tiktok.com/@ladobsex" target="_blank" rel="noopener">TikTok</a></li>
+        <li><a href="mailto:hola@ladobsex.com">Email</a></li>
       </ul>
       <div style="margin-top:20px;padding:14px;background:var(--ink-3);border:1px solid var(--edge);">
         <div style="font-family:'Inconsolata';font-size:9px;letter-spacing:2px;color:var(--rose);margin-bottom:5px;">Atención ahora</div>
@@ -1512,9 +1552,17 @@
   </div>
   <div class="footer-bottom">
     <span class="f-copy">© 2025 El Lado B · Sex Shop Tandil · Todos los derechos reservados</span>
-    <div class="f-legal"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Cookies</a></div>
+    <div class="f-legal"><a href="#" onclick="showSection('privacidad')">Privacidad</a><a href="#" onclick="showSection('terminos')">Términos</a><a href="#" onclick="showSection('cookies')">Cookies</a></div>
   </div>
 </footer>
+
+<!-- ── Info modal (FAQ, cambios, legales) ── -->
+<div class="info-overlay" id="info-overlay" onclick="if(event.target===this)closeSection()">
+  <div class="info-modal" id="info-modal">
+    <button class="info-close" onclick="closeSection()">✕</button>
+    <div id="info-content"></div>
+  </div>
+</div>
 
 <div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg"></span></div>
 
@@ -2349,6 +2397,101 @@ function clearSearch() {
   const inp = document.getElementById('search-input');
   if (inp) { inp.value = ''; inp.dispatchEvent(new Event('input')); }
   document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
+}
+
+// ── Info sections content ──
+const infoContent = {
+  'como-funciona': `
+    <h2>¿Cómo <em>funciona?</em></h2>
+    <p><strong>Comprar en El Lado B es fácil, rápido y 100% discreto.</strong></p>
+    <h3>1. Elegí tus productos</h3>
+    <p>Navegá por las categorías o usá el buscador para encontrar lo que necesitás. Cada producto tiene fotos, descripción y precio claros.</p>
+    <h3>2. Hacemos el pedido por WhatsApp</h3>
+    <p>Agregá los productos al carrito y envianos el pedido por WhatsApp. Te vamos a responder al toque para confirmar disponibilidad y coordinar el pago y el envío.</p>
+    <h3>3. Recibí sin que nadie se entere</h3>
+    <p>Todo llega en packaging completamente neutro: caja sin logos ni etiquetas que revelen el contenido. Si te lo entrega un familiar o portero, nunca van a saber qué hay adentro.</p>
+    <h3>4. Disfrutá con tranquilidad</h3>
+    <p>Si tenés alguna duda sobre el producto, el uso o la garantía, estamos siempre disponibles por WhatsApp.</p>
+  `,
+  'cambios': `
+    <h2>Cambios y <em>devoluciones</em></h2>
+    <p><strong>Queremos que estés conforme con tu compra.</strong> Si algo no salió como esperabas, tenemos una política clara y justa.</p>
+    <h3>Productos que aceptamos sin problema</h3>
+    <p>Ropa, lencería, accesorios y kits sin uso, en su empaque original y dentro de los 10 días posteriores a la compra. Hacemos cambio o devolución del importe.</p>
+    <h3>Productos que <em>no</em> tienen cambio (por higiene)</h3>
+    <p>Por razones de salud e higiene, no aceptamos cambios ni devoluciones de juguetes sexuales, vibradores, lubricantes, geles, sprays ni ningún producto que haya sido abierto, usado o cuyo sello de garantía esté roto.</p>
+    <h3>Productos en oferta</h3>
+    <p>Los productos con descuento o promociones tienen las mismas condiciones de cambio, excepto que se indique lo contrario en la oferta.</p>
+    <h3>¿Cómo gestiono un cambio?</h3>
+    <p>Escribinos por WhatsApp con tu número de pedido y te indicamos los pasos. Los cambios se coordinan en el mismo punto de entrega o retiro.</p>
+  `,
+  'faq': `
+    <h2>Preguntas <em>frecuentes</em></h2>
+    <h3>¿Cómo llega el paquete?</h3>
+    <p>En una caja o bolsa completamente neutra, sin logos, sin marcas, sin nada que indique el contenido. La persona que recibe no tiene forma de saber qué hay adentro.</p>
+    <h3>¿Qué figura en el extracto bancario?</h3>
+    <p>Figura un nombre comercial genérico que no revela la naturaleza del producto. Nunca aparece "sex shop" ni nada similar.</p>
+    <h3>¿Hay garantía?</h3>
+    <p>Sí. Todos los productos tienen garantía contra defectos de fábrica. Si algo no funciona correctamente, lo reemplazamos sin costo.</p>
+    <h3>¿Puedo retirar personalmente?</h3>
+    <p>Sí. Coordinamos por WhatsApp un punto de encuentro en Tandil para que retires tu pedido de forma totalmente discreta.</p>
+    <h3>¿Hacen envíos al interior?</h3>
+    <p>Sí, hacemos envíos a todo el país a través de Correo Argentino. El paquete viaja en las mismas condiciones de discreción.</p>
+    <h3>¿Aceptan todas las tarjetas?</h3>
+    <p>Sí. Trabajamos con Mercado Pago, tarjetas de débito, crédito (hasta 6 cuotas) y efectivo.</p>
+    <h3>¿Los precios tienen IVA incluido?</h3>
+    <p>Sí, todos los precios publicados tienen IVA incluido. No hay cargos ocultos.</p>
+  `,
+  'privacidad': `
+    <h2>Política de <em>Privacidad</em></h2>
+    <p>En El Lado B nos tomamos tu privacidad muy en serio. Esta política explica qué datos recopilamos y cómo los usamos.</p>
+    <h3>Datos que recopilamos</h3>
+    <p>Únicamente recopilamos los datos que nos proporcionás voluntariamente al hacer un pedido: nombre, dirección de entrega y número de WhatsApp. No almacenamos información de tarjetas de crédito ni datos bancarios.</p>
+    <h3>Uso de la información</h3>
+    <p>Usamos tus datos exclusivamente para procesar y entregar tu pedido, y para comunicarnos con vos sobre el mismo. Nunca compartimos tu información con terceros.</p>
+    <h3>Discreción garantizada</h3>
+    <p>No enviamos correos promocionales ni mensajes no solicitados. No compartimos tu número de WhatsApp con nadie. Todos los envíos son en empaque neutro.</p>
+    <h3>Derechos</h3>
+    <p>Podés solicitar la eliminación de tus datos en cualquier momento escribiéndonos por WhatsApp. No conservamos datos más allá de lo necesario para cumplir con obligaciones fiscales.</p>
+  `,
+  'terminos': `
+    <h2>Términos y <em>Condiciones</em></h2>
+    <p>Al realizar una compra en El Lado B, aceptás los siguientes términos y condiciones.</p>
+    <h3>Mayoría de edad</h3>
+    <p>Al realizar un pedido, declarás ser mayor de 18 años. Todos los productos están destinados a personas adultas.</p>
+    <h3>Precios y disponibilidad</h3>
+    <p>Los precios publicados pueden variar sin previo aviso. La disponibilidad de productos está sujeta al stock real. En caso de falta de stock, te informaremos y ofreceremos alternativas o reembolso.</p>
+    <h3>Envíos</h3>
+    <p>Los envíos a domicilio en Tandil se realizan sin cargo. Los envíos al interior del país tienen un costo adicional que se informa antes de confirmar la compra. No nos hacemos responsables por demoras del correo.</p>
+    <h3>Legislación</h3>
+    <p>Estos términos se rigen por la legislación de la República Argentina. Cualquier controversia será resuelta en los tribunales de la Ciudad de Tandil, Provincia de Buenos Aires.</p>
+  `,
+  'cookies': `
+    <h2>Política de <em>Cookies</em></h2>
+    <p>Esta página web utiliza cookies mínimas para su funcionamiento técnico.</p>
+    <h3>¿Qué cookies usamos?</h3>
+    <p>No utilizamos cookies de rastreo, publicitarias ni de redes sociales. Solo utilizamos cookies técnicas necesarias para que el sitio funcione (por ejemplo, para mantener el estado del carrito de compras).</p>
+    <h3>Cookies de terceros</h3>
+    <p>No incorporamos scripts de terceros que utilicen cookies de seguimiento. No usamos Google Analytics, Meta Pixel ni herramientas similares.</p>
+    <h3>Más información</h3>
+    <p>Si tenés preguntas sobre nuestra política de cookies, escribinos por WhatsApp.</p>
+  `
+};
+function showSection(id) {
+  const overlay = document.getElementById('info-overlay');
+  const content = document.getElementById('info-content');
+  if (overlay && content && infoContent[id]) {
+    content.innerHTML = infoContent[id];
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+function closeSection() {
+  const overlay = document.getElementById('info-overlay');
+  if (overlay) {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
 }
 
 // Atajo de teclado: / enfoca el buscador, Escape limpia
