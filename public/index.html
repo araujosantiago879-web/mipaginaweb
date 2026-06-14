@@ -1542,7 +1542,7 @@
         <li><a href="#" id="footer-wa-link">WhatsApp</a></li>
         <li><a href="https://www.instagram.com/lado.bsexshop/" target="_blank" rel="noopener">Instagram</a></li>
         <li><a href="https://www.tiktok.com/@ladobsex" target="_blank" rel="noopener">TikTok</a></li>
-        <li><a href="mailto:hola@ladobsex.com">Email</a></li>
+        <li><a href="mailto:elladobsexshop@gmail.com">Email</a></li>
       </ul>
       <div style="margin-top:20px;padding:14px;background:var(--ink-3);border:1px solid var(--edge);">
         <div style="font-family:'Inconsolata';font-size:9px;letter-spacing:2px;color:var(--rose);margin-bottom:5px;">Atención ahora</div>
@@ -1566,38 +1566,8 @@
 
 <div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg"></span></div>
 
-<!-- ── Admin config modal ── -->
-<div class="admin-bg" id="admin-bg">
-  <div class="admin-modal" id="admin-modal" onclick="event.stopPropagation()">
-    <div class="admin-head">
-      <div class="admin-title">Panel de <em>administración</em></div>
-      <button class="admin-close" id="admin-close">✕</button>
-    </div>
-    <div class="admin-tabs">
-      <button class="admin-tab on" data-admin-tab="secciones">Secciones</button>
-      <button class="admin-tab" data-admin-tab="productos">Productos</button>
-    </div>
-    <div class="admin-section open" id="admin-secciones">
-      <div class="admin-add-pillar">
-        <input type="text" id="admin-new-pillar" placeholder="Nuevo pilar…">
-        <button class="admin-btn-sm" id="admin-add-pillar-btn">Agregar</button>
-      </div>
-      <div id="admin-list"></div>
-      <div class="admin-footer">
-        <button class="admin-btn ghost" id="admin-reset">Restablecer valores</button>
-        <button class="admin-btn primary" id="admin-save">Guardar cambios</button>
-      </div>
-    </div>
-    <div class="admin-section" id="admin-productos">
-      <div style="margin-bottom:12px;font-size:11px;color:var(--muted-2);">Asigná cada producto a una subcategoría</div>
-      <div id="admin-prod-list"></div>
-      <div class="admin-footer">
-        <button class="admin-btn primary" id="admin-prod-save">Guardar cambios</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="admin-toast" id="admin-toast"><span class="toast-dot"></span><span id="admin-toast-msg"></span></div>
+
+<!-- Admin toast (creado dinámicamente por JS si se necesita) -->
 
 <!-- Modal producto -->
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
@@ -1633,6 +1603,14 @@
 // ── Número de WhatsApp (se pisa desde /api/config) ──
 
 let configWhatsappNumber = '5492494639700'; // número real de El Lado B
+
+// ── Setear WhatsApp links al instante (sin esperar API) ──
+(function setWA() {
+  const waBase = `https://wa.me/${configWhatsappNumber}`;
+  document.querySelectorAll('#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn')
+    .forEach(el => { if (el && el.href === '#') el.href = waBase; });
+  // El hero tienda-btn también apunta a tienda
+})();
 
 // ── Helpers WhatsApp ──
 // Arma el mensaje completo; incluye la URL /producto/:id para que
@@ -2670,7 +2648,9 @@ function getEffectiveProduct(p) {
 // ── Admin config ──
 function adminToast(msg) {
   const el = document.getElementById('admin-toast');
-  document.getElementById('admin-toast-msg').textContent = msg;
+  if (!el) return;
+  const msgEl = document.getElementById('admin-toast-msg');
+  if (msgEl) msgEl.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2200);
 }
@@ -2739,18 +2719,167 @@ function renderAdminProductos() {
     </div>`;
   }).join('');
 }
-document.querySelectorAll('.admin-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
-    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
-    tab.classList.add('on');
-    const target = document.getElementById('admin-' + tab.dataset.adminTab);
-    if (target) {
-      target.classList.add('open');
-      if (tab.dataset.adminTab === 'productos') renderAdminProductos();
+
+// ── Admin panel (generado dinámicamente, nunca en el source) ──
+let adminInjected = false;
+
+function getAdminHTML() {
+  return `
+<div class="admin-bg" id="admin-bg">
+  <div class="admin-modal" id="admin-modal" onclick="event.stopPropagation()">
+    <div class="admin-head">
+      <div class="admin-title">Panel de <em>administración</em></div>
+      <button class="admin-close" id="admin-close">✕</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab on" data-admin-tab="secciones">Secciones</button>
+      <button class="admin-tab" data-admin-tab="productos">Productos</button>
+    </div>
+    <div class="admin-section open" id="admin-secciones">
+      <div class="admin-add-pillar">
+        <input type="text" id="admin-new-pillar" placeholder="Nuevo pilar\u2026">
+        <button class="admin-btn-sm" id="admin-add-pillar-btn">Agregar</button>
+      </div>
+      <div id="admin-list"></div>
+      <div class="admin-footer">
+        <button class="admin-btn ghost" id="admin-reset">Restablecer valores</button>
+        <button class="admin-btn primary" id="admin-save">Guardar cambios</button>
+      </div>
+    </div>
+    <div class="admin-section" id="admin-productos">
+      <div style="margin-bottom:12px;font-size:11px;color:var(--muted-2);">Asign\u00e1 cada producto a una subcategor\u00eda</div>
+      <div id="admin-prod-list"></div>
+      <div class="admin-footer">
+        <button class="admin-btn primary" id="admin-prod-save">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="admin-toast" id="admin-toast"><span class="toast-dot"></span><span id="admin-toast-msg"></span></div>`;
+}
+
+function openAdminPanel() {
+  if (!adminInjected) {
+    const div = document.createElement('div');
+    div.innerHTML = getAdminHTML();
+    document.body.appendChild(div.firstElementChild);
+    document.body.appendChild(div.lastElementChild);
+    adminInjected = true;
+    bindAdminListeners();
+  }
+  renderAdmin();
+  loadProductOverrides();
+  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
+  document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
+  document.getElementById('admin-secciones')?.classList.add('open');
+  document.getElementById('admin-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function bindAdminListeners() {
+  // Tabs
+  document.querySelectorAll('.admin-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
+      tab.classList.add('on');
+      const target = document.getElementById('admin-' + tab.dataset.adminTab);
+      if (target) {
+        target.classList.add('open');
+        if (tab.dataset.adminTab === 'productos') renderAdminProductos();
+      }
+    });
+  });
+  document.getElementById('admin-close')?.addEventListener('click', () => {
+    document.getElementById('admin-bg').classList.remove('open');
+    document.body.style.overflow = '';
+  });
+  document.getElementById('admin-bg')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      document.getElementById('admin-bg').classList.remove('open');
+      document.body.style.overflow = '';
     }
   });
-});
+  document.getElementById('admin-save')?.addEventListener('click', () => {
+    syncAdminToTree();
+    loadProducts();
+    document.getElementById('admin-bg').classList.remove('open');
+    document.body.style.overflow = '';
+    adminToast('Secciones guardadas \u2713');
+  });
+  document.getElementById('admin-reset')?.addEventListener('click', () => {
+    if (!confirm('\u00bfRestablecer secciones a los valores originales?')) return;
+    categoryTree = DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
+    saveCategoryTree();
+    renderAdmin();
+    loadProducts();
+    adminToast('Valores restablecidos');
+  });
+  document.getElementById('admin-add-pillar-btn')?.addEventListener('click', () => {
+    const inp = document.getElementById('admin-new-pillar');
+    const name = inp.value.trim();
+    if (!name) return;
+    categoryTree.push({ name, subs: [] });
+    saveCategoryTree();
+    inp.value = '';
+    renderAdmin();
+  });
+  document.getElementById('admin-prod-save')?.addEventListener('click', () => {
+    const fields = document.querySelectorAll('#admin-prod-list .admin-prod-field');
+    const newOverrides = {};
+    fields.forEach(inp => {
+      const key = inp.dataset.key;
+      const field = inp.dataset.field;
+      if (!key) return;
+      if (!newOverrides[key]) newOverrides[key] = {};
+      newOverrides[key][field] = inp.value.trim();
+    });
+    const selects = document.querySelectorAll('#admin-prod-list select[data-prod-key]');
+    selects.forEach(sel => {
+      const key = sel.dataset.prodKey;
+      const val = sel.value.trim();
+      if (!key) return;
+      if (!newOverrides[key]) newOverrides[key] = {};
+      if (val) newOverrides[key].categoria = val;
+      else delete newOverrides[key].categoria;
+    });
+    Object.keys(newOverrides).forEach(k => {
+      const empty = Object.values(newOverrides[k]).every(v => !v);
+      if (empty) delete newOverrides[k];
+    });
+    productOverrides = newOverrides;
+    saveProductOverrides();
+    document.getElementById('admin-bg').classList.remove('open');
+    document.body.style.overflow = '';
+    loadProducts();
+    adminToast('Productos actualizados \u2713');
+  });
+  document.getElementById('admin-list')?.addEventListener('click', e => {
+    const removePillar = e.target.closest('[data-remove-pillar]');
+    if (removePillar) {
+      const pi = parseInt(removePillar.dataset.removePillar);
+      if (!isNaN(pi)) { categoryTree.splice(pi, 1); saveCategoryTree(); renderAdmin(); }
+      return;
+    }
+    const removeSub = e.target.closest('[data-remove-sub]');
+    if (removeSub) {
+      const [pi, si] = removeSub.dataset.removeSub.split(',').map(Number);
+      if (!isNaN(pi) && !isNaN(si) && categoryTree[pi]) { categoryTree[pi].subs.splice(si, 1); saveCategoryTree(); renderAdmin(); }
+      return;
+    }
+    const addBtn = e.target.closest('[data-add-sub-btn]');
+    if (addBtn) {
+      const pi = parseInt(addBtn.dataset.addSubBtn);
+      const inp = addBtn.parentElement.querySelector('input');
+      const val = inp.value.trim();
+      if (!isNaN(pi) && val) { categoryTree[pi].subs.push(val); saveCategoryTree(); inp.value = ''; renderAdmin(); }
+      return;
+    }
+  });
+}
+
+// ── Logo 5 clicks → admin ──
 let adminClicks = 0;
 let adminClickTimer = null;
 document.querySelector('.logo')?.addEventListener('click', (e) => {
@@ -2759,114 +2888,12 @@ document.querySelector('.logo')?.addEventListener('click', (e) => {
   adminClickTimer = setTimeout(() => { adminClicks = 0; }, 1500);
   if (adminClicks >= 5) {
     adminClicks = 0;
-    renderAdmin();
-    loadProductOverrides();
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
-    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
-    document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
-    document.getElementById('admin-secciones')?.classList.add('open');
-    document.getElementById('admin-bg').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    openAdminPanel();
   }
 });
 if (window.location.hash === '#admin') {
-  setTimeout(() => {
-    renderAdmin();
-    loadProductOverrides();
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('on'));
-    document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('open'));
-    document.querySelector('.admin-tab[data-admin-tab="secciones"]')?.classList.add('on');
-    document.getElementById('admin-secciones')?.classList.add('open');
-    document.getElementById('admin-bg').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }, 1000);
+  setTimeout(() => { openAdminPanel(); }, 1000);
 }
-document.getElementById('admin-close')?.addEventListener('click', () => {
-  document.getElementById('admin-bg').classList.remove('open');
-  document.body.style.overflow = '';
-});
-document.getElementById('admin-bg')?.addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) {
-    document.getElementById('admin-bg').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-});
-document.getElementById('admin-save')?.addEventListener('click', () => {
-  syncAdminToTree();
-  loadProducts();
-  document.getElementById('admin-bg').classList.remove('open');
-  document.body.style.overflow = '';
-  adminToast('Secciones guardadas ✓');
-});
-document.getElementById('admin-reset')?.addEventListener('click', () => {
-  if (!confirm('¿Restablecer secciones a los valores originales?')) return;
-  categoryTree = DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
-  saveCategoryTree();
-  renderAdmin();
-  loadProducts();
-  adminToast('Valores restablecidos');
-});
-document.getElementById('admin-add-pillar-btn')?.addEventListener('click', () => {
-  const inp = document.getElementById('admin-new-pillar');
-  const name = inp.value.trim();
-  if (!name) return;
-  categoryTree.push({ name, subs: [] });
-  saveCategoryTree();
-  inp.value = '';
-  renderAdmin();
-});
-document.getElementById('admin-prod-save')?.addEventListener('click', () => {
-  const fields = document.querySelectorAll('#admin-prod-list .admin-prod-field');
-  const newOverrides = {};
-  fields.forEach(inp => {
-    const key = inp.dataset.key;
-    const field = inp.dataset.field;
-    if (!key) return;
-    if (!newOverrides[key]) newOverrides[key] = {};
-    newOverrides[key][field] = inp.value.trim();
-  });
-  const selects = document.querySelectorAll('#admin-prod-list select[data-prod-key]');
-  selects.forEach(sel => {
-    const key = sel.dataset.prodKey;
-    const val = sel.value.trim();
-    if (!key) return;
-    if (!newOverrides[key]) newOverrides[key] = {};
-    if (val) newOverrides[key].categoria = val;
-    else delete newOverrides[key].categoria;
-  });
-  Object.keys(newOverrides).forEach(k => {
-    const empty = Object.values(newOverrides[k]).every(v => !v);
-    if (empty) delete newOverrides[k];
-  });
-  productOverrides = newOverrides;
-  saveProductOverrides();
-  document.getElementById('admin-bg').classList.remove('open');
-  document.body.style.overflow = '';
-  loadProducts();
-  adminToast('Productos actualizados ✓');
-});
-document.getElementById('admin-list')?.addEventListener('click', e => {
-  const removePillar = e.target.closest('[data-remove-pillar]');
-  if (removePillar) {
-    const pi = parseInt(removePillar.dataset.removePillar);
-    if (!isNaN(pi)) { categoryTree.splice(pi, 1); saveCategoryTree(); renderAdmin(); }
-    return;
-  }
-  const removeSub = e.target.closest('[data-remove-sub]');
-  if (removeSub) {
-    const [pi, si] = removeSub.dataset.removeSub.split(',').map(Number);
-    if (!isNaN(pi) && !isNaN(si) && categoryTree[pi]) { categoryTree[pi].subs.splice(si, 1); saveCategoryTree(); renderAdmin(); }
-    return;
-  }
-  const addBtn = e.target.closest('[data-add-sub-btn]');
-  if (addBtn) {
-    const pi = parseInt(addBtn.dataset.addSubBtn);
-    const inp = addBtn.parentElement.querySelector('input');
-    const val = inp.value.trim();
-    if (!isNaN(pi) && val) { categoryTree[pi].subs.push(val); saveCategoryTree(); inp.value = ''; renderAdmin(); }
-    return;
-  }
-});
 
 // ── Inicializar ──
 loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });

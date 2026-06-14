@@ -216,10 +216,18 @@ app.get('/producto/:id', async (req, res) => {
 
 // ─── API pública ─────────────────────────────────────────────────────────────
 
+// Helper: productos desde JSON (fallback sin DB)
+function getProductsFromJSON() {
+  try { return require('./data/products.json').map(({ id, ...p }) => ({ id, ...p })); }
+  catch { return []; }
+}
+
 // GET /api/products (con búsqueda)
 app.get('/api/products', async (req, res) => {
   try {
-    const col = await getProducts();
+    const col = await getProducts().catch(() => null);
+    if (!col) return res.json(getProductsFromJSON());
+
     const { categoria, search } = req.query;
     let query = {};
     if (categoria && categoria !== 'Todo') query.categoria = categoria;
@@ -238,7 +246,8 @@ app.get('/api/products', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error del servidor' });
+    // fallback: devolver desde JSON
+    res.json(getProductsFromJSON());
   }
 });
 
@@ -299,12 +308,13 @@ app.get('/api/products/:id', async (req, res) => {
 // GET /api/config
 app.get('/api/config', async (req, res) => {
   try {
-    const col = await getConfig();
+    const col = await getConfig().catch(() => null);
+    if (!col) return res.json({ whatsappNumber: '5492494639700' });
     const cfg = await col.findOne({ _id: 'main' });
     const { adminPassword, _id, ...publicConfig } = cfg;
     res.json(publicConfig);
   } catch (err) {
-    res.status(500).json({ error: 'Error del servidor' });
+    res.json({ whatsappNumber: '5492494639700' });
   }
 });
 
