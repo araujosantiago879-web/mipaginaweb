@@ -135,6 +135,23 @@
     .drawer-item-price { font-family:'Inconsolata',monospace; font-size:12px; color:var(--lime); }
     .drawer-item-cat { font-family:'Inconsolata',monospace; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
     .drawer-empty { padding:40px 24px; text-align:center; color:var(--muted); font-size:13px; }
+    .drawer-tabs { display:flex; gap:4px; }
+    .drawer-tab { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:6px 14px; border:1px solid var(--edge); background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; border-radius:2px; }
+    .drawer-tab.on { border-color:var(--rose); color:var(--rose); background:rgba(255,51,102,.06); }
+    .drawer-categories { flex:1; padding:8px 0; overflow-y:auto; }
+    .drawer-cat-group { border-bottom:1px solid var(--edge); }
+    .drawer-cat-header { display:flex; align-items:center; gap:8px; padding:12px 24px; cursor:pointer; font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); font-weight:700; transition:background .15s; user-select:none; }
+    .drawer-cat-header:hover { background:var(--ink-3); }
+    .drawer-cat-header::before { content:''; width:6px; height:6px; border-right:2px solid var(--muted-2); border-bottom:2px solid var(--muted-2); transform:rotate(-45deg); transition:transform .3s; flex-shrink:0; }
+    .drawer-cat-header.open::before { transform:rotate(45deg); }
+    .drawer-cat-subs { overflow:hidden; max-height:0; transition:max-height .35s ease; }
+    .drawer-cat-group.open .drawer-cat-subs { max-height:600px; }
+    .drawer-cat-sub { display:block; width:100%; padding:10px 24px 10px 40px; font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; transition:color .2s, background .15s; background:none; border:none; text-align:left; }
+    .drawer-cat-sub:hover { color:var(--paper); background:rgba(255,255,255,.02); }
+    .drawer-products { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+    .pillars-cat-btn { display:none; margin-bottom:16px; }
+    .pillars-cat-btn button { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 16px; border:1px solid var(--edge); background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; border-radius:2px; width:100%; }
+    .pillars-cat-btn button:hover { border-color:var(--rose); color:var(--rose); }
 
     /* ── Hero ── */
     .hero {
@@ -1014,7 +1031,8 @@
 
       .tabs-bar { margin-bottom:24px; }
       .tab { padding:10px 14px; font-size:10px; }
-      .pillars { grid-template-columns:repeat(2,1fr); }
+      .pillars { display:none; }
+      .pillars-cat-btn { display:block; }
       .pillar { padding:16px 0 8px 12px; }
 
 
@@ -1081,17 +1099,23 @@
   </div>
 </nav>
 
-<!-- ── Drawer de productos ── -->
+<!-- ── Drawer de navegación ── -->
 <div class="drawer-bg" id="drawerBg"></div>
 <div class="drawer" id="drawer">
   <div class="drawer-header">
-    <span class="drawer-title">Productos</span>
+    <div class="drawer-tabs">
+      <button class="drawer-tab on" data-drawer-view="categories">Categorías</button>
+      <button class="drawer-tab" data-drawer-view="products">Productos</button>
+    </div>
     <button class="drawer-close" id="drawerClose">✕</button>
   </div>
-  <div class="drawer-search">
-    <input type="text" id="drawerSearch" placeholder="Buscar producto…" class="drawer-input">
+  <div class="drawer-categories" id="drawerCategories"></div>
+  <div class="drawer-products" id="drawerProducts" style="display:none;">
+    <div class="drawer-search">
+      <input type="text" id="drawerSearch" placeholder="Buscar producto…" class="drawer-input">
+    </div>
+    <div class="drawer-list" id="drawerList"></div>
   </div>
-  <div class="drawer-list" id="drawerList"></div>
 </div>
 
 <!-- ── Cart drawer ── -->
@@ -1333,6 +1357,7 @@
     </div>
     <div class="search-results-count" id="search-results-count"></div>
 
+    <div class="pillars-cat-btn"><button onclick="openDrawer('categories')">Categorías</button></div>
     <div class="pillars" id="pillars-container"></div>
     <div class="tabs-bar" id="tabs-bar"></div>
     <div class="toolbar reveal">
@@ -2521,8 +2546,39 @@ document.addEventListener('click', e => {
   }
 });
 
-// ── Drawer de productos ──
-function renderDrawer(items) {
+// ── Drawer de navegación ──
+function renderDrawerCategories() {
+  const el = document.getElementById('drawerCategories');
+  el.innerHTML = categoryTree.map(p => `<div class="drawer-cat-group">
+    <div class="drawer-cat-header">${p.name}</div>
+    <div class="drawer-cat-subs">${p.subs.map(s => `<button class="drawer-cat-sub" data-sub="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}</div>
+  </div>`).join('');
+  el.querySelectorAll('.drawer-cat-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const grp = h.parentElement;
+      const wasOpen = grp.classList.contains('open');
+      el.querySelectorAll('.drawer-cat-group.open').forEach(g => g.classList.remove('open'));
+      if (!wasOpen) grp.classList.add('open');
+    });
+  });
+  el.querySelectorAll('.drawer-cat-sub').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sub = btn.dataset.sub;
+      closeDrawer();
+      document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
+      document.querySelector(`.pillar-l[data-sub="${sub.replace(/"/g,'&quot;')}"]`)?.classList.add('on');
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+      document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
+      filtroActual = 'all';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+      document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('on');
+      document.getElementById('search-input').value = '';
+      busquedaActual = '';
+      renderProducts(sub);
+    });
+  });
+}
+function renderDrawerProducts(items) {
   const list = document.getElementById('drawerList');
   if (!items.length) { list.innerHTML = '<div class="drawer-empty">No se encontraron productos</div>'; return; }
   list.innerHTML = items.map(p_ => {
@@ -2544,13 +2600,22 @@ function renderDrawer(items) {
     });
   });
 }
-function openDrawer() {
+function switchDrawerView(view) {
+  document.querySelectorAll('.drawer-tab').forEach(t => t.classList.toggle('on', t.dataset.drawerView === view));
+  document.getElementById('drawerCategories').style.display = view === 'categories' ? '' : 'none';
+  document.getElementById('drawerProducts').style.display = view === 'products' ? '' : 'none';
+  if (view === 'categories') renderDrawerCategories();
+  if (view === 'products') { renderDrawerProducts(productos); document.getElementById('drawerSearch').value = ''; }
+}
+document.querySelectorAll('.drawer-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchDrawerView(tab.dataset.drawerView));
+});
+function openDrawer(view) {
   document.getElementById('drawerBg').classList.add('open');
   document.getElementById('drawer').classList.add('open');
   document.getElementById('hamburgerBtn').classList.add('active');
   document.body.style.overflow = 'hidden';
-  renderDrawer(productos);
-  document.getElementById('drawerSearch').value = '';
+  switchDrawerView(view || 'categories');
 }
 function closeDrawer() {
   document.getElementById('drawerBg').classList.remove('open');
@@ -2560,14 +2625,14 @@ function closeDrawer() {
 }
 document.getElementById('hamburgerBtn').addEventListener('click', () => {
   if (document.getElementById('drawer').classList.contains('open')) closeDrawer();
-  else openDrawer();
+  else openDrawer('categories');
 });
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawerBg').addEventListener('click', closeDrawer);
 document.getElementById('drawerSearch').addEventListener('input', e => {
   const q = e.target.value.toLowerCase().trim();
-  if (!q) { renderDrawer(productos); return; }
-  renderDrawer(productos.filter(p =>
+  if (!q) { renderDrawerProducts(productos); return; }
+  renderDrawerProducts(productos.filter(p =>
     p.nombre?.toLowerCase().includes(q) ||
     p.descripcion?.toLowerCase().includes(q) ||
     getEffectiveCategory(p)?.toLowerCase().includes(q)
