@@ -1959,10 +1959,14 @@ function renderProducts(categoria = null) {
     `;
   }).join('');
   if (categoria) {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       const target = document.getElementById('products-container');
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+      if (target) {
+        const rect = target.getBoundingClientRect();
+        const absTop = window.scrollY + rect.top - 20;
+        window.scrollTo({ top: absTop, behavior: 'smooth' });
+      }
+    }, 80);
   }
 }
 
