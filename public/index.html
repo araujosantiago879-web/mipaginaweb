@@ -1863,8 +1863,10 @@ function renderPillars() {
       document.getElementById('search-input').value = '';
       busquedaActual = '';
       renderProducts(sub);
-      const target = document.getElementById('products-container');
-      if (target && target.children.length) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        const el = document.querySelector('.search-wrap') || document.getElementById('products-container');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 50);
     });
   });
   container.querySelectorAll('.pillar-h').forEach(hdr => {
