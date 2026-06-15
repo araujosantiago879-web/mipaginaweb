@@ -104,7 +104,7 @@
     .btn-wa-nav svg { flex-shrink:0; }
 
     /* ── Hamburguesa ── */
-    .hamburger-btn { display:none; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer; padding:6px; }
+    .hamburger-btn { display:flex; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer; padding:6px; }
     .hamburger-btn span { width:20px; height:2px; background:var(--paper); border-radius:2px; transition:all .25s; }
     .hamburger-btn.active span:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
     .hamburger-btn.active span:nth-child(2) { opacity:0; }
@@ -970,7 +970,7 @@
       .nav-links { gap:12px; overflow-x:auto; scrollbar-width:none; flex-shrink:1; }
       .nav-links::-webkit-scrollbar { display:none; }
       .nav-links a { font-size:11px; white-space:nowrap; }
-      .hamburger-btn { display:flex; }
+
       .tag-online { display:none; }
       .btn-wa-nav { padding:8px 12px; font-size:10px; }
       .btn-wa-nav .btn-wa-label { display:none; }
