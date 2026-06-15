@@ -149,10 +149,6 @@
     .drawer-cat-sub { display:block; width:100%; padding:10px 24px 10px 40px; font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; transition:color .2s, background .15s; background:none; border:none; text-align:left; }
     .drawer-cat-sub:hover { color:var(--paper); background:rgba(255,255,255,.02); }
     .drawer-products { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-    .pillars-cat-btn { display:none; margin-bottom:16px; }
-    .pillars-cat-btn button { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:8px 16px; border:1px solid var(--edge); background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; border-radius:2px; width:100%; }
-    .pillars-cat-btn button:hover { border-color:var(--rose); color:var(--rose); }
-
     /* ── Hero ── */
     .hero {
       min-height:calc(100vh - 96px);
@@ -256,27 +252,7 @@
     .tab.on { color:var(--paper); border-bottom-color:var(--rose); }
     .tab-badge { font-size:9px; padding:2px 6px; border-radius:20px; background:var(--ink-3); border:1px solid var(--edge); color:var(--muted); }
     .tab.on .tab-badge { background:var(--rose); border-color:var(--rose); color:#fff; }
-    .pillars { display:grid; grid-template-columns:repeat(5,1fr); gap:0; margin-bottom:40px; }
-    .pillar { background:var(--ink); padding:20px 0 12px 16px; display:flex; flex-direction:column; gap:0; transition:background .3s; }
-    .pillar.open { background:var(--ink-2); }
-    .pillar-h { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); margin-bottom:0; font-weight:700; cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; padding-right:16px; padding-bottom:8px; }
-    .pillar-h::after { content:''; width:8px; height:8px; border-right:2px solid var(--muted-2); border-bottom:2px solid var(--muted-2); transform:rotate(45deg); transition:transform .35s ease; flex-shrink:0; }
-    .pillar.open .pillar-h::after { transform:rotate(-135deg); }
-    .pillar-body { max-height:0; overflow:hidden; transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .3s ease; display:flex; flex-direction:column; gap:6px; padding-top:4px; opacity:.6; }
-    .pillar.open .pillar-body { max-height:2000px; opacity:1; }
-    .pillar-l { font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); padding:6px 0 6px 2px; cursor:pointer; transition:color .2s, padding-left .2s, background .2s; margin-top:0; border-radius:2px; }
-    .pillar-l:hover { padding-left:8px; color:var(--paper); background:rgba(255,255,255,.02); }
-    .pillar-l.on { color:var(--rose); }
-    .pillar-l.sub { padding-left:14px; font-size:13px; color:var(--muted-2); }
-    .pillar-products { display:flex; flex-direction:column; gap:2px; margin:2px 0 8px 2px; }
-    .pillar-product { display:flex; align-items:center; gap:8px; cursor:pointer; padding:4px 6px; border-radius:3px; border:1px solid transparent; transition:all .2s; }
-    .pillar-product:hover { background:rgba(255,255,255,.03); border-color:var(--edge); }
-    .pillar-product img { width:32px; height:32px; border-radius:2px; object-fit:cover; flex-shrink:0; background:var(--ink-4); }
-    .pillar-product img[src=""], .pillar-product img[style*="display:none"] { display:none; }
-    .pillar-product-name { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
-    .pillar-product:hover .pillar-product-name { color:var(--paper); }
-    .pillar-l.sub:hover { color:var(--paper); }
-    .pillar-l.sub.on { color:var(--rose); }
+
     .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; gap:16px; flex-wrap:wrap; }
     .filters { display:flex; gap:8px; flex-wrap:wrap; }
     .filter-btn { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:6px 14px; border:1px solid var(--edge); color:var(--muted); transition:all .25s; }
@@ -989,8 +965,6 @@
       .ts-item { padding:20px 16px; }
 
       .tienda { padding:48px 16px; }
-      .pillars { grid-template-columns:repeat(3,1fr); }
-
       /* 2 columnas en tablet/móvil */
       .products { grid-template-columns:repeat(2, 1fr); gap:12px; }
       .card-hover-cta { transform:none; padding:12px 8px 8px; }
@@ -1031,9 +1005,6 @@
 
       .tabs-bar { margin-bottom:24px; }
       .tab { padding:10px 14px; font-size:10px; }
-      .pillars { display:none; }
-      .pillars-cat-btn { display:block; }
-      .pillar { padding:16px 0 8px 12px; }
 
 
       .toolbar { flex-direction:column; align-items:flex-start; gap:10px; }
@@ -1357,8 +1328,6 @@
     </div>
     <div class="search-results-count" id="search-results-count"></div>
 
-    <div class="pillars-cat-btn"><button onclick="openDrawer('categories')">Categorías</button></div>
-    <div class="pillars" id="pillars-container"></div>
     <div class="tabs-bar" id="tabs-bar"></div>
     <div class="toolbar reveal">
       <div class="filters" id="filters-bar">
@@ -1815,7 +1784,6 @@ async function loadProducts() {
     if (!Array.isArray(data)) throw new Error('Respuesta inválida');
     productos = data;
     categoriasUnicas = ['Todo', ...new Set(productos.map(p => getEffectiveCategory(p)))];
-    renderPillars();
     renderTabs();
     renderProducts();
   } catch (err) {
@@ -1836,61 +1804,7 @@ async function loadProducts() {
   }
 }
 
-function renderPillars() {
-  const container = document.getElementById('pillars-container');
-  if (!container) return;
-  container.innerHTML = categoryTree.map(p => {
-    const subsHtml = p.subs.map(s => {
-      const sc = productos.filter(pr => getEffectiveCategory(pr) === s).length;
-      const label = s === 'Arnéses y Prótesis' ? 'Arnéses' : s;
-      const prods = productos.filter(pr => getEffectiveCategory(pr) === s).slice(0, 6);
-      const prodThumbs = prods.length ? `<div class="pillar-products">${prods.map(pr_ => {
-        const pr = getEffectiveProduct(pr_);
-        const src = pr.imagenes?.[0] || pr.imagen || '';
-        const pid = pr.id ?? productos.indexOf(pr_);
-        const name = pr.nombre?.replace(/"/g,'&quot;') || '';
-        return `<div class="pillar-product" data-pid="${pid}" title="${name}"><img src="${src}" alt="${name}" onerror="this.style.display='none'"><span class="pillar-product-name">${name}</span></div>`;
-      }).join('')}</div>` : '';
-      return `<span class="pillar-l${sc ? '' : ' sub'}" data-sub="${s}">${label}${sc ? `<span class="tab-badge">${sc}</span>` : ''}</span>${prodThumbs}`;
-    }).join('');
-    const extra = p.name === 'Anillos & Arnéses' ? '<span class="pillar-l sub" style="cursor:default;color:var(--muted-2);font-size:10px;">Prótesis · Fundas</span>' : '';
-    return `<div class="pillar"><div class="pillar-h">${p.name}</div><div class="pillar-body">${subsHtml}${extra}</div></div>`;
-  }).join('');
-  container.querySelectorAll('.pillar-l[data-sub]').forEach(el => {
-    el.addEventListener('click', () => {
-      container.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
-      el.classList.add('on');
-      document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
-      const sub = el.dataset.sub;
-      document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
-      document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
-      filtroActual = 'all';
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
-      document.querySelector('.filter-btn[data-filter="all"]')?.classList.add('on');
-      document.getElementById('search-input').value = '';
-      busquedaActual = '';
-      renderProducts(sub);
-    });
-  });
-  container.querySelectorAll('.pillar-h').forEach(hdr => {
-    hdr.addEventListener('click', () => {
-      const parent = hdr.parentElement;
-      const isOpen = parent.classList.contains('open');
-      container.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
-      document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
-      if (!isOpen) parent.classList.add('open');
-    });
-  });
-  container.addEventListener('click', e => {
-    const prod = e.target.closest('.pillar-product');
-    if (prod) {
-      e.stopPropagation();
-      const pid = prod.dataset.pid;
-      const p = productos.find(pr => String(pr.id ?? '') === pid) ?? productos[parseInt(pid)];
-      if (p) openModal(p.id ?? pid);
-    }
-  });
-}
+
 
 function renderTabs() {
   const bar = document.getElementById('tabs-bar');
@@ -1902,9 +1816,7 @@ function renderTabs() {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
-      document.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
       const cat = btn.dataset.categoria;
-      document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
       filtroActual = 'all';
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
       document.querySelector('.filter-btn[data-filter="all"]').classList.add('on');
@@ -2391,7 +2303,6 @@ async function handleSearch(val) {
 function clearSearch() {
   const inp = document.getElementById('search-input');
   if (inp) { inp.value = ''; inp.dispatchEvent(new Event('input')); }
-  document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
 }
 
 // ── Info sections content ──
@@ -2509,7 +2420,6 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
     filtroActual = btn.dataset.filter;
     renderProducts(document.querySelector('.tab.on')?.dataset.categoria === 'Todo' ? null : document.querySelector('.tab.on')?.dataset.categoria || null);
   });
@@ -2565,8 +2475,6 @@ function renderDrawerCategories() {
     btn.addEventListener('click', () => {
       const sub = btn.dataset.sub;
       closeDrawer();
-      document.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
-      document.querySelector(`.pillar-l[data-sub="${sub.replace(/"/g,'&quot;')}"]`)?.classList.add('on');
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
       filtroActual = 'all';
