@@ -174,9 +174,11 @@
     .chip-trust .dot { width:6px; height:6px; border-radius:50%; background:var(--lime); }
     .hero-r { position:relative; overflow:hidden; background:#000; }
     .hero-r-bg-gradient { position:absolute; inset:0; background:radial-gradient(circle at 30% 50%,#000000 0%,#2a0a12 70%,#4a1a2a 100%); z-index:1; opacity:.85; mix-blend-mode:multiply; }
-    .hero-people-blur { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:15% center; filter:blur(3px) brightness(1) saturate(1.2); transform:scale(1.03); opacity:1; z-index:0; }
+    .hero-people-blur { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:15% center; filter:blur(3px) brightness(1) saturate(1.2); transform:scale(1.03); opacity:1; z-index:0; transition:all .5s ease; }
     .hero-r-blend { position:absolute; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px); z-index:2; mix-blend-mode:overlay; }
     .hero-r-veil { position:absolute; inset:0; background:linear-gradient(to right,var(--ink) 0%,transparent 40%),linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 60%); z-index:3; }
+    .hero-r:hover .hero-people-blur { filter:blur(2px) brightness(.85); transform:scale(1.08); }
+    .hero-r:hover .hero-r-bg-gradient { opacity:.7; }
     .hero-big-b { position:absolute; bottom:-30px; right:-10px; font-family:'Cormorant Garamond',serif; font-size:260px; font-weight:700; font-style:italic; color:rgba(238,242,245,.03); line-height:1; pointer-events:none; user-select:none; z-index:4; }
     .hero-spin { position:absolute; bottom:36px; right:36px; width:96px; height:96px; animation:spin 22s linear infinite; z-index:4; }
     .hero-spin text { font-family:'Inconsolata',monospace; font-size:8.5px; fill:rgba(238,242,245,.35); letter-spacing:3.2px; text-transform:uppercase; }
@@ -1027,23 +1029,6 @@
       .btn-wa-nav { padding:6px 8px; }
       .btn-wa-nav svg { width:14px; height:14px; }
     }
-
-    /* Desktop: image panel extends down through all sections */
-    .page-wrap { position:relative; }
-    @media(min-width:961px) {
-      .page-wrap::before {
-        content:''; position:absolute; top:0; right:0; width:48%; height:100%;
-        background:
-          linear-gradient(135deg, rgba(5,5,8,.85), rgba(42,10,18,.7)),
-          url(https://t4.ftcdn.net/jpg/06/22/76/41/360_F_622764197_LqqeWWVH338xUy8VpD7HCiVYf73DkdWZ.jpg) center/cover no-repeat;
-        filter:blur(2px) brightness(.9) saturate(1.1);
-        z-index:0; pointer-events:none;
-      }
-      .trust-strip { padding-right:48%; }
-      .tienda { padding-right:48%; }
-      #tab-discrecion { padding-right:48%; }
-      .testimonios { padding-right:48%; }
-    }
   </style>
 </head>
 <body>
@@ -1284,7 +1269,6 @@
   </div>
 </div>
 
-<div class="page-wrap">
 <section class="hero">
   <div class="hero-l">
     <div class="hero-eyebrow">Sex Shop Tandil — 2025</div>
@@ -1419,7 +1403,6 @@
       </form>
     </div>
   </section>
-</div>
 </div>
 
 <div id="tab-contacto" class="section-tab">
