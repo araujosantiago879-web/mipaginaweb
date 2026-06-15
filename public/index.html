@@ -1830,6 +1830,10 @@ function renderPillars() {
     const extra = p.name === 'Anillos & Arnéses' ? '<span class="pillar-l sub" style="cursor:default;color:var(--muted-2);font-size:10px;">Prótesis · Fundas</span>' : '';
     return `<div class="pillar"><div class="pillar-h">${p.name}</div><div class="pillar-body">${subsHtml}${extra}</div></div>`;
   }).join('');
+  // En desktop mostrar todos los pilares expandidos por defecto
+  if (window.innerWidth > 480) {
+    container.querySelectorAll('.pillar').forEach(p => p.classList.add('open'));
+  }
   container.querySelectorAll('.pillar-l[data-sub]').forEach(el => {
     el.addEventListener('click', () => {
       container.querySelectorAll('.pillar-l').forEach(l => l.classList.remove('on'));
@@ -1849,10 +1853,8 @@ function renderPillars() {
   container.querySelectorAll('.pillar-h').forEach(hdr => {
     hdr.addEventListener('click', () => {
       const parent = hdr.parentElement;
-      const isOpen = parent.classList.contains('open');
-      container.querySelectorAll('.pillar.open').forEach(p => p.classList.remove('open'));
+      parent.classList.toggle('open');
       document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
-      if (!isOpen) parent.classList.add('open');
     });
   });
   container.addEventListener('click', e => {
