@@ -258,15 +258,6 @@
     .pillar-product img[src=""], .pillar-product img[style*="display:none"] { display:none; }
     .pillar-product-name { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .2s; }
     .pillar-product:hover .pillar-product-name { color:var(--paper); }
-    .pillar-sub-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:10px 4px 6px 2px; margin:2px 0 6px 0; border-top:1px solid var(--edge); }
-    .pillar-sub-card { display:flex; flex-direction:column; background:var(--ink-3); border:1px solid var(--edge); border-radius:4px; overflow:hidden; cursor:pointer; transition:all .25s; }
-    .pillar-sub-card:hover { border-color:var(--rose); transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.4); z-index:2; }
-    .pillar-sub-card img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; background:var(--ink-4); }
-    .pillar-sub-card-body { padding:8px 10px 10px; display:flex; flex-direction:column; gap:4px; }
-    .pillar-sub-card-name { font-size:12px; font-weight:600; color:var(--paper); line-height:1.25; }
-    .pillar-sub-card-price { font-family:'Inconsolata',monospace; font-size:13px; color:var(--lime); }
-    .pillar-sub-card-price del { font-size:10px; color:#ff6666; margin-left:4px; text-decoration:line-through; }
-    .pillar-sub-card-cat { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-2); }
     .pillar-l.sub:hover { color:var(--paper); }
     .pillar-l.sub.on { color:var(--rose); }
     .toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; gap:16px; flex-wrap:wrap; }
@@ -1024,10 +1015,7 @@
       .tab { padding:10px 14px; font-size:10px; }
       .pillars { grid-template-columns:repeat(2,1fr); }
       .pillar { padding:16px 0 8px 12px; }
-      .pillar-body { max-height:none; }
-      .pillar-sub-grid { grid-template-columns:repeat(2,1fr); }
-      .pillar-h { cursor:default; }
-      .pillar-h::after { display:none; }
+
 
       .toolbar { flex-direction:column; align-items:flex-start; gap:10px; }
       .filters { gap:6px; }
