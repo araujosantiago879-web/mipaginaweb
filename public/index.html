@@ -174,7 +174,7 @@
     .chip-trust .dot { width:6px; height:6px; border-radius:50%; background:var(--lime); }
     .hero-r { position:relative; overflow:hidden; background:#000; }
     .hero-r-bg-gradient { position:absolute; inset:0; background:radial-gradient(circle at 30% 50%,#000000 0%,#2a0a12 70%,#4a1a2a 100%); z-index:1; opacity:.85; mix-blend-mode:multiply; }
-    .hero-people-blur { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(4px) brightness(.85) saturate(1.2); transform:scale(1.05); opacity:.9; z-index:0; transition:all .5s ease; }
+    .hero-people-blur { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:25% center; filter:blur(4px) brightness(.85) saturate(1.2); transform:scale(1.05); opacity:.9; z-index:0; transition:all .5s ease; }
     .hero-r-blend { position:absolute; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px); z-index:2; mix-blend-mode:overlay; }
     .hero-r-veil { position:absolute; inset:0; background:linear-gradient(to right,var(--ink) 0%,transparent 40%),linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 60%); z-index:3; }
     .hero-r:hover .hero-people-blur { filter:blur(2px) brightness(.85); transform:scale(1.08); }
