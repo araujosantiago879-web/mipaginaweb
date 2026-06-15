@@ -1029,6 +1029,22 @@
       .btn-wa-nav { padding:6px 8px; }
       .btn-wa-nav svg { width:14px; height:14px; }
     }
+
+    .page-wrap { position:relative; }
+    @media(min-width:961px) {
+      .page-wrap::before {
+        content:''; position:absolute; top:0; right:0; width:48%; height:100%;
+        background:url(https://t4.ftcdn.net/jpg/06/22/76/41/360_F_622764197_LqqeWWVH338xUy8VpD7HCiVYf73DkdWZ.jpg) center/cover no-repeat;
+        filter:blur(2px) brightness(.9) saturate(1.1);
+        -webkit-mask:linear-gradient(to right, transparent 0%, #000 25%, #000 100%);
+        mask:linear-gradient(to right, transparent 0%, #000 25%, #000 100%);
+        z-index:0; pointer-events:none;
+      }
+      .trust-strip { padding-right:48%; }
+      .tienda { padding-right:48%; }
+      #tab-discrecion { padding-right:48%; }
+      .testimonios { padding-right:48%; }
+    }
   </style>
 </head>
 <body>
@@ -1269,6 +1285,7 @@
   </div>
 </div>
 
+<div class="page-wrap">
 <section class="hero">
   <div class="hero-l">
     <div class="hero-eyebrow">Sex Shop Tandil — 2025</div>
@@ -1403,6 +1420,7 @@
       </form>
     </div>
   </section>
+</div>
 </div>
 
 <div id="tab-contacto" class="section-tab">
