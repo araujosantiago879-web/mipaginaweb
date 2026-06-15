@@ -1836,25 +1836,6 @@ function renderPillars() {
       el.classList.add('on');
       document.querySelectorAll('.pillar-sub-grid').forEach(g => g.remove());
       const sub = el.dataset.sub;
-      const prods = productos.filter(pr => getEffectiveCategory(pr) === sub);
-      if (prods.length) {
-        const grid = document.createElement('div');
-        grid.className = 'pillar-sub-grid';
-        grid.innerHTML = prods.map(pr_ => {
-          const pr = getEffectiveProduct(pr_);
-          const src = pr.imagenes?.[0] || pr.imagen || '';
-          const oldPrice = pr.precioAnterior ? `<del>${pr.precioAnterior}</del>` : '';
-          return `<div class="pillar-sub-card" onclick="event.stopPropagation();openModal('${pr.id ?? ''}')">
-            <img src="${src}" alt="${(pr.nombre||'').replace(/"/g,'&quot;')}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22><rect fill=%22%232a2a2f%22 width=%22120%22 height=%22120%22/></svg>'">
-            <div class="pillar-sub-card-body">
-              <div class="pillar-sub-card-cat">${pr.categoria}</div>
-              <div class="pillar-sub-card-name">${pr.nombre||''}</div>
-              <div class="pillar-sub-card-price">${pr.precio||''} ${oldPrice}</div>
-            </div>
-          </div>`;
-        }).join('');
-        el.after(grid);
-      }
       document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
       document.querySelector('.tab[data-categoria="Todo"]')?.classList.add('on');
       filtroActual = 'all';
