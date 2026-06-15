@@ -1863,12 +1863,6 @@ function renderPillars() {
       document.getElementById('search-input').value = '';
       busquedaActual = '';
       renderProducts(sub);
-      setTimeout(() => {
-        const el = document.getElementById('products-container');
-        if (el && el.offsetTop) {
-          window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' });
-        }
-      }, 100);
     });
   });
   container.querySelectorAll('.pillar-h').forEach(hdr => {
@@ -1983,6 +1977,12 @@ function renderProducts(categoria = null) {
       </div>
     `;
   }).join('');
+  if (categoria) {
+    requestAnimationFrame(() => {
+      const target = document.getElementById('products-container');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 }
 
 // ── Card: botón Consultar rápido ──
