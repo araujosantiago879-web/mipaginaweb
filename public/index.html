@@ -1768,11 +1768,23 @@ const DEFAULT_TREE = [
   { name: 'Perfumes', subs: ['Perfumes Hombre', 'Perfumes Mujer'] },
 ];
 function loadCategoryTree() {
+  let tree;
   try {
     const saved = localStorage.getItem('categoryTree');
-    if (saved) return JSON.parse(saved);
+    if (saved) tree = JSON.parse(saved);
   } catch {}
-  return DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
+  if (!tree) return DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
+  // Fusionar categorías/subcategorías nuevas de DEFAULT_TREE
+  DEFAULT_TREE.forEach(d => {
+    const exist = tree.find(t => t.name === d.name);
+    if (exist) {
+      d.subs.forEach(s => { if (!exist.subs.includes(s)) exist.subs.push(s); });
+    } else {
+      tree.push({ ...d, subs: [...d.subs] });
+    }
+  });
+  localStorage.setItem('categoryTree', JSON.stringify(tree));
+  return tree;
 }
 function saveCategoryTree() {
   localStorage.setItem('categoryTree', JSON.stringify(categoryTree));
