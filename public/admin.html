@@ -113,11 +113,19 @@
 
     /* PRODUCTS GRID */
     .products-grid {
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-      gap:2px;
+      display:flex;
+      flex-direction:column;
+      gap:2rem;
       margin-top:1.5rem;
     }
+    .cat-group { display:flex; flex-direction:column; gap:2px; }
+    .cat-header {
+      font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:700; color:var(--rose);
+      padding:8px 0 4px; border-bottom:1px solid var(--edge); margin-bottom:2px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .cat-count { font-family:'Inconsolata',monospace; font-size:10px; color:var(--muted); background:var(--ink-3); padding:1px 8px; border-radius:99px; }
+    .cat-items { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:2px; }
     .producto-card {
       background:var(--ink-2);
       border:1px solid var(--edge);
@@ -678,24 +686,35 @@ async function cargarProductos() {
     const container = document.getElementById('productos-list');
     if (!productos.length) { container.innerHTML = '<p style="text-align:center;grid-column:1/-1;padding:3rem;color:var(--muted);">📭 No hay productos aún. Creá uno nuevo.</p>'; }
     else {
-      container.innerHTML = productos.map((p, idx) => {
-        const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
-        const idSafe = (p.id || '').toString().replace(/[^a-zA-Z0-9]/g, '');
-        return `<div class="producto-card">
-          <div class="card-gallery">
-            ${imgs.length ? `<div style="position:relative;"><img class="card-main-img" id="mainimg-${idSafe}" src="${imgs[0]}" onerror="this.style.display='none'" data-idx="${idx}">${imgs.length > 1 ? `<span class="card-img-count">${imgs.length} fotos</span>` : ''}</div>${imgs.length > 1 ? `<div class="card-thumbs">${imgs.map((url,i) => `<img src="${url}" onerror="this.style.display='none'" onclick="cambiarMainImg(${idx},${i})" class="${i===0?'active':''}">`).join('')}</div>` : ''}` : '<div style="width:100%;height:180px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sin imagen</div>'}
-          </div>
-          <div class="producto-body">
-            <span class="cat">${p.categoria || ''}</span>
-            <h3>${escapeHtml(p.nombre)}</h3>
-            ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Más vendido' : '💰 Oferta'}</span>` : ''}
-            <div class="price">${p.precio} ${p.precioAnterior ? `<span class="old">${p.precioAnterior}</span>` : ''}</div>
-            <div class="producto-actions">
-              <button class="btn btn-ghost btn-sm" onclick="editarProducto('${p.id}')">✏️ Editar</button>
-              <button class="btn btn-danger btn-sm" onclick="eliminarProducto('${p.id}')">🗑️ Eliminar</button>
+      // Agrupar por categoría
+      const grupos = {};
+      productos.forEach(p => {
+        const cat = p.categoria || 'Sin categoría';
+        if (!grupos[cat]) grupos[cat] = [];
+        grupos[cat].push(p);
+      });
+      const categoriasOrdenadas = Object.keys(grupos).sort((a, b) => a.localeCompare(b));
+      container.innerHTML = categoriasOrdenadas.map(cat => {
+        const items = grupos[cat].map((p, idx) => {
+          const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+          const idSafe = (p.id || '').toString().replace(/[^a-zA-Z0-9]/g, '');
+          return `<div class="producto-card">
+            <div class="card-gallery">
+              ${imgs.length ? `<div style="position:relative;"><img class="card-main-img" id="mainimg-${idSafe}" src="${imgs[0]}" onerror="this.style.display='none'" data-idx="${idx}">${imgs.length > 1 ? `<span class="card-img-count">${imgs.length} fotos</span>` : ''}</div>${imgs.length > 1 ? `<div class="card-thumbs">${imgs.map((url,i) => `<img src="${url}" onerror="this.style.display='none'" onclick="cambiarMainImg(${idx},${i})" class="${i===0?'active':''}">`).join('')}</div>` : ''}` : '<div style="width:100%;height:180px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;">Sin imagen</div>'}
             </div>
-          </div>
-        </div>`;
+            <div class="producto-body">
+              <span class="cat">${p.categoria || ''}</span>
+              <h3>${escapeHtml(p.nombre)}</h3>
+              ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Más vendido' : '💰 Oferta'}</span>` : ''}
+              <div class="price">${p.precio} ${p.precioAnterior ? `<span class="old">${p.precioAnterior}</span>` : ''}</div>
+              <div class="producto-actions">
+                <button class="btn btn-ghost btn-sm" onclick="editarProducto('${p.id}')">✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarProducto('${p.id}')">🗑️ Eliminar</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+        return `<div class="cat-group"><div class="cat-header">${cat} <span class="cat-count">${grupos[cat].length}</span></div><div class="cat-items">${items}</div></div>`;
       }).join('');
     }
     loadingDiv.style.display = 'none';
