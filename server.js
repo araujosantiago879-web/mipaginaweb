@@ -56,10 +56,7 @@ async function connectDB() {
       adminPassword: 'admin123',
       pageAccessPassword: 'admin123',
       efectivoHabilitado: false,
-      efectivoTexto: '',
-      otroHabilitado: false,
-      otroTitulo: '',
-      otroTexto: ''
+      efectivoTexto: ''
     });
     console.log('✅ Config creada por defecto');
   } else {
