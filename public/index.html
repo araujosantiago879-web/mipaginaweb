@@ -1720,6 +1720,12 @@ function renderProducts(categoria = null) {
     );
   }
 
+  // ── Limitar a ~34 productos en la pantalla principal ──
+  const INITIAL_LIMIT = 34;
+  if (!categoria && filtroActual === 'all' && !busquedaActual) {
+    filtered = filtered.slice(0, INITIAL_LIMIT);
+  }
+
   const container = document.getElementById('products-container');
   const emptyEl   = document.getElementById('search-empty');
   const countEl   = document.getElementById('search-results-count');
