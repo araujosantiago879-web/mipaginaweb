@@ -1078,12 +1078,12 @@
         </div>
       </div>
 
-      <div class="pm clickable" id="pm-transferencia" style="display:none;" onclick="openTransferenciaModal()">
+      <div class="pm clickable" id="pm-otro" style="display:none;" onclick="openOtroModal()">
         <div class="pm-header">
           <div class="pm-icon bank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,51,102,.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></div>
           <div class="pm-body">
-            <div class="pm-name">Transferencias</div>
-            <div class="pm-desc" id="cp-transferencia-texto"></div>
+            <div class="pm-name" id="cp-otro-titulo">Transferencias</div>
+            <div class="pm-desc" id="cp-otro-texto"></div>
           </div>
           <span style="color:var(--rose);font-size:14px;opacity:.5;">→</span>
         </div>
@@ -1098,48 +1098,48 @@
 </div>
 
 <!-- ── Transferencia modal ── -->
-<div class="cc-bg" id="transferencia-bg">
+<div class="cc-bg" id="otro-bg">
   <div class="cc-modal">
-    <button class="cc-close" id="transferencia-close">✕</button>
+    <button class="cc-close" id="otro-close">✕</button>
     <div class="cc-modal-dots"><span></span><span></span><span></span></div>
     <div class="cc-head">
       <span class="cc-head-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px rgba(255,51,102,.3));"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></span>
-      <h3>Transferencia <em>bancaria</em></h3>
-      <p>Datos para transferir</p>
+      <h3 id="otro-modal-titulo">Otro método de <em>pago</em></h3>
+      <p id="otro-modal-desc">Datos para realizar el pago</p>
     </div>
-    <div class="bank-card-preview" id="transferencia-preview">
+    <div class="bank-card-preview" id="otro-preview">
       <div class="bank-preview-glow"></div>
       <div class="bank-preview-content">
         <div class="bank-preview-top">
-          <span class="bank-preview-bank" id="transferencia-preview-label">Instrucciones</span>
+          <span class="bank-preview-bank" id="otro-preview-label">Instrucciones</span>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg>
         </div>
         <div class="bank-preview-field">
-          <span class="bank-preview-value" id="transferencia-preview-texto" style="font-size:11px;letter-spacing:.3px;color:rgba(255,255,255,.7);">—</span>
+          <span class="bank-preview-value" id="otro-preview-texto" style="font-size:11px;letter-spacing:.3px;color:rgba(255,255,255,.7);">—</span>
         </div>
       </div>
     </div>
-    <div class="bank-details" id="transferencia-bank-fields" style="display:none;">
+    <div class="bank-details" id="otro-bank-fields" style="display:none;">
       <div class="bank-detail">
         <span class="bank-dt-label">Banco</span>
-        <span class="bank-dt-value" id="transferencia-modal-banco">—</span>
+        <span class="bank-dt-value" id="otro-modal-banco">—</span>
       </div>
       <div class="bank-detail">
         <span class="bank-dt-label">Titular</span>
-        <span class="bank-dt-value" id="transferencia-modal-titular">—</span>
+        <span class="bank-dt-value" id="otro-modal-titular">—</span>
       </div>
       <div class="bank-detail">
         <span class="bank-dt-label">CBU</span>
-        <span class="bank-dt-value mono" id="transferencia-modal-cbu">—</span>
-        <button class="bank-copy-btn" onclick="copyText(document.getElementById('transferencia-modal-cbu').textContent)" title="Copiar CBU">📋</button>
+        <span class="bank-dt-value mono" id="otro-modal-cbu">—</span>
+        <button class="bank-copy-btn" onclick="copyText(document.getElementById('otro-modal-cbu').textContent)" title="Copiar CBU">📋</button>
       </div>
       <div class="bank-detail">
         <span class="bank-dt-label">Alias</span>
-        <span class="bank-dt-value mono" id="transferencia-modal-alias">—</span>
-        <button class="bank-copy-btn" onclick="copyText(document.getElementById('transferencia-modal-alias').textContent)" title="Copiar alias">📋</button>
+        <span class="bank-dt-value mono" id="otro-modal-alias">—</span>
+        <button class="bank-copy-btn" onclick="copyText(document.getElementById('otro-modal-alias').textContent)" title="Copiar alias">📋</button>
       </div>
     </div>
-    <div class="cc-secure">🔒 Consultá por este método de pago</div>
+    <div class="cc-secure" id="otro-modal-secure">🔒 Consultá por este método de pago</div>
   </div>
 </div>
 
@@ -1540,7 +1540,10 @@ async function loadConfig() {
       alias: config.alias || '',
       titular: config.titular || '',
       efectivoHabilitado: config.efectivoHabilitado || false,
-      efectivoTexto: config.efectivoTexto || ''
+      efectivoTexto: config.efectivoTexto || '',
+      otroHabilitado: config.otroHabilitado || false,
+      otroTitulo: config.otroTitulo || '',
+      otroTexto: config.otroTexto || ''
     };
     // Horarios
     const rowsDiv = document.getElementById('horarios-rows');
@@ -1865,15 +1868,14 @@ function renderCart() {
       document.getElementById('cp-efectivo-texto').textContent = pc.efectivoTexto || 'Pagá en efectivo al recibir tu pedido';
       hasPayment = true;
     } else if (efecBlock) { efecBlock.style.display = 'none'; }
-    // Transferencia
-    const transBlock = document.getElementById('pm-transferencia');
-    const transDesc = document.getElementById('cp-transferencia-texto');
-    const hasTransferencia = pc.banco || pc.cbu || pc.alias || pc.titular;
-    if (transBlock && hasTransferencia) {
-      transBlock.style.display = 'flex';
-      if (transDesc) transDesc.textContent = pc.banco ? pc.banco : 'Datos bancarios';
+    // Otro
+    const otroBlock = document.getElementById('pm-otro');
+    if (otroBlock) {
+      otroBlock.style.display = 'flex';
+      document.getElementById('cp-otro-titulo').textContent = pc.otroTitulo || 'Transferencias';
+      document.getElementById('cp-otro-texto').textContent = pc.otroTexto || 'Datos para transferir';
       hasPayment = true;
-    } else if (transBlock) { transBlock.style.display = 'none'; }
+    }
     payDiv.style.display = hasPayment ? 'flex' : 'none';
   }
 }
@@ -1882,25 +1884,39 @@ function copyText(t) {
   navigator.clipboard?.writeText(t).then(() => showToast('📋 Copiado')).catch(() => {});
 }
 
-/* ── Transferencia modal ── */
-function openTransferenciaModal() {
-  const bg = document.getElementById('transferencia-bg');
+/* ── Otro método modal ── */
+function openOtroModal() {
   const pc = window.paymentConfig || {};
-  document.getElementById('transferencia-modal-banco').textContent = pc.banco || '—';
-  document.getElementById('transferencia-modal-titular').textContent = pc.titular || '—';
-  document.getElementById('transferencia-modal-cbu').textContent = pc.cbu || '—';
-  document.getElementById('transferencia-modal-alias').textContent = pc.alias || '—';
-  const hasFields = pc.banco || pc.titular || pc.cbu || pc.alias;
-  document.getElementById('transferencia-bank-fields').style.display = hasFields ? 'flex' : 'none';
-  document.getElementById('transferencia-preview-texto').textContent = hasFields ? (pc.banco || '') + (pc.titular ? ' · ' + pc.titular : '') : 'Pedí los datos por WhatsApp';
-  if (bg) bg.classList.add('open');
+  const titulo = pc.otroTitulo || 'Transferencias';
+  const texto = pc.otroTexto || '';
+
+  document.getElementById('otro-modal-titulo').innerHTML = `${titulo} <em>pago</em>`;
+  document.getElementById('otro-modal-desc').textContent = texto || 'Datos para realizar el pago';
+  document.getElementById('otro-preview-label').textContent = titulo;
+  document.getElementById('otro-preview-texto').textContent = texto || '—';
+
+  const bankFields = document.getElementById('otro-bank-fields');
+  const hasBank = pc.banco || pc.cbu || pc.alias || pc.titular;
+  if (bankFields && hasBank) {
+    bankFields.style.display = 'flex';
+    document.getElementById('otro-modal-banco').textContent = pc.banco || '—';
+    document.getElementById('otro-modal-titular').textContent = pc.titular || '—';
+    document.getElementById('otro-modal-cbu').textContent = pc.cbu || '—';
+    document.getElementById('otro-modal-alias').textContent = pc.alias || '—';
+  } else if (bankFields) {
+    bankFields.style.display = 'none';
+  }
+
+  document.getElementById('otro-modal-secure').textContent = `🔒 Consultá por ${titulo.toLowerCase()}`;
+  document.getElementById('otro-bg')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
-document.getElementById('transferencia-close')?.addEventListener('click', () => {
-  document.getElementById('transferencia-bg')?.classList.remove('open');
-});
-document.getElementById('transferencia-bg')?.addEventListener('click', (e) => {
-  if (e.target === e.currentTarget) e.target.classList.remove('open');
-});
+document.getElementById('otro-close')?.addEventListener('click', closeOtro);
+document.getElementById('otro-bg')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeOtro(); });
+function closeOtro() {
+  document.getElementById('otro-bg')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 function checkoutWA() {
   if (cart.length === 0) return;

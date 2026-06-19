@@ -56,7 +56,10 @@ async function connectDB() {
       adminPassword: 'admin123',
       pageAccessPassword: 'admin123',
       efectivoHabilitado: false,
-      efectivoTexto: ''
+      efectivoTexto: '',
+      otroHabilitado: false,
+      otroTitulo: '',
+      otroTexto: ''
     });
     console.log('✅ Config creada por defecto');
   } else {
@@ -65,6 +68,10 @@ async function connectDB() {
     if (!existing.pageAccessPassword) {
       updates.pageAccessPassword = existing.adminPassword || 'admin123';
     }
+    // Asegurar campos de pago si no existen
+    if (existing.otroHabilitado === undefined) updates.otroHabilitado = false;
+    if (existing.otroTitulo === undefined) updates.otroTitulo = '';
+    if (existing.otroTexto === undefined) updates.otroTexto = '';
     // Actualizar número placeholder si es necesario
     if (existing.whatsappNumber === '5492494000000' || existing.whatsappNumber === '5492490000000') {
       updates.whatsappNumber = WA_NUMBER;
