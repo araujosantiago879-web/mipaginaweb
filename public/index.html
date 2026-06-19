@@ -1458,6 +1458,14 @@ async function loadConfig() {
     }
     // Payment config
     window.paymentConfig = {
+      mercadoPagoLink: config.mercadoPagoLink || '',
+      banco: config.banco || '',
+      cbu: config.cbu || '',
+      alias: config.alias || '',
+      titular: config.titular || '',
+      efectivoHabilitado: config.efectivoHabilitado || false,
+      efectivoTexto: config.efectivoTexto || ''
+    };
     // Horarios
     const rowsDiv = document.getElementById('horarios-rows');
     if (rowsDiv && config.horarios) {
