@@ -572,6 +572,71 @@ app.put('/api/admin/config', checkAuth, async (req, res) => {
   }
 });
 
+// ─── Orders (pedidos) ────────────────────────────────────────────────────────
+async function getOrders() {
+  const database = await connectDB();
+  return database.collection('orders');
+}
+
+// POST /api/orders (sin auth — lo usa el frontend público)
+app.post('/api/orders', async (req, res) => {
+  try {
+    const col = await getOrders();
+    const order = {
+      items: req.body.items || [],
+      total: req.body.total || '',
+      paymentMethod: req.body.paymentMethod || '',
+      customerInfo: req.body.customerInfo || {},
+      createdAt: new Date(),
+      status: 'pendiente'
+    };
+    const result = await col.insertOne(order);
+    res.json({ id: result.insertedId, ...order });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar pedido' });
+  }
+});
+
+// GET /api/orders (auth required)
+app.get('/api/orders', checkAuth, async (req, res) => {
+  try {
+    const col = await getOrders();
+    const orders = await col.find().sort({ createdAt: -1 }).toArray();
+    const result = orders.map(({ _id, ...o }) => ({ id: _id, ...o }));
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener pedidos' });
+  }
+});
+
+// PATCH /api/orders/:id (auth required)
+app.patch('/api/orders/:id', checkAuth, async (req, res) => {
+  try {
+    const col = await getOrders();
+    const id = new ObjectId(req.params.id);
+    await col.updateOne({ _id: id }, { $set: { status: req.body.status || 'completado' } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al actualizar pedido' });
+  }
+});
+
+// DELETE /api/orders/:id (auth required)
+app.delete('/api/orders/:id', checkAuth, async (req, res) => {
+  try {
+    const col = await getOrders();
+    const id = new ObjectId(req.params.id);
+    await col.deleteOne({ _id: id });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar pedido' });
+  }
+});
+
 // ─── Cambiar contraseña ───────────────────────────────────────────────────────
 app.post('/api/admin/change-password', checkAuth, async (req, res) => {
   const { newPassword } = req.body;
