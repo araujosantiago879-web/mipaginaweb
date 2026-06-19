@@ -57,8 +57,6 @@ async function connectDB() {
       pageAccessPassword: 'admin123',
       efectivoHabilitado: false,
       efectivoTexto: '',
-      tarjetasHabilitado: false,
-      tarjetasTexto: '',
       otroHabilitado: false,
       otroTitulo: '',
       otroTexto: ''

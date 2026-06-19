@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sex shop online en Tandil. Envíos discretos a domicilio. Pagá con Mercado Pago, tarjeta o efectivo. Atención por WhatsApp 9 a 23 hs.">
+  <meta name="description" content="Sex shop online en Tandil. Envíos discretos a domicilio. Pagá con Mercado Pago, transferencia o efectivo. Atención por WhatsApp 9 a 23 hs.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="El Lado B · Sex Shop Tandil">
   <meta property="og:title" content="El Lado B · Sex Shop Tandil">
@@ -770,51 +770,6 @@
     .cart-empty { padding:40px 20px; text-align:center; color:var(--muted); font-family:'Inconsolata',monospace; font-size:11px; }
     .cart-list { }
 
-    /* ── Card payment modal ── */
-    .cc-bg { position:fixed; inset:0; z-index:999; background:rgba(5,5,8,.88); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:20px; }
-    .cc-bg.open { display:flex; }
-    .cc-modal { background:linear-gradient(160deg, #0c070a, #0a0a10 50%, #0c070a); border:1px solid rgba(255,51,102,.12); width:100%; max-width:440px; padding:32px 28px 28px; animation:fadein .25s ease; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 0 60px rgba(255,51,102,.05), 0 0 120px rgba(255,51,102,.025); }
-    .cc-modal::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--rose),transparent); opacity:.8; box-shadow:0 0 20px rgba(255,51,102,.4), 0 0 40px rgba(255,51,102,.15); }
-    .cc-modal-dots { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:1; }
-    .cc-modal-dots span { width:4px; height:4px; border-radius:50%; background:rgba(255,51,102,.15); box-shadow:0 0 6px rgba(255,51,102,.1); }
-    .cc-close { position:absolute; top:16px; right:16px; width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .25s; z-index:2; }
-    .cc-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; box-shadow:0 0 20px rgba(255,51,102,.35); transform:rotate(90deg); }
-    .cc-head { text-align:center; margin-bottom:22px; position:relative; }
-    .cc-head-icon { font-size:30px; margin-bottom:8px; display:block; filter:drop-shadow(0 0 12px rgba(255,51,102,.35)); }
-    .cc-head h3 { font-family:'Cormorant Garamond',serif; font-size:23px; font-weight:700; letter-spacing:.5px; }
-    .cc-head h3 em { color:var(--rose); font-style:italic; text-shadow:0 0 20px rgba(255,51,102,.35), 0 0 40px rgba(255,51,102,.12); }
-    .cc-head p { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,51,102,.4); margin-top:6px; text-shadow:0 0 8px rgba(255,51,102,.1); }
-    .cc-card-preview { background:linear-gradient(135deg,#1a0510,#0d0515,#1a0510); border-radius:8px; padding:20px 22px; margin-bottom:24px; min-height:112px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid rgba(255,51,102,.12); position:relative; overflow:hidden; box-shadow:0 0 30px rgba(255,51,102,.08), inset 0 0 50px rgba(255,51,102,.03); animation:cardGlow 4s ease-in-out infinite; }
-    @keyframes cardGlow { 0%,100%{box-shadow:0 0 30px rgba(255,51,102,.08),inset 0 0 50px rgba(255,51,102,.03)} 50%{box-shadow:0 0 40px rgba(255,51,102,.14),inset 0 0 60px rgba(255,51,102,.05)} }
-    .cc-card-preview::before { content:''; position:absolute; top:-50%; right:-25%; width:120px; height:120px; border-radius:50%; background:rgba(255,51,102,.05); pointer-events:none; }
-    .cc-card-preview::after { content:''; position:absolute; bottom:-25%; left:-15%; width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,.015); pointer-events:none; }
-    .cc-card-preview-top { display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:1; }
-    .cc-card-brand { display:flex; align-items:center; gap:6px; }
-    .cc-card-brand svg { width:40px; height:auto; }
-    .cc-card-chip { width:32px; height:24px; background:linear-gradient(135deg,#d4af37,#f5d76e); border-radius:2px; opacity:.65; flex-shrink:0; box-shadow:0 0 12px rgba(212,175,55,.2), inset 0 0 6px rgba(255,255,255,.2); }
-    .cc-card-number { font-family:'Inconsolata',monospace; font-size:18px; letter-spacing:3.5px; color:#fff; margin-top:14px; position:relative; z-index:1; text-shadow:0 0 16px rgba(255,255,255,.06); }
-    .cc-card-bottom { display:flex; justify-content:space-between; margin-top:14px; align-items:flex-end; position:relative; z-index:1; }
-    .cc-card-label { font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.25); text-shadow:0 0 4px rgba(255,255,255,.05); }
-    .cc-card-value { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; color:rgba(255,255,255,.88); text-shadow:0 0 8px rgba(255,255,255,.03); }
-
-    .cc-field { margin-bottom:16px; }
-    .cc-field label { display:block; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,51,102,.45); margin-bottom:5px; text-shadow:0 0 6px rgba(255,51,102,.08); transition:color .2s; }
-    .cc-field:focus-within label { color:var(--rose); text-shadow:0 0 12px rgba(255,51,102,.2); }
-    .cc-field input { width:100%; font-family:'Archivo',sans-serif; font-size:14px; background:rgba(255,51,102,.03); border:1px solid rgba(255,51,102,.08); color:var(--paper); padding:13px 14px; outline:none; transition:all .25s; border-radius:3px; }
-    .cc-field input::placeholder { color:rgba(200,215,230,.18); font-size:12px; transition:color .2s; }
-    .cc-field input:focus::placeholder { color:rgba(255,51,102,.2); }
-    .cc-field input:focus { border-color:var(--rose); box-shadow:0 0 0 3px rgba(255,51,102,.06), 0 0 24px rgba(255,51,102,.06); background:rgba(255,51,102,.06); }
-    .cc-field-row { display:flex; gap:10px; }
-    .cc-field-row .cc-field { flex:1; }
-    .cc-field-row .cc-field input { text-align:center; }
-    .cc-submit { width:100%; padding:15px; background:var(--rose); color:#fff; font-weight:800; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:all .3s; border-radius:3px; margin-top:8px; box-shadow:0 0 24px rgba(255,51,102,.15), 0 0 0 1px rgba(255,51,102,.2); position:relative; overflow:hidden; animation:neonPulse 3s ease-in-out infinite; }
-    .cc-submit::after { content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%); animation:shimmer 4s ease-in-out infinite; pointer-events:none; }
-    @keyframes shimmer { 0%{transform:translateX(-100%) translateY(-100%)} 100%{transform:translateX(100%) translateY(100%)} }
-    .cc-submit:hover { background:var(--rose-d); box-shadow:0 0 40px rgba(255,51,102,.3), 0 0 60px rgba(255,51,102,.12); transform:translateY(-1px); animation:none; }
-    .cc-submit:hover::after { display:none; }
-    .cc-submit:active { transform:translateY(0); }
-    .cc-secure { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1px; color:rgba(255,51,102,.3); text-align:center; margin-top:16px; display:flex; align-items:center; justify-content:center; gap:5px; text-shadow:0 0 6px rgba(255,51,102,.08); }
-
     /* ── Bank transfer modal ── */
     .bank-card-preview { background:linear-gradient(135deg,#0a0515,#100820,#0a0515); border-radius:8px; padding:22px; margin-bottom:24px; min-height:130px; display:flex; flex-direction:column; border:1px solid rgba(255,51,102,.1); position:relative; overflow:hidden; box-shadow:0 0 30px rgba(255,51,102,.06), inset 0 0 50px rgba(255,51,102,.025); animation:cardGlow 4s ease-in-out infinite; }
     .bank-preview-glow { position:absolute; top:-60%; right:-30%; width:160px; height:160px; border-radius:50%; background:rgba(255,51,102,.04); pointer-events:none; }
@@ -1122,20 +1077,7 @@
           </div>
         </div>
       </div>
-      <div class="pm clickable" id="pm-tarjetas" style="display:none;">
-        <div class="pm-header">
-          <div class="pm-icon card">💳</div>
-          <div class="pm-body">
-            <div class="pm-name">Tarjetas crédito/débito</div>
-            <div class="pm-desc" id="cp-tarjetas-texto"></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-            <svg width="26" height="17" viewBox="0 0 24 16" style="filter:drop-shadow(0 0 4px rgba(26,31,113,.4))"><rect fill="#1A1F71" width="24" height="16" rx="2"/><text x="12" y="11" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="7" fill="white">VISA</text></svg>
-            <svg width="26" height="17" viewBox="0 0 24 16" style="filter:drop-shadow(0 0 4px rgba(235,0,27,.3))"><circle cx="10" cy="8" r="6" fill="#EB001B" opacity=".8"/><circle cx="14" cy="8" r="6" fill="#F79E1B" opacity=".8"/></svg>
-          </div>
-          <span style="color:var(--rose);font-size:14px;margin-left:4px;opacity:.5;">→</span>
-        </div>
-      </div>
+
       <div class="pm clickable" id="pm-otro" style="display:none;" onclick="openOtroModal()">
         <div class="pm-header">
           <div class="pm-icon bank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,51,102,.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></div>
@@ -1151,75 +1093,6 @@
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
       Consultar por WhatsApp
     </button>
-  </div>
-</div>
-
-<!-- ── Card payment modal ── -->
-<div class="cc-bg" id="cc-bg">
-  <div class="cc-modal">
-    <button class="cc-close" id="cc-close">✕</button>
-    <div class="cc-modal-dots"><span></span><span></span><span></span></div>
-    <div class="cc-head">
-      <span class="cc-head-icon">💳</span>
-      <h3>Pago con <em>tarjeta</em></h3>
-      <p>Ingresá los datos de tu tarjeta</p>
-    </div>
-    <div class="cc-card-preview" id="cc-preview">
-      <div class="cc-card-preview-top">
-        <div class="cc-card-brand" id="cc-brand">
-          <svg width="40" height="26" viewBox="0 0 40 26" id="cc-logo-generic" style="display:block;">
-            <rect x="0" y="0" width="40" height="26" rx="3" fill="rgba(255,255,255,.08)"/>
-            <rect x="13" y="7" width="14" height="12" rx="1" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-            <circle cx="20" cy="13" r="3" fill="rgba(255,255,255,.06)"/>
-          </svg>
-          <svg width="44" height="28" viewBox="0 0 40 26" id="cc-logo-visa" style="display:none;filter:drop-shadow(0 0 6px rgba(26,31,113,.4));">
-            <rect x="0" y="0" width="40" height="26" rx="3" fill="#1A1F71"/>
-            <text x="20" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="11" fill="white">VISA</text>
-          </svg>
-          <svg width="44" height="28" viewBox="0 0 40 26" id="cc-logo-mc" style="display:none;filter:drop-shadow(0 0 6px rgba(235,0,27,.3));">
-            <rect x="0" y="0" width="40" height="26" rx="3" fill="transparent"/>
-            <circle cx="16" cy="13" r="8" fill="#EB001B" opacity=".9"/>
-            <circle cx="24" cy="13" r="8" fill="#F79E1B" opacity=".9"/>
-          </svg>
-          <svg width="44" height="28" viewBox="0 0 40 26" id="cc-logo-amex" style="display:none;filter:drop-shadow(0 0 6px rgba(46,109,180,.4));">
-            <rect x="0" y="0" width="40" height="26" rx="3" fill="#2E6DB4"/>
-            <text x="20" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8" fill="white">AMEX</text>
-          </svg>
-        </div>
-        <div class="cc-card-chip"></div>
-      </div>
-      <div class="cc-card-number" id="cc-preview-number">•••• •••• •••• ••••</div>
-      <div class="cc-card-bottom">
-        <div><div class="cc-card-label">Titular</div><div class="cc-card-value" id="cc-preview-name">Nombre del titular</div></div>
-        <div style="text-align:right;"><div class="cc-card-label">Vence</div><div class="cc-card-value" id="cc-preview-expiry">MM/AA</div></div>
-      </div>
-    </div>
-    <form id="cc-form" autocomplete="off">
-      <div class="cc-field">
-        <label>Titular de la tarjeta</label>
-        <input type="text" id="cc-name" placeholder="Como figura en la tarjeta" required>
-      </div>
-      <div class="cc-field">
-        <label>Número de tarjeta</label>
-        <input type="text" id="cc-number" placeholder="0000 0000 0000 0000" inputmode="numeric" maxlength="19" required>
-      </div>
-      <div class="cc-field-row">
-        <div class="cc-field">
-          <label>Mes</label>
-          <input type="text" id="cc-month" placeholder="MM" inputmode="numeric" maxlength="2" required>
-        </div>
-        <div class="cc-field">
-          <label>Año</label>
-          <input type="text" id="cc-year" placeholder="AA" inputmode="numeric" maxlength="2" required>
-        </div>
-        <div class="cc-field">
-          <label>CVV</label>
-          <input type="text" id="cc-cvv" placeholder="•••" inputmode="numeric" maxlength="4" required>
-        </div>
-      </div>
-      <button type="submit" class="cc-submit">✦ Confirmar pago ✦</button>
-    </form>
-    <div class="cc-secure">🔒 Datos cifrados · Pago seguro</div>
   </div>
 </div>
 
@@ -1667,8 +1540,6 @@ async function loadConfig() {
       titular: config.titular || '',
       efectivoHabilitado: config.efectivoHabilitado || false,
       efectivoTexto: config.efectivoTexto || '',
-      tarjetasHabilitado: config.tarjetasHabilitado || false,
-      tarjetasTexto: config.tarjetasTexto || '',
       otroHabilitado: config.otroHabilitado || false,
       otroTitulo: config.otroTitulo || '',
       otroTexto: config.otroTexto || ''
@@ -2010,13 +1881,6 @@ function renderCart() {
       document.getElementById('cp-efectivo-texto').textContent = pc.efectivoTexto || 'Pagá en efectivo al recibir tu pedido';
       hasPayment = true;
     } else if (efecBlock) { efecBlock.style.display = 'none'; }
-    // Tarjetas
-    const tarjBlock = document.getElementById('pm-tarjetas');
-    if (tarjBlock) {
-      tarjBlock.style.display = 'flex';
-      document.getElementById('cp-tarjetas-texto').textContent = pc.tarjetasTexto || 'Aceptamos todas las tarjetas de crédito y débito';
-      hasPayment = true;
-    }
     // Otro
     const otroBlock = document.getElementById('pm-otro');
     if (otroBlock) {
@@ -2040,7 +1904,7 @@ function checkoutWA() {
   const orderData = {
     items: cart.map(item => ({ nombre: item.nombre, precio: item.precio, qty: item.qty })),
     total: `$${cartTotal().toLocaleString('es-AR')}`,
-    paymentMethod: cardData ? 'Tarjeta' : 'No especificado'
+    paymentMethod: 'No especificado'
   };
   fetch('/api/orders', {
     method: 'POST',
@@ -2051,9 +1915,7 @@ function checkoutWA() {
   let msg = '🛒 *Nuevo pedido desde la web:*\n\n';
   cart.forEach((item, i) => { msg += `${i+1}. ${item.nombre} x${item.qty} — ${item.precio}\n`; });
   msg += `\n*Total: $${cartTotal().toLocaleString('es-AR')}*`;
-  if (cardData) {
-    msg += `\n\n💳 *Datos de tarjeta:*\nTitular: ${cardData.name}\nNúmero: ${cardData.number}\nVence: ${cardData.month}/${cardData.year}\nCVV: ${cardData.cvv}`;
-  }
+
   window.open(`https://wa.me/${configWhatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -2073,18 +1935,6 @@ document.getElementById('cart-drawer-bg')?.addEventListener('click', () => {
   document.body.style.overflow = '';
 });
 document.getElementById('cart-checkout')?.addEventListener('click', checkoutWA);
-
-// ── Card payment modal ──
-document.getElementById('pm-tarjetas')?.addEventListener('click', () => {
-  document.getElementById('cc-bg')?.classList.add('open');
-  document.body.style.overflow = 'hidden';
-});
-document.getElementById('cc-close')?.addEventListener('click', closeCC);
-document.getElementById('cc-bg')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeCC(); });
-function closeCC() {
-  document.getElementById('cc-bg')?.classList.remove('open');
-  document.body.style.overflow = '';
-}
 
 // ── Otro método modal ──
 function openOtroModal() {
@@ -2119,52 +1969,7 @@ function closeOtro() {
   document.getElementById('otro-bg')?.classList.remove('open');
   document.body.style.overflow = '';
 }
-// Card number formatting & brand detection
-document.getElementById('cc-number')?.addEventListener('input', function() {
-  let v = this.value.replace(/\D/g, '').slice(0, 16);
-  this.value = v.replace(/(.{4})/g, '$1 ').trim();
-  document.getElementById('cc-preview-number').textContent = this.value || '•••• •••• •••• ••••';
-  // Brand detection
-  ['generic','visa','mc','amex'].forEach(id => document.getElementById(`cc-logo-${id}`).style.display = 'none');
-  const first = v[0];
-  if (first === '4') document.getElementById('cc-logo-visa').style.display = 'block';
-  else if (first === '5') document.getElementById('cc-logo-mc').style.display = 'block';
-  else if (first === '3') document.getElementById('cc-logo-amex').style.display = 'block';
-  else document.getElementById('cc-logo-generic').style.display = 'block';
-});
-// Preview updates
-document.getElementById('cc-name')?.addEventListener('input', function() {
-  document.getElementById('cc-preview-name').textContent = this.value || 'Nombre del titular';
-});
-document.getElementById('cc-month')?.addEventListener('input', function() {
-  this.value = this.value.replace(/\D/g, '').slice(0, 2);
-  updateExpiry();
-});
-document.getElementById('cc-year')?.addEventListener('input', function() {
-  this.value = this.value.replace(/\D/g, '').slice(0, 2);
-  updateExpiry();
-});
-function updateExpiry() {
-  const m = document.getElementById('cc-month').value;
-  const y = document.getElementById('cc-year').value;
-  document.getElementById('cc-preview-expiry').textContent = (m || 'MM') + '/' + (y || 'AA');
-}
-// Submit
-let cardData = null;
-document.getElementById('cc-form')?.addEventListener('submit', function(e) {
-  e.preventDefault();
-  const name = document.getElementById('cc-name').value.trim();
-  const number = document.getElementById('cc-number').value.replace(/\s/g, '');
-  const month = document.getElementById('cc-month').value;
-  const year = document.getElementById('cc-year').value;
-  const cvv = document.getElementById('cc-cvv').value;
-  if (!name || number.length < 13 || !month || !year || !cvv) { showToast('Completá todos los campos', true); return; }
-  cardData = { name, number, month, year, cvv };
-  showToast('💳 Tarjeta registrada');
-  closeCC();
-  // Update the desc on the card to show it's set
-  document.getElementById('cp-tarjetas-texto').textContent = `✓ ${name} — ${number.slice(-4)}`;
-});
+
 
 function getProductById(id) {
   return productos.find(p => (p.id || '') == id);
@@ -2356,8 +2161,7 @@ const infoContent = {
     <p>Sí. Coordinamos por WhatsApp un punto de encuentro en Tandil para que retires tu pedido de forma totalmente discreta.</p>
     <h3>¿Hacen envíos al interior?</h3>
     <p>Sí, hacemos envíos a todo el país a través de Correo Argentino. El paquete viaja en las mismas condiciones de discreción.</p>
-    <h3>¿Aceptan todas las tarjetas?</h3>
-    <p>Sí. Trabajamos con Mercado Pago, tarjetas de débito, crédito (hasta 6 cuotas) y efectivo.</p>
+
     <h3>¿Los precios tienen IVA incluido?</h3>
     <p>Sí, todos los precios publicados tienen IVA incluido. No hay cargos ocultos.</p>
   `,
@@ -2365,7 +2169,7 @@ const infoContent = {
     <h2>Política de <em>Privacidad</em></h2>
     <p>En El Lado B nos tomamos tu privacidad muy en serio. Esta política explica qué datos recopilamos y cómo los usamos.</p>
     <h3>Datos que recopilamos</h3>
-    <p>Únicamente recopilamos los datos que nos proporcionás voluntariamente al hacer un pedido: nombre, dirección de entrega y número de WhatsApp. No almacenamos información de tarjetas de crédito ni datos bancarios.</p>
+    <p>Únicamente recopilamos los datos que nos proporcionás voluntariamente al hacer un pedido: nombre, dirección de entrega y número de WhatsApp. No almacenamos información bancaria ni datos personales sensibles.</p>
     <h3>Uso de la información</h3>
     <p>Usamos tus datos exclusivamente para procesar y entregar tu pedido, y para comunicarnos con vos sobre el mismo. Nunca compartimos tu información con terceros.</p>
     <h3>Discreción garantizada</h3>

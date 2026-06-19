@@ -389,13 +389,6 @@
             </div>
           </div>
           <div class="form-group">
-            <label>💳 Tarjetas crédito/débito</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <label class="toggle-label"><input type="checkbox" id="config-tarjetas-habilitado"> Mostrar</label>
-              <input type="text" id="config-tarjetas-texto" class="form-input" placeholder="Aceptamos todas las tarjetas" style="flex:1;">
-            </div>
-          </div>
-          <div class="form-group">
             <label>🔄 Otro método de pago</label>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <label class="toggle-label"><input type="checkbox" id="config-otro-habilitado"> Mostrar</label>
@@ -761,8 +754,6 @@ async function cargarConfig() {
     document.getElementById('config-titular').value = cfg.titular || '';
     document.getElementById('config-efectivo-habilitado').checked = cfg.efectivoHabilitado || false;
     document.getElementById('config-efectivo-texto').value = cfg.efectivoTexto || '';
-    document.getElementById('config-tarjetas-habilitado').checked = cfg.tarjetasHabilitado || false;
-    document.getElementById('config-tarjetas-texto').value = cfg.tarjetasTexto || '';
     document.getElementById('config-otro-habilitado').checked = cfg.otroHabilitado || false;
     document.getElementById('config-otro-titulo').value = cfg.otroTitulo || '';
     document.getElementById('config-otro-texto').value = cfg.otroTexto || '';
@@ -786,8 +777,6 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
     titular: document.getElementById('config-titular').value,
     efectivoHabilitado: document.getElementById('config-efectivo-habilitado').checked,
     efectivoTexto: document.getElementById('config-efectivo-texto').value,
-    tarjetasHabilitado: document.getElementById('config-tarjetas-habilitado').checked,
-    tarjetasTexto: document.getElementById('config-tarjetas-texto').value,
     otroHabilitado: document.getElementById('config-otro-habilitado').checked,
     otroTitulo: document.getElementById('config-otro-titulo').value,
     otroTexto: document.getElementById('config-otro-texto').value
