@@ -770,6 +770,25 @@
     .cart-empty { padding:40px 20px; text-align:center; color:var(--muted); font-family:'Inconsolata',monospace; font-size:11px; }
     .cart-list { }
 
+    /* ── Bank transfer modal ── */
+    .bank-card-preview { background:linear-gradient(135deg,#0a0515,#100820,#0a0515); border-radius:8px; padding:22px; margin-bottom:24px; min-height:130px; display:flex; flex-direction:column; border:1px solid rgba(255,51,102,.1); position:relative; overflow:hidden; box-shadow:0 0 30px rgba(255,51,102,.06), inset 0 0 50px rgba(255,51,102,.025); animation:cardGlow 4s ease-in-out infinite; }
+    .bank-preview-glow { position:absolute; top:-60%; right:-30%; width:160px; height:160px; border-radius:50%; background:rgba(255,51,102,.04); pointer-events:none; }
+    .bank-preview-content { position:relative; z-index:1; display:flex; flex-direction:column; gap:8px; }
+    .bank-preview-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .bank-preview-bank { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:rgba(255,51,102,.4); text-shadow:0 0 8px rgba(255,51,102,.1); }
+    .bank-preview-field { display:flex; align-items:center; gap:10px; }
+    .bank-preview-label { font-family:'Inconsolata',monospace; font-size:7px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.2); width:44px; flex-shrink:0; }
+    .bank-preview-value { font-family:'Inconsolata',monospace; font-size:12px; letter-spacing:.8px; color:rgba(255,255,255,.85); text-shadow:0 0 8px rgba(255,255,255,.03); }
+    .bank-preview-value.mono { font-size:11px; letter-spacing:.5px; background:rgba(255,51,102,.05); padding:2px 8px; border-radius:2px; border:1px solid rgba(255,51,102,.06); }
+    .bank-details { display:flex; flex-direction:column; gap:10px; }
+    .bank-detail { display:flex; align-items:center; gap:10px; min-height:32px; padding:6px 10px; background:rgba(255,51,102,.02); border:1px solid rgba(255,51,102,.04); border-radius:3px; transition:all .2s; }
+    .bank-detail:hover { background:rgba(255,51,102,.04); border-color:rgba(255,51,102,.08); }
+    .bank-dt-label { font-family:'Inconsolata',monospace; font-size:8px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,51,102,.4); width:44px; flex-shrink:0; text-shadow:0 0 4px rgba(255,51,102,.05); }
+    .bank-dt-value { font-family:'Inconsolata',monospace; font-size:12px; letter-spacing:.5px; color:var(--paper); flex:1; word-break:break-all; }
+    .bank-dt-value.mono { font-size:11px; letter-spacing:.5px; }
+    .bank-copy-btn { width:26px; height:26px; border-radius:50%; font-size:10px; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; line-height:1; }
+    .bank-copy-btn:hover { background:rgba(255,51,102,.15); border-color:var(--rose); color:var(--rose); box-shadow:0 0 12px rgba(255,51,102,.15); }
+
     /* ── Card hover CTA ── */
     .card-hover-cta {
       position:absolute; bottom:0; left:0; right:0; z-index:3;
@@ -1059,11 +1078,68 @@
         </div>
       </div>
 
+      <div class="pm clickable" id="pm-transferencia" style="display:none;" onclick="openTransferenciaModal()">
+        <div class="pm-header">
+          <div class="pm-icon bank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,51,102,.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></div>
+          <div class="pm-body">
+            <div class="pm-name">Transferencias</div>
+            <div class="pm-desc" id="cp-transferencia-texto"></div>
+          </div>
+          <span style="color:var(--rose);font-size:14px;opacity:.5;">→</span>
+        </div>
+      </div>
+
     </div>
     <button class="cart-checkout" id="cart-checkout">
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
       Consultar por WhatsApp
     </button>
+  </div>
+</div>
+
+<!-- ── Transferencia modal ── -->
+<div class="cc-bg" id="transferencia-bg">
+  <div class="cc-modal">
+    <button class="cc-close" id="transferencia-close">✕</button>
+    <div class="cc-modal-dots"><span></span><span></span><span></span></div>
+    <div class="cc-head">
+      <span class="cc-head-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px rgba(255,51,102,.3));"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></span>
+      <h3>Transferencia <em>bancaria</em></h3>
+      <p>Datos para transferir</p>
+    </div>
+    <div class="bank-card-preview" id="transferencia-preview">
+      <div class="bank-preview-glow"></div>
+      <div class="bank-preview-content">
+        <div class="bank-preview-top">
+          <span class="bank-preview-bank" id="transferencia-preview-label">Instrucciones</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="1.5"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg>
+        </div>
+        <div class="bank-preview-field">
+          <span class="bank-preview-value" id="transferencia-preview-texto" style="font-size:11px;letter-spacing:.3px;color:rgba(255,255,255,.7);">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="bank-details" id="transferencia-bank-fields" style="display:none;">
+      <div class="bank-detail">
+        <span class="bank-dt-label">Banco</span>
+        <span class="bank-dt-value" id="transferencia-modal-banco">—</span>
+      </div>
+      <div class="bank-detail">
+        <span class="bank-dt-label">Titular</span>
+        <span class="bank-dt-value" id="transferencia-modal-titular">—</span>
+      </div>
+      <div class="bank-detail">
+        <span class="bank-dt-label">CBU</span>
+        <span class="bank-dt-value mono" id="transferencia-modal-cbu">—</span>
+        <button class="bank-copy-btn" onclick="copyText(document.getElementById('transferencia-modal-cbu').textContent)" title="Copiar CBU">📋</button>
+      </div>
+      <div class="bank-detail">
+        <span class="bank-dt-label">Alias</span>
+        <span class="bank-dt-value mono" id="transferencia-modal-alias">—</span>
+        <button class="bank-copy-btn" onclick="copyText(document.getElementById('transferencia-modal-alias').textContent)" title="Copiar alias">📋</button>
+      </div>
+    </div>
+    <div class="cc-secure">🔒 Consultá por este método de pago</div>
   </div>
 </div>
 
@@ -1789,6 +1865,15 @@ function renderCart() {
       document.getElementById('cp-efectivo-texto').textContent = pc.efectivoTexto || 'Pagá en efectivo al recibir tu pedido';
       hasPayment = true;
     } else if (efecBlock) { efecBlock.style.display = 'none'; }
+    // Transferencia
+    const transBlock = document.getElementById('pm-transferencia');
+    const transDesc = document.getElementById('cp-transferencia-texto');
+    const hasTransferencia = pc.banco || pc.cbu || pc.alias || pc.titular;
+    if (transBlock && hasTransferencia) {
+      transBlock.style.display = 'flex';
+      if (transDesc) transDesc.textContent = pc.banco ? pc.banco : 'Datos bancarios';
+      hasPayment = true;
+    } else if (transBlock) { transBlock.style.display = 'none'; }
     payDiv.style.display = hasPayment ? 'flex' : 'none';
   }
 }
@@ -1796,6 +1881,26 @@ function renderCart() {
 function copyText(t) {
   navigator.clipboard?.writeText(t).then(() => showToast('📋 Copiado')).catch(() => {});
 }
+
+/* ── Transferencia modal ── */
+function openTransferenciaModal() {
+  const bg = document.getElementById('transferencia-bg');
+  const pc = window.paymentConfig || {};
+  document.getElementById('transferencia-modal-banco').textContent = pc.banco || '—';
+  document.getElementById('transferencia-modal-titular').textContent = pc.titular || '—';
+  document.getElementById('transferencia-modal-cbu').textContent = pc.cbu || '—';
+  document.getElementById('transferencia-modal-alias').textContent = pc.alias || '—';
+  const hasFields = pc.banco || pc.titular || pc.cbu || pc.alias;
+  document.getElementById('transferencia-bank-fields').style.display = hasFields ? 'flex' : 'none';
+  document.getElementById('transferencia-preview-texto').textContent = hasFields ? (pc.banco || '') + (pc.titular ? ' · ' + pc.titular : '') : 'Pedí los datos por WhatsApp';
+  if (bg) bg.classList.add('open');
+}
+document.getElementById('transferencia-close')?.addEventListener('click', () => {
+  document.getElementById('transferencia-bg')?.classList.remove('open');
+});
+document.getElementById('transferencia-bg')?.addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) e.target.classList.remove('open');
+});
 
 function checkoutWA() {
   if (cart.length === 0) return;
