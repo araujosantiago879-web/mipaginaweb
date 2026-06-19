@@ -316,10 +316,10 @@
       body { padding:1rem; }
       .admin-header h1 { font-size:2rem; }
       .tab-btn { padding:10px 16px; font-size:10px; }
-      .products-grid { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+      .cat-items { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
     }
     @media(max-width:480px) {
-      .products-grid { grid-template-columns:1fr 1fr; gap:1px; }
+      .cat-items { grid-template-columns:1fr 1fr; gap:1px; }
       .producto-body { padding:12px; }
       .producto-body h3 { font-size:12px; }
     }
@@ -688,14 +688,15 @@ async function cargarProductos() {
     else {
       // Agrupar por categoría
       const grupos = {};
-      productos.forEach(p => {
+      productos.forEach((p, globalIdx) => {
         const cat = p.categoria || 'Sin categoría';
         if (!grupos[cat]) grupos[cat] = [];
-        grupos[cat].push(p);
+        grupos[cat].push({ ...p, _globalIdx: globalIdx });
       });
       const categoriasOrdenadas = Object.keys(grupos).sort((a, b) => a.localeCompare(b));
       container.innerHTML = categoriasOrdenadas.map(cat => {
-        const items = grupos[cat].map((p, idx) => {
+        const items = grupos[cat].map(p => {
+          const idx = p._globalIdx;
           const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
           const idSafe = (p.id || '').toString().replace(/[^a-zA-Z0-9]/g, '');
           return `<div class="producto-card">
