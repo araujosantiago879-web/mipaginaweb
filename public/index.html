@@ -789,6 +789,23 @@
     .bank-copy-btn { width:26px; height:26px; border-radius:50%; font-size:10px; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; line-height:1; }
     .bank-copy-btn:hover { background:rgba(255,51,102,.15); border-color:var(--rose); color:var(--rose); box-shadow:0 0 12px rgba(255,51,102,.15); }
 
+    /* ── Modal overlay ── */
+    .cc-bg { position:fixed; inset:0; z-index:999; background:rgba(5,5,8,.88); backdrop-filter:blur(12px); display:none; align-items:center; justify-content:center; padding:20px; }
+    .cc-bg.open { display:flex; }
+    .cc-modal { background:linear-gradient(160deg, #0c070a, #0a0a10 50%, #0c070a); border:1px solid rgba(255,51,102,.12); width:100%; max-width:440px; padding:32px 28px 28px; animation:fadein .25s ease; max-height:90vh; overflow-y:auto; position:relative; box-shadow:0 0 60px rgba(255,51,102,.05), 0 0 120px rgba(255,51,102,.025); }
+    .cc-modal::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--rose),transparent); opacity:.8; box-shadow:0 0 20px rgba(255,51,102,.4), 0 0 40px rgba(255,51,102,.15); }
+    .cc-modal-dots { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:1; }
+    .cc-modal-dots span { width:4px; height:4px; border-radius:50%; background:rgba(255,51,102,.15); box-shadow:0 0 6px rgba(255,51,102,.1); }
+    .cc-close { position:absolute; top:16px; right:16px; width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .25s; z-index:2; }
+    .cc-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; box-shadow:0 0 20px rgba(255,51,102,.35); transform:rotate(90deg); }
+    .cc-head { text-align:center; margin-bottom:22px; position:relative; }
+    .cc-head-icon { font-size:30px; margin-bottom:8px; display:block; filter:drop-shadow(0 0 12px rgba(255,51,102,.35)); }
+    .cc-head h3 { font-family:'Cormorant Garamond',serif; font-size:23px; font-weight:700; letter-spacing:.5px; }
+    .cc-head h3 em { color:var(--rose); font-style:italic; text-shadow:0 0 20px rgba(255,51,102,.35), 0 0 40px rgba(255,51,102,.12); }
+    .cc-head p { font-family:'Inconsolata',monospace; font-size:10px; color:var(--muted); letter-spacing:.5px; margin-top:2px; }
+    .cc-secure { margin-top:24px; padding:10px 14px; background:rgba(255,51,102,.03); border:1px solid rgba(255,51,102,.06); border-radius:4px; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:.3px; color:var(--muted); text-align:center; }
+    .cc-secure a { color:var(--rose); text-decoration:underline; text-underline-offset:2px; }
+
     /* ── Card hover CTA ── */
     .card-hover-cta {
       position:absolute; bottom:0; left:0; right:0; z-index:3;
