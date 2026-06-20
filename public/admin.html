@@ -779,7 +779,7 @@ async function cargarProductos() {
             </div>
           </div>`;
         }).join('');
-        return `<div class="cat-group"><div class="cat-header">${cat} <span class="cat-count">${grupos[cat].length}</span></div><div class="cat-items">${items}</div></div>`;
+        return `<div class="cat-group"><div class="cat-header" data-cat="${cat.replace(/"/g,'&quot;')}">${cat} <span class="cat-count">${grupos[cat].length}</span></div><div class="cat-items">${items}</div></div>`;
       }).join('');
     }
     loadingDiv.style.display = 'none';
@@ -826,14 +826,14 @@ function renderDrawerCategories() {
   el.querySelectorAll('.drawer-cat-sub').forEach(btn => {
     btn.addEventListener('click', () => {
       const sub = btn.dataset.sub;
-      closeDrawer();
       const headers = document.querySelectorAll('#productos-list .cat-header');
       for (const h of headers) {
-        if (h.textContent.trim().startsWith(sub)) {
+        if (h.dataset.cat === sub) {
           h.scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
         }
       }
+      closeDrawer();
     });
   });
 }
