@@ -191,6 +191,7 @@
     .drawer-cat-group.open .drawer-cat-subs { max-height:600px; }
     .drawer-cat-sub { display:block; width:100%; padding:10px 24px 10px 40px; font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; transition:color .2s, background .15s; background:none; border:none; text-align:left; }
     .drawer-cat-sub:hover { color:var(--paper); background:rgba(255,255,255,.02); }
+    .drawer-search input:focus { border-color:var(--rose); box-shadow:0 0 0 2px rgba(255,51,102,.1); }
 
     /* CONFIG SECTION */
     .config-grid {
@@ -401,6 +402,9 @@
       <div class="drawer-header">
         <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--paper);">Categorías</span>
         <button class="drawer-close" id="drawerClose">✕</button>
+      </div>
+      <div class="drawer-search" style="padding:12px 16px;">
+        <input type="text" id="drawerSearch" placeholder="Buscar categoría…" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--edge);background:var(--ink-3);color:var(--paper);font-family:'Inconsolata',monospace;font-size:12px;outline:none;">
       </div>
       <div class="drawer-categories" id="drawerCategories"></div>
     </div>
@@ -814,6 +818,7 @@ function openDrawer() {
   document.getElementById('drawerBg').classList.add('open');
   document.getElementById('drawer').classList.add('open');
   document.getElementById('hamburgerBtn').classList.add('active');
+  document.getElementById('drawerSearch').value = '';
   document.body.style.overflow = 'hidden';
   renderDrawerCategories();
 }
@@ -829,6 +834,25 @@ document.getElementById('hamburgerBtn').addEventListener('click', () => {
 });
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 document.getElementById('drawerBg').addEventListener('click', closeDrawer);
+
+document.getElementById('drawerSearch').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('#drawerCategories .drawer-cat-group').forEach(grp => {
+    const header = grp.querySelector('.drawer-cat-header');
+    const subs = grp.querySelectorAll('.drawer-cat-sub');
+    const headerMatch = header?.textContent.toLowerCase().includes(q);
+    const subMatch = Array.from(subs).some(s => s.textContent.toLowerCase().includes(q));
+    if (!q) {
+      grp.style.display = '';
+      grp.classList.remove('open');
+    } else if (headerMatch || subMatch) {
+      grp.style.display = '';
+      grp.classList.add('open');
+    } else {
+      grp.style.display = 'none';
+    }
+  });
+});
 
 function escapeHtml(str) {
   if (!str) return '';
