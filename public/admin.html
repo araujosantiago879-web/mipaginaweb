@@ -169,20 +169,28 @@
     /* TOOLBAR */
     .toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem; }
     .toolbar-left { display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
-    .hamburger-btn { width:32px; height:32px; border-radius:6px; background:var(--ink-2); border:1px solid var(--edge); color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
-    .hamburger-btn:hover { background:var(--ink-3); border-color:var(--rose); color:var(--rose); }
-    /* ── Side category menu ── */
-    .cat-side-bg { position:fixed; inset:0; z-index:998; background:rgba(5,5,8,.7); backdrop-filter:blur(6px); display:none; }
-    .cat-side-bg.open { display:block; }
-    .cat-side { position:fixed; top:0; left:0; bottom:0; z-index:999; width:260px; max-width:80vw; background:linear-gradient(180deg,#0c070a,#0a0a10); border-right:1px solid var(--edge); display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .3s cubic-bezier(.4,0,.2,1); }
-    .cat-side.open { transform:none; }
-    .cat-side-head { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--edge); font-family:'Cormorant Garamond',serif; font-size:16px; color:var(--paper); }
-    .cat-side-head button { width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .2s; }
-    .cat-side-head button:hover { background:var(--rose); border-color:var(--rose); color:#fff; }
-    .cat-side-list { flex:1; overflow-y:auto; padding:8px 0; }
-    .cat-side-item { display:flex; align-items:center; gap:8px; padding:10px 18px; cursor:pointer; font-size:13px; color:var(--muted); transition:all .15s; border:none; background:none; width:100%; text-align:left; }
-    .cat-side-item:hover { background:rgba(255,51,102,.04); color:var(--paper); }
-    .cat-side-item .cat-side-count { margin-left:auto; font-size:10px; font-family:'Inconsolata',monospace; color:var(--muted); background:var(--ink-3); padding:1px 8px; border-radius:99px; }
+    .hamburger-btn { display:flex; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer; padding:6px; }
+    .hamburger-btn span { width:20px; height:2px; background:var(--paper); border-radius:2px; transition:all .25s; }
+    .hamburger-btn.active span:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
+    .hamburger-btn.active span:nth-child(2) { opacity:0; }
+    .hamburger-btn.active span:nth-child(3) { transform:rotate(-45deg) translate(4px,-4px); }
+    .drawer-bg { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:600; opacity:0; pointer-events:none; transition:opacity .3s; }
+    .drawer-bg.open { opacity:1; pointer-events:auto; }
+    .drawer { position:fixed; top:0; left:0; bottom:0; width:300px; max-width:85vw; background:var(--bg); border-right:1px solid var(--edge); z-index:610; display:flex; flex-direction:column; transform:translateX(-100%); transition:transform .35s cubic-bezier(.4,0,.2,1); overflow:hidden; box-shadow:4px 0 40px rgba(0,0,0,.4); }
+    .drawer.open { transform:none; }
+    .drawer-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--edge); flex-shrink:0; }
+    .drawer-close { width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .25s; }
+    .drawer-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; box-shadow:0 0 20px rgba(255,51,102,.35); transform:rotate(90deg); }
+    .drawer-categories { flex:1; padding:8px 0; overflow-y:auto; }
+    .drawer-cat-group { border-bottom:1px solid var(--edge); }
+    .drawer-cat-header { display:flex; align-items:center; gap:8px; padding:12px 24px; cursor:pointer; font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); font-weight:700; transition:background .15s; user-select:none; }
+    .drawer-cat-header:hover { background:var(--ink-3); }
+    .drawer-cat-header::before { content:''; width:6px; height:6px; border-right:2px solid var(--muted-2); border-bottom:2px solid var(--muted-2); transform:rotate(-45deg); transition:transform .3s; flex-shrink:0; }
+    .drawer-cat-header.open::before { transform:rotate(45deg); }
+    .drawer-cat-subs { overflow:hidden; max-height:0; transition:max-height .35s ease; }
+    .drawer-cat-group.open .drawer-cat-subs { max-height:600px; }
+    .drawer-cat-sub { display:block; width:100%; padding:10px 24px 10px 40px; font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; transition:color .2s, background .15s; background:none; border:none; text-align:left; }
+    .drawer-cat-sub:hover { color:var(--paper); background:rgba(255,255,255,.02); }
 
     /* CONFIG SECTION */
     .config-grid {
@@ -376,7 +384,9 @@
     <div id="tab-productos" class="tab-content active">
       <div class="toolbar">
         <div class="toolbar-left">
-          <button class="hamburger-btn" id="hamburger-btn" title="Ir a categoría"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menú">
+            <span></span><span></span><span></span>
+          </button>
           <h2 class="section-title">Gestión de <em>productos</em></h2>
         </div>
         <button class="btn btn-primary" id="btn-nuevo-producto">+ Nuevo producto</button>
@@ -385,14 +395,14 @@
       <div class="products-grid" id="productos-list" style="display:none;"></div>
     </div>
 
-    <!-- ── Side category menu ── -->
-    <div class="cat-side-bg" id="cat-side-bg"></div>
-    <div class="cat-side" id="cat-side">
-      <div class="cat-side-head">
-        <span>Categorías</span>
-        <button id="cat-side-close">✕</button>
+    <!-- ── Drawer de navegación ── -->
+    <div class="drawer-bg" id="drawerBg"></div>
+    <div class="drawer" id="drawer">
+      <div class="drawer-header">
+        <span style="font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--paper);">Categorías</span>
+        <button class="drawer-close" id="drawerClose">✕</button>
       </div>
-      <div class="cat-side-list" id="cat-side-list"></div>
+      <div class="drawer-categories" id="drawerCategories"></div>
     </div>
 
     <!-- TAB CONFIG -->
@@ -745,50 +755,70 @@ async function cargarProductos() {
     }
     loadingDiv.style.display = 'none';
     gridDiv.style.display = 'grid';
-    populateSideMenu();
   } catch (err) {
     loadingDiv.innerHTML = '❌ Error al cargar productos. Verificá que el servidor esté corriendo.';
     showToast('Error al cargar productos', true);
   }
 }
 
-/* ── Side category menu ── */
-function populateSideMenu() {
-  const list = document.getElementById('cat-side-list');
-  const headers = document.querySelectorAll('#productos-list .cat-header');
-  list.innerHTML = Array.from(headers).map(h => {
-    const name = h.childNodes[0].textContent.trim();
-    const count = h.querySelector('.cat-count')?.textContent || '';
-    return `<button class="cat-side-item" data-cat="${name}">${name}<span class="cat-side-count">${count}</span></button>`;
-  }).join('');
+/* ── Drawer de navegación (categorías) ── */
+function loadCategoryTreeFromStorage() {
+  try {
+    const saved = localStorage.getItem('categoryTree');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return null;
 }
-document.getElementById('hamburger-btn')?.addEventListener('click', () => {
-  populateSideMenu();
-  document.getElementById('cat-side-bg')?.classList.add('open');
-  document.getElementById('cat-side')?.classList.add('open');
+function renderDrawerCategories() {
+  const el = document.getElementById('drawerCategories');
+  const tree = loadCategoryTreeFromStorage();
+  if (!tree) { el.innerHTML = '<div style="padding:24px;color:var(--muted);font-size:12px;">Abrí la tienda primero para cargar las categorías</div>'; return; }
+  el.innerHTML = tree.map(p => `<div class="drawer-cat-group">
+    <div class="drawer-cat-header">${p.name}</div>
+    <div class="drawer-cat-subs">${p.subs.map(s => `<button class="drawer-cat-sub" data-cat="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}</div>
+  </div>`).join('');
+  el.querySelectorAll('.drawer-cat-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const grp = h.parentElement;
+      const wasOpen = grp.classList.contains('open');
+      el.querySelectorAll('.drawer-cat-group.open').forEach(g => g.classList.remove('open'));
+      if (!wasOpen) grp.classList.add('open');
+    });
+  });
+  el.querySelectorAll('.drawer-cat-sub').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cat = btn.dataset.cat;
+      closeDrawer();
+      // Scroll to matching category group in the admin products grid
+      const headers = document.querySelectorAll('#productos-list .cat-header');
+      for (const h of headers) {
+        if (h.textContent.trim().startsWith(cat)) {
+          h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+      }
+    });
+  });
+}
+function openDrawer() {
+  document.getElementById('drawerBg').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('hamburgerBtn').classList.add('active');
   document.body.style.overflow = 'hidden';
-});
-function closeCatSide() {
-  document.getElementById('cat-side-bg')?.classList.remove('open');
-  document.getElementById('cat-side')?.classList.remove('open');
+  renderDrawerCategories();
+}
+function closeDrawer() {
+  document.getElementById('drawerBg').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('hamburgerBtn').classList.remove('active');
   document.body.style.overflow = '';
 }
-document.getElementById('cat-side-close')?.addEventListener('click', closeCatSide);
-document.getElementById('cat-side-bg')?.addEventListener('click', closeCatSide);
-document.getElementById('cat-side-list')?.addEventListener('click', (e) => {
-  const btn = e.target.closest('.cat-side-item');
-  if (!btn) return;
-  const cat = btn.dataset.cat;
-  closeCatSide();
-  // Scroll to the category header
-  const headers = document.querySelectorAll('#productos-list .cat-header');
-  for (const h of headers) {
-    if (h.childNodes[0].textContent.trim() === cat) {
-      h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      break;
-    }
-  }
+document.getElementById('hamburgerBtn').addEventListener('click', () => {
+  if (document.getElementById('drawer').classList.contains('open')) closeDrawer();
+  else openDrawer();
 });
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.getElementById('drawerBg').addEventListener('click', closeDrawer);
 
 function escapeHtml(str) {
   if (!str) return '';
