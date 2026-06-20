@@ -762,20 +762,29 @@ async function cargarProductos() {
 }
 
 /* ── Drawer de navegación (categorías) ── */
-function loadCategoryTreeFromStorage() {
-  try {
-    const saved = localStorage.getItem('categoryTree');
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return null;
-}
 function renderDrawerCategories() {
   const el = document.getElementById('drawerCategories');
-  const tree = loadCategoryTreeFromStorage();
-  if (!tree) { el.innerHTML = '<div style="padding:24px;color:var(--muted);font-size:12px;">Abrí la tienda primero para cargar las categorías</div>'; return; }
+  // Try loading from localStorage first (set by index.html)
+  let tree = null;
+  try {
+    const saved = localStorage.getItem('categoryTree');
+    if (saved) tree = JSON.parse(saved);
+  } catch {}
+  if (!tree) {
+    // Build tree from DOM categories in the products grid
+    const headers = document.querySelectorAll('#productos-list .cat-header');
+    if (!headers.length) {
+      el.innerHTML = '<div style="padding:24px;color:var(--muted);font-size:12px;">No hay categorías cargadas</div>';
+      return;
+    }
+    tree = Array.from(headers).map(h => {
+      const name = h.childNodes[0].textContent.trim();
+      return { name, subs: [] };
+    });
+  }
   el.innerHTML = tree.map(p => `<div class="drawer-cat-group">
     <div class="drawer-cat-header">${p.name}</div>
-    <div class="drawer-cat-subs">${p.subs.map(s => `<button class="drawer-cat-sub" data-cat="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}</div>
+    <div class="drawer-cat-subs">${p.subs.length ? p.subs.map(s => `<button class="drawer-cat-sub" data-cat="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('') : `<button class="drawer-cat-sub" data-cat="${p.name.replace(/"/g,'&quot;')}">${p.name}</button>`}</div>
   </div>`).join('');
   el.querySelectorAll('.drawer-cat-header').forEach(h => {
     h.addEventListener('click', () => {
@@ -789,10 +798,11 @@ function renderDrawerCategories() {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;
       closeDrawer();
-      // Scroll to matching category group in the admin products grid
+      // Scroll to matching category in the admin products grid
       const headers = document.querySelectorAll('#productos-list .cat-header');
       for (const h of headers) {
-        if (h.textContent.trim().startsWith(cat)) {
+        const hName = h.childNodes[0].textContent.trim();
+        if (hName === cat || hName.startsWith(cat)) {
           h.scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
         }
