@@ -796,6 +796,29 @@
     .cc-modal::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--rose),transparent); opacity:.8; box-shadow:0 0 20px rgba(255,51,102,.4), 0 0 40px rgba(255,51,102,.15); }
     .cc-modal-dots { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:1; }
     .cc-modal-dots span { width:4px; height:4px; border-radius:50%; background:rgba(255,51,102,.15); box-shadow:0 0 6px rgba(255,51,102,.1); }
+    /* ── Checkout online ── */
+    .co-modal .cc-modal { max-width:520px; padding:32px 28px 24px; }
+    .co-form { display:flex; flex-direction:column; gap:12px; margin:16px 0; }
+    .co-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .co-field { display:flex; flex-direction:column; gap:4px; }
+    .co-field label { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted-2); }
+    .co-field input,
+    .co-field textarea { background:var(--ink-2); border:1px solid var(--edge); padding:10px 12px; font-family:'Archivo',sans-serif; font-size:13px; color:var(--paper); outline:none; transition:border .2s; border-radius:1px; }
+    .co-field input:focus,
+    .co-field textarea:focus { border-color:var(--rose); }
+    .co-field textarea { resize:vertical; min-height:60px; }
+    .co-summary { background:var(--ink-3); border:1px solid var(--edge); padding:14px 16px; margin:8px 0 12px; font-size:13px; }
+    .co-summary-item { display:flex; justify-content:space-between; padding:4px 0; color:var(--muted); }
+    .co-summary-total { display:flex; justify-content:space-between; padding:8px 0 0; margin-top:8px; border-top:1px solid var(--edge); font-weight:700; color:var(--paper); font-size:15px; }
+    .co-btn { width:100%; padding:14px; background:linear-gradient(135deg,#009ee3,#0055ff); color:#fff; font-weight:800; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:opacity .2s; display:flex; align-items:center; justify-content:center; gap:8px; border-radius:1px; }
+    .co-btn:hover { opacity:.85; }
+    .co-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .co-btn svg { width:18px; height:18px; }
+    .co-error { color:var(--rose); font-size:12px; text-align:center; padding:8px; display:none; }
+    .co-success { text-align:center; padding:32px 16px; }
+    .co-success h3 { font-size:24px; margin-bottom:8px; }
+    .co-success p { color:var(--muted); font-size:14px; line-height:1.6; }
+    .co-success .co-btn { display:inline-flex; width:auto; margin-top:16px; padding:12px 24px; }
     .cc-close { position:absolute; top:16px; right:16px; width:28px; height:28px; border-radius:50%; background:rgba(255,51,102,.06); border:1px solid rgba(255,51,102,.1); color:var(--muted); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .25s; z-index:2; }
     .cc-close:hover { background:var(--rose); border-color:var(--rose); color:#fff; box-shadow:0 0 20px rgba(255,51,102,.35); transform:rotate(90deg); }
     .cc-head { text-align:center; margin-bottom:22px; position:relative; }
@@ -1107,10 +1130,71 @@
       </div>
 
     </div>
+    <button class="co-btn" id="cart-checkout-online" style="margin-bottom:8px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      Comprar online ahora
+    </button>
     <button class="cart-checkout" id="cart-checkout">
       <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
       Consultar por WhatsApp
     </button>
+  </div>
+</div>
+
+<!-- ── Checkout online modal ── -->
+<div class="cc-bg co-modal" id="checkout-bg">
+  <div class="cc-modal">
+    <button class="cc-close" id="checkout-close">✕</button>
+    <div class="cc-modal-dots"><span></span><span></span><span></span></div>
+    <div class="cc-head">
+      <span class="cc-head-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 8px rgba(255,51,102,.3));"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg></span>
+      <h3>Compra 100% <em>online</em></h3>
+      <p>Completá tus datos y pagá con Mercado Pago</p>
+    </div>
+    <div id="checkout-body">
+      <div class="co-form" id="checkout-form">
+        <div class="co-row">
+          <div class="co-field">
+            <label>Nombre completo</label>
+            <input type="text" id="co-nombre" placeholder="Ej: Juan Pérez" required>
+          </div>
+          <div class="co-field">
+            <label>Teléfono / WhatsApp</label>
+            <input type="tel" id="co-telefono" placeholder="Ej: 2494123456" required>
+          </div>
+        </div>
+        <div class="co-field">
+          <label>Dirección de entrega</label>
+          <input type="text" id="co-direccion" placeholder="Calle, número, piso" required>
+        </div>
+        <div class="co-row">
+          <div class="co-field">
+            <label>Ciudad</label>
+            <input type="text" id="co-ciudad" placeholder="Ej: Tandil" required>
+          </div>
+          <div class="co-field">
+            <label>Código postal (opcional)</label>
+            <input type="text" id="co-cp" placeholder="Ej: 7000">
+          </div>
+        </div>
+        <div class="co-field">
+          <label>Notas del pedido (opcional)</label>
+          <textarea id="co-notas" placeholder="Horario de entrega, puntos de referencia..."></textarea>
+        </div>
+      </div>
+      <div class="co-summary" id="checkout-summary"></div>
+      <div class="co-error" id="co-error"></div>
+      <button class="co-btn" id="co-submit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Pagar con Mercado Pago
+      </button>
+    </div>
+    <div class="co-success" id="checkout-success" style="display:none;">
+      <h3>✅ Pedido recibido</h3>
+      <p>Tu pedido fue registrado correctamente. Te redirigimos a Mercado Pago para completar el pago de forma segura.</p>
+      <p style="margin-top:12px;font-size:13px;color:var(--muted);">Si no redirige automáticamente, hace clic en el botón de abajo.</p>
+      <button class="co-btn" id="co-retry-btn">Ir a Mercado Pago</button>
+    </div>
   </div>
 </div>
 
@@ -1963,6 +2047,70 @@ function checkoutWA() {
   window.open(`https://wa.me/${configWhatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
+/* ── Compra online ── */
+let _checkoutInitPoint = '';
+function openCheckoutModal() {
+  if (!cart.length) return;
+  document.getElementById('checkout-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('checkout-body').style.display = '';
+  document.getElementById('checkout-success').style.display = 'none';
+  document.getElementById('co-error').style.display = 'none';
+  document.getElementById('checkout-form').reset();
+  // Render summary
+  const el = document.getElementById('checkout-summary');
+  el.innerHTML = cart.map(item => `<div class="co-summary-item"><span>${item.nombre} x${item.qty}</span><span>$${(parseFloat(item.precio.replace(/[^0-9]/g,'')) * item.qty).toLocaleString('es-AR')}</span></div>`).join('') +
+    `<div class="co-summary-total"><span>Total</span><span>$${cartTotal().toLocaleString('es-AR')}</span></div>`;
+  _checkoutInitPoint = '';
+}
+function closeCheckoutModal() {
+  document.getElementById('checkout-bg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+async function submitOnlineOrder() {
+  const errEl = document.getElementById('co-error');
+  errEl.style.display = 'none';
+  const nombre = document.getElementById('co-nombre').value.trim();
+  const telefono = document.getElementById('co-telefono').value.trim();
+  const direccion = document.getElementById('co-direccion').value.trim();
+  const ciudad = document.getElementById('co-ciudad').value.trim();
+  if (!nombre) { errEl.textContent = 'Ingresá tu nombre'; errEl.style.display = 'block'; return; }
+  if (!telefono) { errEl.textContent = 'Ingresá tu teléfono'; errEl.style.display = 'block'; return; }
+  if (!direccion) { errEl.textContent = 'Ingresá tu dirección'; errEl.style.display = 'block'; return; }
+  if (!ciudad) { errEl.textContent = 'Ingresá tu ciudad'; errEl.style.display = 'block'; return; }
+  const btn = document.getElementById('co-submit');
+  btn.disabled = true; btn.textContent = 'Procesando…';
+  try {
+    const res = await fetch('/api/create-preference', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: cart.map(item => ({ nombre: item.nombre, precio: item.precio, qty: item.qty })),
+        customerInfo: { nombre, telefono, direccion, ciudad, cp: document.getElementById('co-cp').value.trim(), notas: document.getElementById('co-notas').value.trim() }
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Error al procesar el pedido'; errEl.style.display = 'block'; btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Pagar con Mercado Pago'; return; }
+    _checkoutInitPoint = data.initPoint;
+    // Show success + redirect
+    document.getElementById('checkout-body').style.display = 'none';
+    document.getElementById('checkout-success').style.display = 'block';
+    document.getElementById('co-retry-btn').onclick = () => { window.location.href = _checkoutInitPoint; };
+    setTimeout(() => { if (_checkoutInitPoint) window.location.href = _checkoutInitPoint; }, 1500);
+  } catch (err) {
+    errEl.textContent = 'Error de conexión. Verificá que el servidor esté funcionando.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Pagar con Mercado Pago';
+  }
+}
+
+document.getElementById('cart-checkout-online')?.addEventListener('click', openCheckoutModal);
+document.getElementById('checkout-close')?.addEventListener('click', closeCheckoutModal);
+document.getElementById('checkout-bg')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeCheckoutModal(); });
+document.getElementById('co-submit')?.addEventListener('click', submitOnlineOrder);
+// Enter en el último campo del formulario también envía
+document.getElementById('co-notas')?.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitOnlineOrder(); } });
+
 document.getElementById('cart-btn')?.addEventListener('click', () => {
   document.getElementById('cart-drawer-bg')?.classList.add('open');
   document.getElementById('cart-drawer')?.classList.add('open');
@@ -2738,6 +2886,13 @@ if (window.location.hash === '#admin') {
 
 // ── Inicializar ──
 loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
+// Manejar redirect de Mercado Pago
+const orderParam = new URLSearchParams(window.location.search).get('order');
+if (orderParam === 'success') showToast('✅ Pago aprobado. Te vamos a contactar para coordinar la entrega.');
+else if (orderParam === 'failure') showToast('❌ El pago no pudo completarse. Intentá de nuevo o usá otro método.', true);
+else if (orderParam === 'pending') showToast('⏳ El pago está pendiente. Te avisaremos cuando se confirme.');
+// Limpiar URL sin recargar
+if (orderParam) history.replaceState(null, '', window.location.pathname);
 </script>
 </body>
 </html>

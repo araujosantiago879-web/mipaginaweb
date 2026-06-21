@@ -4,6 +4,16 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
+const mercadopago = require('mercadopago');
+
+// ─── Mercado Pago ────────────────────────────────────────────────────────────
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+if (MP_ACCESS_TOKEN) {
+  mercadopago.configure({ access_token: MP_ACCESS_TOKEN });
+  console.log('✅ Mercado Pago configurado');
+} else {
+  console.log('⚠️  MP_ACCESS_TOKEN no configurado — compra online no disponible');
+}
 
 const app = express();
 
@@ -636,6 +646,94 @@ app.delete('/api/orders/:id', checkAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al eliminar pedido' });
+  }
+});
+
+// ─── Mercado Pago — Compra online ──────────────────────────────────────────
+app.post('/api/create-preference', async (req, res) => {
+  try {
+    if (!MP_ACCESS_TOKEN) {
+      return res.status(400).json({ error: 'Mercado Pago no configurado. Configurá MP_ACCESS_TOKEN en las variables de entorno.' });
+    }
+    const { items, customerInfo } = req.body;
+    if (!items || !items.length) {
+      return res.status(400).json({ error: 'Carrito vacío' });
+    }
+    const preferenceItems = items.map(item => ({
+      title: item.nombre,
+      unit_price: parseFloat(String(item.precio).replace(/[^0-9]/g, '')) || 0,
+      quantity: item.qty || 1,
+      currency_id: 'ARS'
+    }));
+    const siteUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : `http://localhost:${process.env.PORT || 3000}`;
+    const preference = {
+      items: preferenceItems,
+      payer: {
+        name: (customerInfo && customerInfo.nombre) || '',
+        phone: { number: (customerInfo && customerInfo.telefono) || '' },
+        address: { street_name: (customerInfo && customerInfo.direccion) || '' }
+      },
+      back_urls: {
+        success: `${siteUrl}/api/order-result`,
+        failure: `${siteUrl}/api/order-result`,
+        pending: `${siteUrl}/api/order-result`
+      },
+      auto_return: 'approved',
+      external_reference: Date.now().toString()
+    };
+    const result = await mercadopago.preferences.create(preference);
+    const prefId = result.body.id;
+    const initPoint = result.body.init_point;
+    // Guardar orden en DB
+    const ordersCol = await getOrders();
+    const total = items.reduce((sum, item) => {
+      const price = parseFloat(String(item.precio).replace(/[^0-9]/g, '')) || 0;
+      return sum + price * (item.qty || 1);
+    }, 0);
+    const order = {
+      items,
+      total: `$${total.toLocaleString('es-AR')}`,
+      paymentMethod: 'Mercado Pago',
+      customerInfo: customerInfo || {},
+      preferenceId: prefId,
+      createdAt: new Date(),
+      status: 'pendiente',
+      paymentStatus: 'pending'
+    };
+    const saved = await ordersCol.insertOne(order);
+    res.json({ id: saved.insertedId, preferenceId: prefId, initPoint });
+  } catch (err) {
+    console.error('Error creating MP preference:', err);
+    res.status(500).json({ error: 'Error al crear preferencia de pago', detail: err.message });
+  }
+});
+
+// Redirect de vuelta de Mercado Pago
+app.get('/api/order-result', async (req, res) => {
+  const { status, preference_id } = req.query;
+  let paymentStatus = 'pending';
+  if (status === 'approved' || status === 'success') paymentStatus = 'approved';
+  else if (status === 'rejected' || status === 'failure') paymentStatus = 'rejected';
+  else if (status === 'pending') paymentStatus = 'pending';
+  if (preference_id) {
+    try {
+      const ordersCol = await getOrders();
+      await ordersCol.updateOne(
+        { preferenceId: preference_id },
+        { $set: { paymentStatus } }
+      );
+    } catch (err) {
+      console.error('Error updating order after MP redirect:', err);
+    }
+  }
+  if (paymentStatus === 'approved') {
+    res.redirect('/?order=success');
+  } else if (paymentStatus === 'rejected') {
+    res.redirect('/?order=failure');
+  } else {
+    res.redirect('/?order=pending');
   }
 });
 
