@@ -1156,7 +1156,7 @@
         <button class="bank-copy-btn" onclick="copyText(document.getElementById('otro-modal-alias').textContent)" title="Copiar alias">📋</button>
       </div>
     </div>
-    <div class="cc-secure" id="otro-modal-secure">🔒 Consultá por este método de pago</div>
+    <div class="cc-secure" id="otro-modal-secure">🔒 Al usar este método aceptás nuestra <a href="#" onclick="closeOtro();showSection('privacidad')" style="color:var(--rose);text-decoration:underline;">Política de Privacidad</a></div>
   </div>
 </div>
 
@@ -2176,15 +2176,65 @@ const infoContent = {
   `,
   'privacidad': `
     <h2>Política de <em>Privacidad</em></h2>
-    <p>En El Lado B nos tomamos tu privacidad muy en serio. Esta política explica qué datos recopilamos y cómo los usamos.</p>
-    <h3>Datos que recopilamos</h3>
-    <p>Únicamente recopilamos los datos que nos proporcionás voluntariamente al hacer un pedido: nombre, dirección de entrega y número de WhatsApp. No almacenamos información bancaria ni datos personales sensibles.</p>
-    <h3>Uso de la información</h3>
-    <p>Usamos tus datos exclusivamente para procesar y entregar tu pedido, y para comunicarnos con vos sobre el mismo. Nunca compartimos tu información con terceros.</p>
-    <h3>Discreción garantizada</h3>
-    <p>No enviamos correos promocionales ni mensajes no solicitados. No compartimos tu número de WhatsApp con nadie. Todos los envíos son en empaque neutro.</p>
-    <h3>Derechos</h3>
-    <p>Podés solicitar la eliminación de tus datos en cualquier momento escribiéndonos por WhatsApp. No conservamos datos más allá de lo necesario para cumplir con obligaciones fiscales.</p>
+    <p>En <strong>El Lado B</strong> nos tomamos tu privacidad muy en serio. Esta política describe qué datos personales recopilamos, con qué fin, cómo los protegemos y cuáles son tus derechos, en cumplimiento de la <strong>Ley 25.326</strong> de Protección de Datos Personales de la República Argentina y su Decreto Reglamentario 1558/2001.</p>
+
+    <h3>1. Responsable del tratamiento</h3>
+    <p><strong>El Lado B</strong> — Sex Shop Tandil<br>
+    Contacto: <a href="https://wa.me/5492494123456" target="_blank">WhatsApp</a> / <a href="mailto:elladobsexshop@gmail.com">elladobsexshop@gmail.com</a><br>
+    Responsable del tratamiento de datos: Santiago Araujo</p>
+
+    <h3>2. Datos que recopilamos</h3>
+    <p>Recopilamos únicamente los datos que nos proporcionás voluntariamente al realizar un pedido o consulta:</p>
+    <ul style="margin:8px 0 12px 20px;color:var(--muted);font-size:14px;line-height:1.8;list-style:disc;">
+      <li>Nombre y apellido</li>
+      <li>Dirección de entrega</li>
+      <li>Número de WhatsApp / teléfono de contacto</li>
+      <li>Productos solicitados</li>
+      <li>Datos bancarios para pago por transferencia: <strong>CBU, alias, banco, titular de cuenta</strong> (proporcionados voluntariamente por el cliente para procesar el pago)</li>
+      <li>Correo electrónico (si lo proporcionás)</li>
+    </ul>
+    <p>No recopilamos datos sensibles como orientación sexual, preferencias políticas, religión, ni información biométrica. Los productos que comprás son tratados con total discreción y no se asocian públicamente a tu identidad.</p>
+
+    <h3>3. Finalidad del tratamiento</h3>
+    <p>Utilizamos tus datos exclusivamente para:</p>
+    <ul style="margin:8px 0 12px 20px;color:var(--muted);font-size:14px;line-height:1.8;list-style:disc;">
+      <li>Procesar, confirmar y entregar tu pedido</li>
+      <li>Comunicarnos con vos sobre el estado de tu compra</li>
+      <li>Gestionar medios de pago (incluyendo transferencias bancarias)</li>
+      <li>Cumplir con obligaciones fiscales y contables (emisión de facturas, registros de venta)</li>
+      <li>Responder consultas y brindar atención al cliente</li>
+    </ul>
+    <p>No utilizamos tus datos para envío de publicidad, mailing masivo, marketing automatizado ni perfiles comerciales sin tu consentimiento expreso.</p>
+
+    <h3>4. Base legal</h3>
+    <p>El tratamiento de tus datos se basa en tu <strong>consentimiento</strong> al proporcionarlos voluntariamente al realizar un pedido, y en la <strong>relación comercial</strong> que se establece entre vos y El Lado B al concretar una compra. La Ley 25.326 ampara este tratamiento en sus artículos 5 y 6.</p>
+
+    <h3>5. Almacenamiento y seguridad</h3>
+    <p>Los datos se almacenan en una base de datos en nuestro servidor con acceso restringido. Implementamos medidas de seguridad básicas: acceso por contraseña, entorno cerrado, y empaque neutro en todos los envíos para proteger tu privacidad física. No compartimos ni cedemos tus datos a terceros bajo ningún concepto, salvo obligación legal expresa.</p>
+
+    <h3>6. Plazo de conservación</h3>
+    <p>Conservamos tus datos personales durante el tiempo necesario para cumplir con la finalidad para la que fueron recogidos y mientras exista obligación fiscal o contable de por medio (mínimo 5 años según normas de AFIP). Una vez vencido ese plazo, los datos se eliminan de forma segura.</p>
+
+    <h3>7. Tus derechos (ARCO)</h3>
+    <p>La Ley 25.326 te otorga los siguientes derechos:</p>
+    <ul style="margin:8px 0 12px 20px;color:var(--muted);font-size:14px;line-height:1.8;list-style:disc;">
+      <li><strong>Acceso:</strong> solicitarnos qué datos tenemos tuyos</li>
+      <li><strong>Rectificación:</strong> corregir datos inexactos o desactualizados</li>
+      <li><strong>Cancelación:</strong> solicitar la eliminación de tus datos</li>
+      <li><strong>Oposición:</strong> oponerte al tratamiento de tus datos</li>
+    </ul>
+    <p>Podés ejercer estos derechos en cualquier momento escribiéndonos por <a href="https://wa.me/5492494123456" target="_blank">WhatsApp</a> o por <a href="mailto:elladobsexshop@gmail.com">email</a>. Responderemos tu solicitud en un plazo máximo de 10 días hábiles.</p>
+
+    <h3>8. Discreción garantizada</h3>
+    <p>No compartimos tu número de WhatsApp con nadie. Todos los envíos son en empaque neutro, sin logos ni referencias al contenido. No realizamos llamadas ni mensajes no solicitados. Tu privacidad es la base de nuestro servicio.</p>
+
+    <h3>9. Transferencia de datos</h3>
+    <p>No realizamos transferencias internacionales de datos personales. Toda la información se almacena y procesa en servidores ubicados en Argentina.</p>
+
+    <h3>10. Modificaciones</h3>
+    <p>Esta política puede ser actualizada periódicamente. Te recomendamos revisarla cada vez que realices un pedido. La versión vigente está siempre disponible en este enlace.</p>
+
+    <p style="margin-top:20px;padding:14px;background:var(--ink-3);border:1px solid var(--edge);font-size:12px;color:var(--muted);">📄 <strong>Última actualización:</strong> Junio 2026. Ante cualquier duda, escribinos por WhatsApp.</p>
   `,
   'terminos': `
     <h2>Términos y <em>Condiciones</em></h2>
