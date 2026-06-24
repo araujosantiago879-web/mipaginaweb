@@ -386,6 +386,32 @@
       gap:20px;
     }
 
+    /* ── Catálogo visual ── */
+    .catalog-grid { display:flex; flex-direction:column; gap:48px; margin-top:12px; }
+    .cat-chapter { }
+    .cat-chapter-head { display:flex; align-items:center; gap:16px; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid var(--edge); }
+    .cat-chapter-num { font-family:'Inconsolata',monospace; font-size:11px; color:var(--rose); letter-spacing:2px; opacity:.6; }
+    .cat-chapter-title { font-family:'Inconsolata',monospace; font-size:13px; letter-spacing:3px; text-transform:uppercase; color:var(--paper); font-weight:600; }
+    .cat-chapter-count { font-size:12px; color:var(--muted); margin-left:auto; }
+    .cat-chapter-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px; }
+    .cat-item { position:relative; overflow:hidden; cursor:pointer; aspect-ratio:3/4; background:var(--ink-3); border:1px solid var(--edge); transition:transform .35s, box-shadow .35s; }
+    .cat-item:hover { transform:scale(1.02); box-shadow:0 12px 32px rgba(0,0,0,.5); z-index:2; }
+    .cat-item img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s; }
+    .cat-item:hover img { transform:scale(1.05); }
+    .cat-item-overlay { position:absolute; inset:0; background:linear-gradient(0deg,rgba(5,5,8,.92) 0%,rgba(5,5,8,.3) 50%,rgba(5,5,8,.1) 100%); display:flex; flex-direction:column; justify-content:flex-end; padding:16px 14px 14px; opacity:0; transition:opacity .35s; }
+    .cat-item:hover .cat-item-overlay { opacity:1; }
+    .cat-item-overlay .cat-item-name { font-size:13px; font-weight:600; color:var(--paper); line-height:1.3; }
+    .cat-item-overlay .cat-item-price { font-size:15px; font-weight:700; color:var(--rose); margin-top:3px; }
+    .cat-item-overlay .cat-item-badge { position:absolute; top:12px; left:12px; font-size:9px; letter-spacing:1px; text-transform:uppercase; padding:3px 8px; border-radius:1px; background:var(--rose); color:var(--ink); font-weight:700; }
+    .cat-item .cat-add-btn { position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:var(--rose); border:none; color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transform:scale(.8); transition:opacity .3s, transform .3s; box-shadow:0 4px 12px rgba(232,54,93,.4); }
+    .cat-item:hover .cat-add-btn { opacity:1; transform:scale(1); }
+    .cat-item .cat-add-btn:hover { background:var(--rose-d); transform:scale(1.1) !important; }
+    .cat-nav { display:flex; gap:8px; flex-wrap:wrap; margin:16px 0 8px; }
+    .cat-nav-btn { padding:8px 16px; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; background:var(--ink-3); border:1px solid var(--edge); color:var(--muted); cursor:pointer; transition:all .2s; border-radius:1px; }
+    .cat-nav-btn:hover { border-color:var(--rose); color:var(--paper); }
+    .cat-nav-btn.on { background:var(--rose); color:var(--ink); border-color:var(--rose); font-weight:700; }
+    @media (max-width:640px) { .cat-chapter-grid { grid-template-columns:repeat(2,1fr); gap:8px; } .cat-item { aspect-ratio:2/3; } }
+
     /* ── Card ── */
     .card {
       display:flex; flex-direction:column;
@@ -1042,6 +1068,7 @@
   <a href="#" class="logo">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
   <ul class="nav-links">
     <li><a href="#" data-tab="tienda" class="active">Tienda</a></li>
+    <li><a href="#" data-tab="catalogo">Catálogo</a></li>
     <li><a href="#" data-tab="discrecion">Discreción</a></li>
     <li><a href="#" data-tab="testimonios">Reseñas</a></li>
     <li><a href="#" data-tab="contacto">Contacto</a></li>
@@ -1326,6 +1353,20 @@
         <button class="search-empty-clear" onclick="clearSearch()">Limpiar búsqueda</button>
       </div>
     </div>
+  </section>
+</div>
+
+<div id="tab-catalogo" class="section-tab">
+  <section class="catalogo" id="catalogo">
+    <div class="section-head reveal">
+      <div>
+        <div style="font-family:'Inconsolata';font-size:10px;letter-spacing:3px;color:var(--rose);margin-bottom:8px;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:1px;background:var(--rose);display:inline-block;"></span>Catálogo visual</div>
+        <h2 class="section-h2">Catálogo <em>completo</em></h2>
+      </div>
+      <div class="section-label" style="font-family:'Inconsolata',monospace;font-size:10px;color:var(--muted);">Navegá por categorías · Hacé clic para ver detalle</div>
+    </div>
+    <div class="cat-nav" id="catalog-nav"></div>
+    <div class="catalog-grid" id="catalog-grid"></div>
   </section>
 </div>
 
@@ -1669,9 +1710,10 @@ function activateTab(tabId) {
   const activeLink = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
   if (activeLink) activeLink.classList.add('active');
   localStorage.setItem('activeTab', tabId);
+  if (tabId === 'catalogo' && productos.length) renderCatalog();
 }
 const savedTab = localStorage.getItem('activeTab');
-if (savedTab && ['tienda','discrecion','testimonios','contacto'].includes(savedTab)) {
+if (savedTab && ['tienda','catalogo','discrecion','testimonios','contacto'].includes(savedTab)) {
   activateTab(savedTab);
 } else {
   activateTab('tienda');
@@ -1785,6 +1827,57 @@ function renderTabs() {
 }
 
 const WA_SVG = `<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.557 4.126 1.533 5.861L.057 23.197a.75.75 0 00.921.91l5.42-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.695 9.695 0 01-4.956-1.358l-.356-.213-3.686.994.989-3.604-.234-.373A9.692 9.692 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>`;
+
+/* ── Catálogo visual ── */
+function renderCatalog() {
+  const grid = document.getElementById('catalog-grid');
+  const nav = document.getElementById('catalog-nav');
+  if (!grid || !productos.length) return;
+  const cats = [...new Set(productos.map(p => p.categoria || 'Sin categoría'))].sort((a,b) => a.localeCompare(b));
+  nav.innerHTML = `<button class="cat-nav-btn on" data-cat="all">Todo</button>` + cats.map(c => `<button class="cat-nav-btn" data-cat="${c.replace(/"/g,'&quot;')}">${c}</button>`).join('');
+  nav.querySelectorAll('.cat-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      nav.querySelectorAll('.cat-nav-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      renderCatalogGrid(btn.dataset.cat);
+    });
+  });
+  renderCatalogGrid('all');
+}
+function renderCatalogGrid(filterCat) {
+  const grid = document.getElementById('catalog-grid');
+  const grouped = {};
+  productos.forEach(p => {
+    const cat = p.categoria || 'Sin categoría';
+    if (filterCat !== 'all' && cat !== filterCat) return;
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(p);
+  });
+  const cats = Object.keys(grouped).sort((a,b) => a.localeCompare(b));
+  if (!cats.length) { grid.innerHTML = '<p style="text-align:center;padding:40px;color:var(--muted);">Sin productos en esta categoría</p>'; return; }
+  grid.innerHTML = cats.map((cat, ci) => {
+    const items = grouped[cat].map((p, i) => {
+      const img = (p.imagenes && p.imagenes[0]) || p.imagen || '';
+      return `<div class="cat-item" onclick="openModal('${(p.id || i).toString().replace(/'/g,"\\'")}')">
+        ${img ? `<img src="${img}" alt="${p.nombre.replace(/"/g,'&quot;')}" loading="lazy">` : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px;">Sin imagen</div>'}
+        ${p.badge ? `<span class="cat-item-badge">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? 'Hot' : 'Oferta'}</span>` : ''}
+        <button class="cat-add-btn" onclick="event.stopPropagation();addToCart({id:'${(p.id || '').toString().replace(/'/g,"\\'")}',nombre:${JSON.stringify(p.nombre)},precio:${JSON.stringify(p.precio)},imagen:${JSON.stringify(img)}})" title="Agregar al carrito">+</button>
+        <div class="cat-item-overlay">
+          <div class="cat-item-name">${p.nombre}</div>
+          <div class="cat-item-price">${p.precio}${p.precioAnterior ? ` <span style="font-size:11px;color:var(--muted);text-decoration:line-through;font-weight:400;">${p.precioAnterior}</span>` : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="cat-chapter">
+      <div class="cat-chapter-head">
+        <span class="cat-chapter-num">${String(ci+1).padStart(2,'0')}</span>
+        <span class="cat-chapter-title">${cat}</span>
+        <span class="cat-chapter-count">${grouped[cat].length} productos</span>
+      </div>
+      <div class="cat-chapter-grid">${items}</div>
+    </div>`;
+  }).join('');
+}
 
 function renderProducts(categoria = null) {
   let filtered = categoria ? productos.filter(p => getEffectiveCategory(p) === categoria) : [...productos];
@@ -2885,7 +2978,7 @@ if (window.location.hash === '#admin') {
 }
 
 // ── Inicializar ──
-loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => renderFooterCats()); renderCart(); });
+loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { renderCatalog(); renderFooterCats(); }); renderCart(); });
 // Manejar redirect de Mercado Pago
 const orderParam = new URLSearchParams(window.location.search).get('order');
 if (orderParam === 'success') showToast('✅ Pago aprobado. Te vamos a contactar para coordinar la entrega.');
