@@ -411,6 +411,28 @@
     .cat-nav-btn:hover { border-color:var(--rose); color:var(--paper); }
     .cat-nav-btn.on { background:var(--rose); color:var(--ink); border-color:var(--rose); font-weight:700; }
     @media (max-width:640px) { .cat-chapter-grid { grid-template-columns:repeat(2,1fr); gap:8px; } .cat-item { aspect-ratio:2/3; } }
+    /* ── Catálogo PDF (oculto, solo para generación) ── */
+    .pdf-catalog { position:fixed; left:-9999px; top:0; width:800px; background:#fff; color:#111; font-family:Helvetica,Arial,sans-serif; padding:0; }
+    .pdf-catalog * { box-sizing:border-box; }
+    .pdf-catalog .pdf-page { page-break-after:always; padding:40px 36px; position:relative; min-height:1120px; }
+    .pdf-catalog .pdf-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:16px; border-bottom:2px solid #e8365d; }
+    .pdf-catalog .pdf-brand { font-size:24px; font-weight:800; color:#09090b; letter-spacing:-.5px; }
+    .pdf-catalog .pdf-brand em { color:#e8365d; font-style:normal; }
+    .pdf-catalog .pdf-brand small { display:block; font-size:9px; font-weight:400; color:#888; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+    .pdf-catalog .pdf-cat-title { font-size:22px; font-weight:700; color:#09090b; margin-bottom:20px; padding-bottom:8px; border-bottom:1px solid #ddd; }
+    .pdf-catalog .pdf-cat-title span { font-size:11px; font-weight:400; color:#999; margin-left:10px; }
+    .pdf-catalog .pdf-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .pdf-catalog .pdf-card { border:1px solid #eee; padding:12px; display:flex; gap:12px; align-items:flex-start; }
+    .pdf-catalog .pdf-card-img { width:80px; height:80px; object-fit:cover; border-radius:2px; flex-shrink:0; background:#f5f5f5; }
+    .pdf-catalog .pdf-card-body { flex:1; min-width:0; }
+    .pdf-catalog .pdf-card-name { font-size:12px; font-weight:700; color:#09090b; margin-bottom:2px; line-height:1.3; }
+    .pdf-catalog .pdf-card-cat { font-size:8px; color:#e8365d; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .pdf-catalog .pdf-card-desc { font-size:9px; color:#666; line-height:1.4; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .pdf-catalog .pdf-card-price { font-size:14px; font-weight:700; color:#09090b; }
+    .pdf-catalog .pdf-card-price .old { font-size:11px; color:#999; text-decoration:line-through; font-weight:400; margin-left:4px; }
+    .pdf-catalog .pdf-card-badge { display:inline-block; font-size:7px; letter-spacing:1px; text-transform:uppercase; padding:2px 6px; background:#e8365d; color:#fff; font-weight:700; border-radius:1px; margin-bottom:4px; }
+    .pdf-catalog .pdf-footer { position:absolute; bottom:32px; left:36px; right:36px; display:flex; justify-content:space-between; font-size:8px; color:#aaa; padding-top:12px; border-top:1px solid #eee; }
+    .pdf-catalog .pdf-watermark { position:absolute; right:40px; bottom:68px; font-size:60px; font-weight:900; color:rgba(232,54,93,.04); pointer-events:none; letter-spacing:4px; text-transform:uppercase; }
 
     /* ── Card ── */
     .card {
@@ -1051,6 +1073,7 @@
       .btn-wa-nav svg { width:14px; height:14px; }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -1363,7 +1386,9 @@
         <div style="font-family:'Inconsolata';font-size:10px;letter-spacing:3px;color:var(--rose);margin-bottom:8px;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:1px;background:var(--rose);display:inline-block;"></span>Catálogo visual</div>
         <h2 class="section-h2">Catálogo <em>completo</em></h2>
       </div>
-      <div class="section-label" style="font-family:'Inconsolata',monospace;font-size:10px;color:var(--muted);">Navegá por categorías · Hacé clic para ver detalle</div>
+      <div class="section-label" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-family:'Inconsolata',monospace;font-size:10px;color:var(--muted);">Navegá por categorías · Hacé clic para ver detalle
+        <button onclick="downloadCatalogPDF()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--rose);color:var(--ink);border:none;font-family:'Inconsolata',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;cursor:pointer;border-radius:1px;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">📄 Descargar PDF</button>
+      </div>
     </div>
     <div class="cat-nav" id="catalog-nav"></div>
     <div class="catalog-grid" id="catalog-grid"></div>
@@ -1647,6 +1672,7 @@ function buildWaUrl(producto) {
 }
 
 // ── Toast ──
+function escapeHtml(str) { const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
@@ -1877,6 +1903,75 @@ function renderCatalogGrid(filterCat) {
       <div class="cat-chapter-grid">${items}</div>
     </div>`;
   }).join('');
+}
+
+/* ── Descargar catálogo PDF ── */
+function downloadCatalogPDF() {
+  if (!productos.length) { showToast('No hay productos para generar el catálogo', true); return; }
+  if (typeof html2pdf === 'undefined') { showToast('Error al cargar la librería PDF. ¿Estás conectado a internet?', true); return; }
+  // Build grouped data
+  const grouped = {};
+  productos.forEach(p => {
+    const cat = p.categoria || 'Sin categoría';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(p);
+  });
+  const cats = Object.keys(grouped).sort((a,b) => a.localeCompare(b));
+  // Build HTML
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-AR', { year:'numeric', month:'long', day:'numeric' });
+  let html = `<div class="pdf-catalog" id="pdf-catalog-temp">`;
+  cats.forEach((cat, ci) => {
+    const items = grouped[cat];
+    html += `<div class="pdf-page">
+      <div class="pdf-header">
+        <div class="pdf-brand">El <em>Lado B</em><small>Sex Shop · Tandil · Catálogo ${dateStr}</small></div>
+        <div style="font-size:10px;color:#999;text-align:right;">${dateStr}</div>
+      </div>
+      <div class="pdf-cat-title">${cat} <span>${items.length} productos</span></div>
+      <div class="pdf-grid">`;
+    items.forEach(p => {
+      const img = (p.imagenes && p.imagenes[0]) || p.imagen || '';
+      const desc = (p.descripcion || '').substring(0, 90);
+      const badgeHTML = p.badge ? `<div class="pdf-card-badge">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? 'Más vendido' : 'Oferta'}</div>` : '';
+      html += `<div class="pdf-card">
+        ${img ? `<img class="pdf-card-img" src="${img}" alt="">` : '<div class="pdf-card-img" style="display:flex;align-items:center;justify-content:center;font-size:8px;color:#ccc;">Sin imagen</div>'}
+        <div class="pdf-card-body">
+          ${badgeHTML}
+          <div class="pdf-card-name">${escapeHtml(p.nombre)}</div>
+          <div class="pdf-card-desc">${escapeHtml(desc)}</div>
+          <div class="pdf-card-price">${p.precio}${p.precioAnterior ? `<span class="old">${p.precioAnterior}</span>` : ''}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>
+      <div class="pdf-footer"><span>El Lado B · Sex Shop Tandil</span><span>Página ${ci+1} de ${cats.length}</span></div>
+      <div class="pdf-watermark">El Lado B</div>
+    </div>`;
+  });
+  html += `</div>`;
+  // Inject into body, render PDF, then remove
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  document.body.appendChild(div);
+  const el = document.getElementById('pdf-catalog-temp');
+  showToast('Generando catálogo PDF…');
+  const opt = {
+    margin: 0,
+    filename: `catalogo-el-lado-b-${now.toISOString().split('T')[0]}.pdf`,
+    image: { type: 'jpeg', quality: 0.85 },
+    html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+    jsPDF: { unit: 'px', format: [800, 1130], orientation: 'portrait' },
+    pagebreak: { mode: 'css' }
+  };
+  html2pdf().set(opt).from(el).save().then(() => {
+    document.body.removeChild(div);
+    showToast('✅ Catálogo descargado');
+  }).catch(err => {
+    console.error(err);
+    document.body.removeChild(div);
+    showToast('Error al generar el PDF', true);
+  });
 }
 
 function renderProducts(categoria = null) {
