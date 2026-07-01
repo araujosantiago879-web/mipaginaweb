@@ -2879,11 +2879,11 @@ loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { re
     ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
     ctx.beginPath(); ctx.moveTo(520, 110); ctx.lineTo(680, 110); ctx.stroke();
     ctx.globalAlpha = 1;
-    // LB stacked
+    // LB side by side
     ctx.fillStyle = '#ff3366'; ctx.textAlign = 'center';
-    ctx.font = 'bold 130px "Cormorant Garamond", Georgia, serif';
-    ctx.fillText('L', 600, 260);
-    ctx.fillText('B', 600, 355);
+    ctx.font = 'bold 160px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText('L', 520, 320);
+    ctx.fillText('B', 690, 320);
     // Brand name
     ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
     ctx.font = 'bold 44px "Cormorant Garamond", Georgia, serif';
