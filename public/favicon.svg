@@ -6,12 +6,8 @@
     </linearGradient>
   </defs>
   <rect width="100" height="100" rx="22" fill="#0c0c10"/>
-  <!-- Vertical shared stroke (L + B back) -->
-  <path d="M 33 18 L 33 72" stroke="url(#g)" stroke-width="13" stroke-linecap="round" fill="none"/>
-  <!-- L foot -->
-  <path d="M 33 72 L 63 72" stroke="url(#g)" stroke-width="13" stroke-linecap="round" fill="none"/>
-  <!-- B upper loop -->
-  <path d="M 37 18 C 63 20, 63 44, 37 45" stroke="url(#g)" stroke-width="10" stroke-linecap="round" fill="none"/>
-  <!-- B lower loop -->
-  <path d="M 37 45 C 63 46, 63 70, 37 72" stroke="url(#g)" stroke-width="10" stroke-linecap="round" fill="none"/>
+  <!-- Calligraphic L: vertical + curved bottom -->
+  <path d="M 32 18 L 32 58 C 32 74, 44 78, 68 72" stroke="url(#g)" stroke-width="15" stroke-linecap="round" fill="none"/>
+  <!-- Decorative dot accent -->
+  <circle cx="60" cy="28" r="7.5" fill="url(#g)"/>
 </svg>

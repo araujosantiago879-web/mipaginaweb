@@ -17,7 +17,6 @@
   <meta name="twitter:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
   <title>El Lado B · Sex Shop Tandil</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="alternate icon" href="/favicon.ico">
   <link rel="image_src" href="/og-image.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Archivo:wght@400;500;600;700;900&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
@@ -2872,47 +2871,42 @@ loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { re
     // Background
     ctx.fillStyle = '#0c0c10'; ctx.fillRect(0, 0, 1200, 630);
     // Glow
-    const grd = ctx.createRadialGradient(600, 315, 0, 600, 315, 400);
+    const grd = ctx.createRadialGradient(600, 300, 0, 600, 300, 380);
     grd.addColorStop(0, 'rgba(255,51,102,.08)');
     grd.addColorStop(1, 'rgba(255,51,102,0)');
     ctx.fillStyle = grd; ctx.fillRect(0, 0, 1200, 630);
-    // LB monogram - draw paths scaled
-    const cx = 520, cy = 145, s = 3.2;
-    function drawMonogram(ctx) {
-      const l = (x) => cx + x * s, t = (y) => cy + y * s, w = (v) => v * s;
-      ctx.strokeStyle = '#ff3366';
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      // Shared vertical
-      ctx.lineWidth = w(13);
-      ctx.beginPath(); ctx.moveTo(l(33), t(18)); ctx.lineTo(l(33), t(72)); ctx.stroke();
-      // L foot
-      ctx.beginPath(); ctx.moveTo(l(33), t(72)); ctx.lineTo(l(63), t(72)); ctx.stroke();
-      // B upper loop
-      ctx.lineWidth = w(10);
-      ctx.beginPath(); ctx.moveTo(l(37), t(18));
-      ctx.bezierCurveTo(l(63), t(20), l(63), t(44), l(37), t(45));
-      ctx.stroke();
-      // B lower loop
-      ctx.beginPath(); ctx.moveTo(l(37), t(45));
-      ctx.bezierCurveTo(l(63), t(46), l(63), t(70), l(37), t(72));
-      ctx.stroke();
-    }
-    drawMonogram(ctx);
+    // Top line
+    ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
+    ctx.beginPath(); ctx.moveTo(520, 110); ctx.lineTo(680, 110); ctx.stroke();
+    ctx.globalAlpha = 1;
+    // Calligraphic L - scaled
+    const cx = 380, cy = 35, s = 4.0;
+    ctx.strokeStyle = '#ff3366'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineWidth = s * 15;
+    ctx.beginPath();
+    ctx.moveTo(cx + 32*s, cy + 18*s);
+    ctx.lineTo(cx + 32*s, cy + 58*s);
+    ctx.bezierCurveTo(cx + 32*s, cy + 74*s, cx + 44*s, cy + 78*s, cx + 68*s, cy + 72*s);
+    ctx.stroke();
+    // Decorative dot
+    ctx.fillStyle = '#ff3366';
+    ctx.beginPath();
+    ctx.arc(cx + 60*s, cy + 28*s, s * 7.5, 0, Math.PI * 2);
+    ctx.fill();
     // Brand name
     ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
     ctx.font = 'bold 44px "Cormorant Garamond", Georgia, serif';
-    ctx.fillText('EL LADO B', 600, 420);
+    ctx.fillText('EL LADO B', 600, 370);
     // Subtitle
     ctx.fillStyle = '#888'; ctx.font = '20px "Cormorant Garamond", Georgia, serif';
-    ctx.fillText('SEX SHOP · TANDIL', 600, 465);
+    ctx.fillText('SEX SHOP · TANDIL', 600, 415);
     // Bottom line
     ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
-    ctx.beginPath(); ctx.moveTo(540, 510); ctx.lineTo(660, 510); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(540, 460); ctx.lineTo(660, 460); ctx.stroke();
     ctx.globalAlpha = 1;
     // CTA
     ctx.fillStyle = '#444'; ctx.font = '11px Georgia, serif';
-    ctx.fillText('PACKAGING DISCRETO · ENTREGA EN EL DÍA', 600, 575);
+    ctx.fillText('PACKAGING DISCRETO · ENTREGA EN EL DÍA', 600, 525);
 
     const dataUrl = c.toDataURL('image/png');
     const og = document.querySelector('meta[property="og:image"]');
