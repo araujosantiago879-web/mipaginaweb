@@ -533,7 +533,7 @@
             <option value="">Ninguno</option>
             <option value="new">🆕 Nuevo</option>
             <option value="hot">🔥 Más vendido</option>
-            <option value="sale">💰 Oferta</option>
+            <option value="sale">💰 Descuento</option>
           </select>
         </div>
         <div class="form-group">
@@ -771,7 +771,7 @@ async function cargarProductos() {
             <div class="producto-body">
               <span class="cat">${p.categoria || ''}</span>
               <h3>${escapeHtml(p.nombre)}</h3>
-              ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Más vendido' : '💰 Oferta'}</span>` : ''}
+              ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Más vendido' : '💰 Descuento'}</span>` : ''}
               <div class="price">${p.precio} ${p.precioAnterior ? `<span class="old">${p.precioAnterior}</span>` : ''}</div>
               <div class="producto-actions">
                 <button class="btn btn-ghost btn-sm" onclick="editarProducto('${p.id}')">✏️ Editar</button>
