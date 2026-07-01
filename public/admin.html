@@ -726,11 +726,9 @@ document.getElementById('productForm').addEventListener('submit', async e => {
   formData.append('descripcion', descripcion);
   if (badge) formData.append('badge', badge);
   for (const file of fileInput.files) formData.append('imagenes', file);
-  if (editandoId) {
-    const conservar = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
-    formData.append('imagenesConservar', JSON.stringify(conservar));
-    if (imagenesARemover.length) formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
-  }
+  const conservar = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
+  if (conservar.length) formData.append('imagenesConservar', JSON.stringify(conservar));
+  if (editandoId && imagenesARemover.length) formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
   try {
     let url = '/api/products';
     let method = 'POST';

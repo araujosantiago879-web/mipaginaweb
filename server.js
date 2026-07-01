@@ -436,6 +436,12 @@ app.post('/api/products', checkAuth, upload.array('imagenes', 10), async (req, r
     if (req.files && req.files.length > 0) {
       imagenes = req.files.map(f => `/uploads/${f.filename}`);
     }
+    if (req.body.imagenesConservar) {
+      try {
+        const urls = JSON.parse(req.body.imagenesConservar);
+        imagenes = [...imagenes, ...urls];
+      } catch (_) {}
+    }
 
     const nuevo = {
       nombre: req.body.nombre,
