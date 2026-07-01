@@ -8,12 +8,17 @@
   <meta property="og:site_name" content="El Lado B · Sex Shop Tandil">
   <meta property="og:title" content="El Lado B · Sex Shop Tandil">
   <meta property="og:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
-  <meta property="og:image" content="https://ladobsex.vercel.app/uploads/og-image.jpg">
+  <meta property="og:image" content="/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta property="og:locale" content="es_AR">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="El Lado B · Sex Shop Tandil">
   <meta name="twitter:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
   <title>El Lado B · Sex Shop Tandil</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="alternate icon" href="/favicon.ico">
+  <link rel="image_src" href="/og-image.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Archivo:wght@400;500;600;700;900&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -2857,6 +2862,65 @@ async function downloadCatalogPDF() {
 
 // ── Inicializar ──
 loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { renderFooterCats(); }); renderCart(); });
+
+// ── Canvas fallback para og:image (WhatsApp etc no siempre soportan SVG) ──
+(function() {
+  try {
+    const c = document.createElement('canvas');
+    c.width = 1200; c.height = 630;
+    const ctx = c.getContext('2d');
+    // Background
+    ctx.fillStyle = '#0c0c10'; ctx.fillRect(0, 0, 1200, 630);
+    // Glow
+    const grd = ctx.createRadialGradient(600, 315, 0, 600, 315, 400);
+    grd.addColorStop(0, 'rgba(255,51,102,.08)');
+    grd.addColorStop(1, 'rgba(255,51,102,0)');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, 1200, 630);
+    // LB monogram - draw paths scaled
+    const cx = 520, cy = 145, s = 3.2;
+    function drawMonogram(ctx) {
+      const l = (x) => cx + x * s, t = (y) => cy + y * s, w = (v) => v * s;
+      ctx.strokeStyle = '#ff3366';
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      // Shared vertical
+      ctx.lineWidth = w(13);
+      ctx.beginPath(); ctx.moveTo(l(33), t(18)); ctx.lineTo(l(33), t(72)); ctx.stroke();
+      // L foot
+      ctx.beginPath(); ctx.moveTo(l(33), t(72)); ctx.lineTo(l(63), t(72)); ctx.stroke();
+      // B upper loop
+      ctx.lineWidth = w(10);
+      ctx.beginPath(); ctx.moveTo(l(37), t(18));
+      ctx.bezierCurveTo(l(63), t(20), l(63), t(44), l(37), t(45));
+      ctx.stroke();
+      // B lower loop
+      ctx.beginPath(); ctx.moveTo(l(37), t(45));
+      ctx.bezierCurveTo(l(63), t(46), l(63), t(70), l(37), t(72));
+      ctx.stroke();
+    }
+    drawMonogram(ctx);
+    // Brand name
+    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+    ctx.font = 'bold 44px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText('EL LADO B', 600, 420);
+    // Subtitle
+    ctx.fillStyle = '#888'; ctx.font = '20px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText('SEX SHOP · TANDIL', 600, 465);
+    // Bottom line
+    ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
+    ctx.beginPath(); ctx.moveTo(540, 510); ctx.lineTo(660, 510); ctx.stroke();
+    ctx.globalAlpha = 1;
+    // CTA
+    ctx.fillStyle = '#444'; ctx.font = '11px Georgia, serif';
+    ctx.fillText('PACKAGING DISCRETO · ENTREGA EN EL DÍA', 600, 575);
+
+    const dataUrl = c.toDataURL('image/png');
+    const og = document.querySelector('meta[property="og:image"]');
+    if (og && dataUrl.length < 500000) {
+      og.setAttribute('content', dataUrl);
+    }
+  } catch(e) { console.warn('og:image canvas fallback failed', e); }
+})();
 </script>
 </body>
 </html>
