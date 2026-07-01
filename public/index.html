@@ -2879,23 +2879,11 @@ loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { re
     ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
     ctx.beginPath(); ctx.moveTo(520, 110); ctx.lineTo(680, 110); ctx.stroke();
     ctx.globalAlpha = 1;
-    // LB monogram
-    const cx = 380, cy = 40, s = 4.0;
-    ctx.strokeStyle = '#ff3366'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // Shared vertical
-    ctx.lineWidth = s * 16;
-    ctx.beginPath(); ctx.moveTo(cx + 38*s, cy + 16*s); ctx.lineTo(cx + 38*s, cy + 76*s); ctx.stroke();
-    // L foot
-    ctx.beginPath(); ctx.moveTo(cx + 38*s, cy + 76*s); ctx.lineTo(cx + 66*s, cy + 76*s); ctx.stroke();
-    // B upper loop
-    ctx.lineWidth = s * 12;
-    ctx.beginPath(); ctx.moveTo(cx + 44*s, cy + 16*s);
-    ctx.bezierCurveTo(cx + 66*s, cy + 18*s, cx + 66*s, cy + 42*s, cx + 44*s, cy + 45*s);
-    ctx.stroke();
-    // B lower loop
-    ctx.beginPath(); ctx.moveTo(cx + 44*s, cy + 45*s);
-    ctx.bezierCurveTo(cx + 66*s, cy + 48*s, cx + 66*s, cy + 72*s, cx + 44*s, cy + 76*s);
-    ctx.stroke();
+    // LB stacked
+    ctx.fillStyle = '#ff3366'; ctx.textAlign = 'center';
+    ctx.font = 'bold 130px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText('L', 600, 260);
+    ctx.fillText('B', 600, 355);
     // Brand name
     ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
     ctx.font = 'bold 44px "Cormorant Garamond", Georgia, serif';
