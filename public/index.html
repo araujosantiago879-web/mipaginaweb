@@ -2879,20 +2879,23 @@ loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { re
     ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
     ctx.beginPath(); ctx.moveTo(520, 110); ctx.lineTo(680, 110); ctx.stroke();
     ctx.globalAlpha = 1;
-    // Calligraphic L - scaled
-    const cx = 380, cy = 35, s = 4.0;
+    // LB monogram
+    const cx = 380, cy = 40, s = 4.0;
     ctx.strokeStyle = '#ff3366'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.lineWidth = s * 15;
-    ctx.beginPath();
-    ctx.moveTo(cx + 32*s, cy + 18*s);
-    ctx.lineTo(cx + 32*s, cy + 58*s);
-    ctx.bezierCurveTo(cx + 32*s, cy + 74*s, cx + 44*s, cy + 78*s, cx + 68*s, cy + 72*s);
+    // Shared vertical
+    ctx.lineWidth = s * 16;
+    ctx.beginPath(); ctx.moveTo(cx + 38*s, cy + 16*s); ctx.lineTo(cx + 38*s, cy + 76*s); ctx.stroke();
+    // L foot
+    ctx.beginPath(); ctx.moveTo(cx + 38*s, cy + 76*s); ctx.lineTo(cx + 66*s, cy + 76*s); ctx.stroke();
+    // B upper loop
+    ctx.lineWidth = s * 12;
+    ctx.beginPath(); ctx.moveTo(cx + 44*s, cy + 16*s);
+    ctx.bezierCurveTo(cx + 66*s, cy + 18*s, cx + 66*s, cy + 42*s, cx + 44*s, cy + 45*s);
     ctx.stroke();
-    // Decorative dot
-    ctx.fillStyle = '#ff3366';
-    ctx.beginPath();
-    ctx.arc(cx + 60*s, cy + 28*s, s * 7.5, 0, Math.PI * 2);
-    ctx.fill();
+    // B lower loop
+    ctx.beginPath(); ctx.moveTo(cx + 44*s, cy + 45*s);
+    ctx.bezierCurveTo(cx + 66*s, cy + 48*s, cx + 66*s, cy + 72*s, cx + 44*s, cy + 76*s);
+    ctx.stroke();
     // Brand name
     ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
     ctx.font = 'bold 44px "Cormorant Garamond", Georgia, serif';
