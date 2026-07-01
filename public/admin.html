@@ -207,7 +207,7 @@
     .drawer-cat-header { display:flex; align-items:center; gap:8px; padding:12px 24px; cursor:pointer; font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); font-weight:700; transition:background .15s; user-select:none; }
     .drawer-cat-header:hover { background:var(--ink-3); }
     .drawer-cat-header::before { content:''; width:6px; height:6px; border-right:2px solid var(--muted-2); border-bottom:2px solid var(--muted-2); transform:rotate(-45deg); transition:transform .3s; flex-shrink:0; }
-    .drawer-cat-header.open::before { transform:rotate(45deg); }
+    .drawer-cat-group.open .drawer-cat-header::before { transform:rotate(45deg); }
     .drawer-cat-subs { overflow:hidden; max-height:0; transition:max-height .35s ease; }
     .drawer-cat-group.open .drawer-cat-subs { max-height:600px; }
     .drawer-cat-sub { display:block; width:100%; padding:10px 24px 10px 40px; font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; transition:color .2s, background .15s; background:none; border:none; text-align:left; }
