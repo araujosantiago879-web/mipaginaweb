@@ -1858,6 +1858,12 @@ function renderProducts(categoria = null) {
     );
   }
 
+  // La vista principal "Todo" muestra como máximo 29 productos
+  const LIMITE_PRINCIPAL = 29;
+  if (!categoria && filtroActual === 'all' && !busquedaActual) {
+    filtered = filtered.slice(0, LIMITE_PRINCIPAL);
+  }
+
   const container = document.getElementById('products-container');
   const emptyEl   = document.getElementById('search-empty');
   const countEl   = document.getElementById('search-results-count');
