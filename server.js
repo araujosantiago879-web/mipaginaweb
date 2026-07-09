@@ -234,13 +234,18 @@ function getProductsFromJSON() {
 }
 
 // GET /api/products (con búsqueda)
+// ?todos=1 incluye también los productos pausados (lo usa el panel admin)
 app.get('/api/products', async (req, res) => {
   try {
+    const { categoria, search, todos } = req.query;
     const col = await getProducts().catch(() => null);
-    if (!col) return res.json(getProductsFromJSON());
+    if (!col) {
+      const lista = getProductsFromJSON();
+      return res.json(todos ? lista : lista.filter(p => !p.pausado));
+    }
 
-    const { categoria, search } = req.query;
     let query = {};
+    if (!todos) query.pausado = { $ne: true };
     if (categoria && categoria !== 'Todo') query.categoria = categoria;
     if (search && search.trim()) {
       const s = search.trim();
@@ -463,6 +468,7 @@ app.post('/api/products', checkAuth, upload.array('imagenes', 10), async (req, r
       badge: req.body.badge || '',
       rating: parseFloat(req.body.rating) || 4.5,
       destacado: req.body.destacado === 'true',
+      pausado: req.body.pausado === 'true',
       creadoEn: new Date()
     };
 
@@ -527,7 +533,8 @@ app.put('/api/products/:id', checkAuth, upload.array('imagenes', 10), async (req
       imagenes: imagenesFinal,
       badge: req.body.badge || '',
       rating: parseFloat(req.body.rating) || existing.rating,
-      destacado: req.body.destacado === 'true'
+      destacado: req.body.destacado === 'true',
+      pausado: req.body.pausado === 'true'
     };
 
     await col.updateOne({ _id: id }, { $set: updated });
