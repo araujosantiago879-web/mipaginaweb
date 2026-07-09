@@ -52,6 +52,13 @@ tienda, carrito, buscador, drawer de categorías y modal de producto.
   ordenar/sumar se parsean con regex.
 - `/producto/:id` genera una página con meta Open Graph para que WhatsApp
   muestre preview rico al compartir un producto.
+- Los productos tienen campo `pausado` (bool): la tienda pública los excluye;
+  el admin los ve pidiendo `/api/products?todos=1`. También `destacado` y
+  `rating`, editables desde el panel (switches y estrellas).
+- La vista principal "Todo" de la tienda muestra máximo 29 productos (los
+  primeros que devuelve la DB); categorías, filtros y búsqueda muestran todo.
+- El carrito pide nombre y teléfono opcionales que se guardan en
+  `orders.customerInfo` y se muestran en la pestaña Pedidos del admin.
 
 ## Convenciones
 
