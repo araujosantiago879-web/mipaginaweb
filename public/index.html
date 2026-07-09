@@ -1054,34 +1054,7 @@
       .btn-wa-nav { padding:6px 8px; }
       .btn-wa-nav svg { width:14px; height:14px; }
     }
-    /* ── Catálogo PDF (oculto, solo para generación) ──
-       Importante: el contenedor que renderiza html2pdf NO puede tener
-       position fixed/absolute (colapsa a altura 0). Se oculta con un wrapper. */
-    .pdf-catalog-wrap { position:fixed; left:-9999px; top:0; width:800px; height:0; overflow:hidden; }
-    .pdf-catalog { width:800px; background:#fff; color:#111; font-family:Helvetica,Arial,sans-serif; padding:0; }
-    .pdf-catalog * { box-sizing:border-box; }
-    .pdf-catalog .pdf-page { page-break-after:always; padding:40px 36px; position:relative; min-height:1120px; }
-    .pdf-catalog .pdf-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:16px; border-bottom:2px solid #e8365d; }
-    .pdf-catalog .pdf-brand { font-size:24px; font-weight:800; color:#09090b; letter-spacing:-.5px; }
-    .pdf-catalog .pdf-brand em { color:#e8365d; font-style:normal; }
-    .pdf-catalog .pdf-brand small { display:block; font-size:9px; font-weight:400; color:#888; letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
-    .pdf-catalog .pdf-cat-title { font-size:22px; font-weight:700; color:#09090b; margin-bottom:20px; padding-bottom:8px; border-bottom:1px solid #ddd; }
-    .pdf-catalog .pdf-cat-title span { font-size:11px; font-weight:400; color:#999; margin-left:10px; }
-    .pdf-catalog .pdf-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .pdf-catalog .pdf-card { border:1px solid #eee; padding:12px; display:flex; gap:12px; align-items:flex-start; }
-    .pdf-catalog .pdf-card-img-wrap { width:80px; height:80px; flex-shrink:0; background:#f5f5f5; border-radius:2px; overflow:hidden; }
-    .pdf-catalog .pdf-card-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
-    .pdf-catalog .pdf-card-body { flex:1; min-width:0; }
-    .pdf-catalog .pdf-card-name { font-size:12px; font-weight:700; color:#09090b; margin-bottom:2px; line-height:1.3; }
-    .pdf-catalog .pdf-card-desc { font-size:9px; color:#666; line-height:1.4; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-    .pdf-catalog .pdf-card-price { font-size:14px; font-weight:700; color:#09090b; }
-    .pdf-catalog .pdf-card-price .old { font-size:11px; color:#999; text-decoration:line-through; font-weight:400; margin-left:4px; }
-    .pdf-catalog .pdf-card-badge { display:inline-block; font-size:7px; letter-spacing:1px; text-transform:uppercase; padding:2px 6px; background:#e8365d; color:#fff; font-weight:700; border-radius:1px; margin-bottom:4px; }
-    .pdf-catalog .pdf-card-rating { font-size:9px; color:#f59e0b; margin-bottom:2px; }
-    .pdf-catalog .pdf-footer { position:absolute; bottom:32px; left:36px; right:36px; display:flex; justify-content:space-between; font-size:8px; color:#aaa; padding-top:12px; border-top:1px solid #eee; }
-    .pdf-catalog .pdf-watermark { position:absolute; right:40px; bottom:68px; font-size:60px; font-weight:900; color:rgba(232,54,93,.04); pointer-events:none; letter-spacing:4px; text-transform:uppercase; }
   </style>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -1488,7 +1461,6 @@
         <li><a href="#" onclick="showSection('cambios')">Cambios y devoluciones</a></li>
         <li><a data-tab="contacto">Medios de pago</a></li>
         <li><a href="#" onclick="showSection('faq')">Preguntas frecuentes</a></li>
-        <li><a href="#" onclick="downloadCatalogPDF()">📄 Catálogo PDF</a></li>
       </ul>
     </div>
     <div>
@@ -2826,120 +2798,6 @@ function escapeHtml(str) {
   const d = document.createElement('div');
   d.textContent = str;
   return d.innerHTML;
-}
-
-// ── Catálogo PDF ──
-async function downloadCatalogPDF() {
-  closeSection();
-  if (typeof html2pdf === 'undefined') { showToast('El generador de PDF todavía está cargando, probá de nuevo', true); return; }
-
-  // Traer el catálogo COMPLETO (no lo que quedó filtrado por una búsqueda)
-  let products = [];
-  try {
-    const res = await fetch('/api/products');
-    products = (await res.json()).map(getEffectiveProduct);
-  } catch (_) {
-    products = (productos || []).map(getEffectiveProduct);
-  }
-  if (!products.length) { showToast('No hay productos para generar el catálogo', true); return; }
-  showToast('Generando catálogo PDF...');
-
-  // Agrupar por la categoría propia de cada producto: ninguno queda afuera.
-  // Se ordenan según el árbol de categorías; las que no están, al final.
-  const tree = loadCategoryTree();
-  const ordenTree = tree.flatMap(c => [c.name, ...c.subs]).map(c => c.trim().toLowerCase());
-  const grupos = new Map();
-  for (const p of products) {
-    const nombreCat = (p.categoria || 'Otros').trim() || 'Otros';
-    const key = nombreCat.toLowerCase();
-    if (!grupos.has(key)) grupos.set(key, { nombre: nombreCat, items: [] });
-    grupos.get(key).items.push(p);
-  }
-  const cats = [...grupos.keys()].sort((a, b) => {
-    const ia = ordenTree.indexOf(a), ib = ordenTree.indexOf(b);
-    if (ia !== -1 && ib !== -1) return ia - ib;
-    if (ia !== -1) return -1;
-    if (ib !== -1) return 1;
-    return a.localeCompare(b);
-  });
-
-  // Build DOM (wrapper oculto + contenedor en flujo normal para html2pdf)
-  document.getElementById('pdf-catalog-wrap')?.remove();
-  const wrap = document.createElement('div');
-  wrap.id = 'pdf-catalog-wrap';
-  wrap.className = 'pdf-catalog-wrap';
-  const container = document.createElement('div');
-  container.className = 'pdf-catalog';
-  wrap.appendChild(container);
-  document.body.appendChild(wrap);
-
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('es-AR', { year:'numeric', month:'long', day:'numeric' });
-
-  let pageNum = 0;
-  for (const key of cats) {
-    const { nombre: cat, items } = grupos.get(key);
-    if (!items.length) continue;
-    pageNum++;
-
-    const page = document.createElement('div');
-    page.className = 'pdf-page';
-
-    // header
-    page.innerHTML = `
-      <div class="pdf-header">
-        <div class="pdf-brand">El <em>Lado B</em> <small>Sex Shop Tandil</small></div>
-        <div style="font-size:10px;color:#999;text-align:right;line-height:1.5">Catálogo ${now.getFullYear()}<br>${dateStr}</div>
-      </div>
-      <div class="pdf-cat-title">${escapeHtml(cat)} <span>${items.length} producto${items.length !== 1 ? 's' : ''}</span></div>
-      <div class="pdf-grid" id="pdf-grid-${pageNum}"></div>
-      <div class="pdf-footer"><span>El Lado B · Sex Shop Tandil</span><span>Página ${pageNum}</span></div>
-      <div class="pdf-watermark">Catálogo</div>
-    `;
-    container.appendChild(page);
-
-    const grid = page.querySelector('.pdf-grid');
-    for (const p of items) {
-      // Los precios ya vienen formateados como string (ej: "$24.900")
-      const precioStr = p.precio || '';
-      const precioAntStr = p.precioAnterior || '';
-      const badgeLabel = p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? 'Más vendido' : p.badge === 'sale' ? 'Oferta' : '';
-      const badgeHtml = badgeLabel ? `<div class="pdf-card-badge">${badgeLabel}</div>` : '';
-      const ratingHtml = p.rating ? `<div class="pdf-card-rating">${'★'.repeat(Math.round(p.rating))}</div>` : '';
-      const card = document.createElement('div');
-      card.className = 'pdf-card';
-      card.innerHTML = `
-        <div class="pdf-card-img-wrap"><img src="${escapeHtml(p.imagen||'')}" alt="${escapeHtml(p.nombre||'')}" loading="lazy"></div>
-        <div class="pdf-card-body">
-          ${badgeHtml}
-          <div class="pdf-card-name">${escapeHtml(p.nombre||'')}</div>
-          ${ratingHtml}
-          <div class="pdf-card-desc">${escapeHtml(p.descripcion||'').substring(0,120)}</div>
-          <div class="pdf-card-price">${precioStr} ${precioAntStr ? `<span class="old">${precioAntStr}</span>` : ''}</div>
-        </div>
-      `;
-      grid.appendChild(card);
-      // mini delay for image settle
-      await new Promise(r => requestAnimationFrame(r));
-    }
-  }
-
-  // Render
-  await new Promise(r => setTimeout(r, 500));
-  html2pdf().set({
-    margin: [0, 0, 0, 0],
-    filename: `catalogo-el-lado-b.pdf`,
-    image: { type: 'jpeg', quality: 0.95 },
-    html2canvas: { scale: 2, useCORS: true, allowTaint: true, letterRendering: true, logging: false },
-    jsPDF: { unit: 'px', format: [800, 1200], orientation: 'portrait' },
-    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-  }).from(container).save().then(() => {
-    wrap.remove();
-    showToast('¡Catálogo descargado!');
-  }).catch(() => {
-    showToast('Error al generar PDF', true);
-    wrap.remove();
-  });
 }
 
 // ── Inicializar ──
