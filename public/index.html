@@ -106,13 +106,7 @@
     .nav-links a:hover { color:var(--paper); }
     .nav-links a.active { color:var(--rose); border-bottom:2px solid var(--rose); padding-bottom:4px; }
     .nav-actions { display:flex; gap:10px; align-items:center; flex-shrink:0; }
-    /* Chip Abierto/Cerrado calculado con la hora real */
-    .tag-online { font-family:'Inconsolata',monospace; font-size:10px; padding:4px 10px; border-radius:20px; font-weight:700; display:inline-flex; align-items:center; gap:6px; }
-    .tag-online .pto { width:6px; height:6px; border-radius:50%; }
-    .tag-online.si { background:rgba(102,255,204,.14); color:var(--lime); border:1px solid rgba(102,255,204,.3); }
-    .tag-online.si .pto { background:var(--lime); box-shadow:0 0 8px rgba(102,255,204,.7); }
-    .tag-online.no { background:var(--ink-3); color:var(--muted); border:1px solid var(--edge); }
-    .tag-online.no .pto { background:var(--muted-2); }
+    .tag-online { font-family:'Inconsolata',monospace; font-size:10px; background:var(--lime); color:var(--ink); padding:4px 10px; border-radius:20px; font-weight:700; }
 
     /* ── Botón WhatsApp nav ── */
     .btn-wa-nav {
@@ -191,44 +185,20 @@
     .btn-fill:hover::before { transform:translateX(0); }
     .btn-ghost { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); padding:15px 24px; border:1px solid var(--edge); transition:all .25s; border-radius:2px; }
     .btn-ghost:hover { border-color:rgba(238,242,245,.3); color:var(--paper); }
-    /* Números de confianza bajo el hero */
-    .hero-nums { display:flex; margin-top:44px; border-top:1px solid var(--edge); }
-    .hnum { padding:18px 26px 0 0; margin-right:26px; }
-    .hnum + .hnum { border-left:1px solid var(--edge); padding-left:26px; }
-    .hnum b { display:block; font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; color:var(--lime); }
-    .hnum span { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted-2); }
-
-    /* Hero derecho: caja neutra ilustrada (nuestro packaging discreto) */
-    .hero-r { position:relative; overflow:hidden; background:radial-gradient(circle at 40% 55%, #1a0d13 0%, var(--ink) 75%); display:flex; align-items:center; justify-content:center; }
-    .caja-escena { position:relative; width:min(340px, 70%); aspect-ratio:1/1.02; }
-    .caja-glow { position:absolute; inset:10% 0 auto; height:78%; background:radial-gradient(ellipse 60% 55% at 50% 55%, rgba(255,51,102,.2), transparent 70%); filter:blur(14px); }
-    .caja { position:absolute; left:8%; right:8%; top:21%; bottom:13%;
-      background:linear-gradient(160deg, #221921 0%, #171017 55%, #100b10 100%);
-      border-radius:6px; border:1px solid rgba(255,150,180,.15);
-      box-shadow:0 40px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06); }
-    .caja::before { content:''; position:absolute; top:0; bottom:0; left:50%; width:44px; transform:translateX(-50%);
-      background:linear-gradient(180deg, rgba(255,51,102,.15), rgba(255,51,102,.05));
-      border-left:1px solid rgba(255,51,102,.22); border-right:1px solid rgba(255,51,102,.22); }
-    .caja-tapa { position:absolute; left:5%; right:5%; top:15%; height:12%;
-      background:linear-gradient(170deg, #2a1e26 0%, #1a121a 100%);
-      border-radius:5px; border:1px solid rgba(255,150,180,.18); box-shadow:0 14px 30px rgba(0,0,0,.4); }
-    .caja-sello { position:absolute; left:50%; top:53%; transform:translate(-50%,-50%);
-      width:74px; height:74px; border-radius:50%; border:1px solid rgba(255,51,102,.4);
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Cormorant Garamond',serif; font-style:italic; font-size:40px; color:var(--rose);
-      background:rgba(255,51,102,.06); box-shadow:0 0 34px rgba(255,51,102,.18); }
-    .caja-etiqueta { position:absolute; left:13%; bottom:20%;
-      font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase;
-      color:var(--muted-2); border:1px dashed var(--muted-2); padding:6px 10px;
-      transform:rotate(-3deg); background:rgba(12,12,16,.5); }
-    .caja-chip { position:absolute; background:var(--ink-3); border:1px solid var(--edge); padding:10px 14px;
-      font-size:11.5px; font-weight:700; display:flex; gap:8px; align-items:center;
-      box-shadow:0 18px 40px rgba(0,0,0,.45); border-radius:3px; }
-    .caja-chip small { display:block; font-weight:400; font-size:10px; color:var(--muted); }
-    .caja-chip .pto { width:7px; height:7px; border-radius:50%; background:var(--lime); box-shadow:0 0 10px rgba(102,255,204,.6); flex-shrink:0; }
-    .caja-chip.a { right:-2%; top:9%; }
-    .caja-chip.b { left:-4%; bottom:2%; }
-    .caja-chip.b .pto { background:var(--wa); box-shadow:0 0 10px rgba(37,211,102,.6); }
+    .hero-chips { display:flex; gap:10px; margin-top:44px; flex-wrap:wrap; }
+    .chip-trust { display:inline-flex; align-items:center; gap:8px; font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); background:var(--ink-3); border:1px solid var(--edge); padding:8px 14px; }
+    .chip-trust .dot { width:6px; height:6px; border-radius:50%; background:var(--lime); }
+    .hero-r { position:relative; overflow:hidden; background:#000; }
+    .hero-r-bg-gradient { position:absolute; inset:0; background:radial-gradient(circle at 30% 50%,#000000 0%,#2a0a12 70%,#4a1a2a 100%); z-index:1; opacity:.85; mix-blend-mode:multiply; }
+    .hero-people-blur { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:15% center; filter:blur(3px) brightness(1) saturate(1.2); transform:scale(1.03); opacity:1; z-index:0; transition:all .5s ease; }
+    .hero-r-blend { position:absolute; inset:0; background:rgba(0,0,0,.4); backdrop-filter:blur(3px); z-index:2; mix-blend-mode:overlay; }
+    .hero-r-veil { position:absolute; inset:0; background:linear-gradient(to right,var(--ink) 0%,transparent 40%),linear-gradient(to top,rgba(0,0,0,.8) 0%,transparent 60%); z-index:3; }
+    .hero-r:hover .hero-people-blur { filter:blur(2px) brightness(.85); transform:scale(1.08); }
+    .hero-r:hover .hero-r-bg-gradient { opacity:.7; }
+    .hero-big-b { position:absolute; bottom:-30px; right:-10px; font-family:'Cormorant Garamond',serif; font-size:260px; font-weight:700; font-style:italic; color:rgba(238,242,245,.03); line-height:1; pointer-events:none; user-select:none; z-index:4; }
+    .hero-spin { position:absolute; bottom:36px; right:36px; width:96px; height:96px; animation:spin 22s linear infinite; z-index:4; }
+    .hero-spin text { font-family:'Inconsolata',monospace; font-size:8.5px; fill:rgba(238,242,245,.35); letter-spacing:3.2px; text-transform:uppercase; }
+    @keyframes spin { to { transform:rotate(360deg); } }
 
     /* ── Trust strip ── */
     .trust-strip { display:grid; grid-template-columns:repeat(4,1fr); }
@@ -388,6 +358,10 @@
       100%{transform:translateY(calc(100vh + 50px)) rotate(480deg) translateX(60px);opacity:0}
     }
 
+    /* Hero: gradiente que respira */
+    .hero-r-bg-gradient {
+      animation:heroGradientMove 16s ease-in-out infinite;
+    }
     /* WPP y Canal: gradiente animado */
     .wpp-block {
       background:linear-gradient(135deg,#0a1f14 0%,#14502e 30%,#0e1c12 70%,#0a1f14 100%);
@@ -892,10 +866,6 @@
       transition:all .2s; border-radius:1px;
     }
     .cta-view:hover { background:var(--rose); border-color:var(--rose); color:#fff; }
-    /* Botón "Agregar" bajo la card (solo móvil/tablet, no tapa la foto) */
-    .card-add-mini { display:none; }
-    /* Rating compacto para móvil */
-    .rating-mini { display:none; font-family:'Inconsolata',monospace; font-size:11px; color:#f5c518; white-space:nowrap; }
 
     /* ── Modal gallery ── */
     #m-gallery { display:flex; gap:6px; padding:8px; overflow-x:auto; position:absolute; bottom:0; left:0; right:0; z-index:5; background:rgba(5,5,8,.6); scrollbar-width:none; }
@@ -996,17 +966,9 @@
     .reveal { opacity:0; transform:translateY(20px); transition:opacity .7s, transform .7s; }
     .reveal.vis { opacity:1; transform:none; }
 
-    /* ── Secciones apiladas (antes eran pestañas ocultas) ── */
-    .section-tab { display:block; }
-
-    /* ── Cómo funciona ── */
-    .como { padding:0 48px 96px; }
-    .pasos { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:44px; }
-    .paso { border:1px solid var(--edge); padding:38px 30px; position:relative; overflow:hidden; background:var(--ink-2); }
-    .paso::after { content:attr(data-n); position:absolute; right:12px; bottom:-20px; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:100px; line-height:1; color:rgba(255,51,102,.08); }
-    .paso-ico { width:46px; height:46px; background:rgba(255,51,102,.08); border:1px solid rgba(255,51,102,.15); display:flex; align-items:center; justify-content:center; color:var(--rose); margin-bottom:16px; }
-    .paso h3 { font-family:'Cormorant Garamond',serif; font-size:23px; font-weight:700; margin-bottom:8px; }
-    .paso p { font-size:13px; color:var(--muted); line-height:1.7; }
+    /* ── Tabs de sección ── */
+    .section-tab { display:none; }
+    .section-tab.active { display:block; }
 
     /* ===== RESPONSIVE ===== */
 
@@ -1021,16 +983,15 @@
       .btn-wa-nav { padding:8px 12px; font-size:10px; }
       .btn-wa-nav .btn-wa-label { display:none; }
 
-      /* Hero compacto: sin pantallas muertas antes de la tienda */
-      .hero { grid-template-columns:1fr; min-height:0; }
-      .hero-l { padding:52px 20px 40px; }
-      .hero-r { min-height:0; padding:6px 0 34px; }
-      .caja-escena { width:min(230px, 62%); }
-      .caja-chip { font-size:10px; padding:8px 11px; }
-      .hero-nums { margin-top:32px; }
-      .hnum { padding-right:16px; margin-right:16px; }
-      .hnum + .hnum { padding-left:16px; }
-      .hnum b { font-size:20px; }
+      .hero { grid-template-columns:1fr; }
+      .hero-r { min-height:320px; background:var(--ink); }
+      .hero-r-bg-gradient { opacity:.4; }
+      .hero-people-blur { filter:brightness(.85) saturate(1.1); transform:none; opacity:.9; }
+      .hero-r-blend { display:none; }
+      .hero-r-veil { background:linear-gradient(to top,rgba(5,5,8,.6) 0%,transparent 40%),linear-gradient(to bottom,rgba(5,5,8,.3) 0%,transparent 30%); }
+      .hero-big-b { display:none; }
+      .hero-spin { bottom:20px; right:20px; width:72px; height:72px; }
+      .hero-l { padding:60px 20px 50px; }
 
       .trust-strip { grid-template-columns:1fr 1fr; }
       .ts-item { padding:20px 16px; }
@@ -1038,18 +999,12 @@
       .petals { display:none; }
 
       .tienda { padding:48px 16px; }
-      /* 2 columnas en tablet/móvil; el botón va debajo de la card, no sobre la foto */
+      /* 2 columnas en tablet/móvil */
       .products { grid-template-columns:repeat(2, 1fr); gap:12px; }
-      .card-hover-cta { display:none; }
+      .card-hover-cta { transform:none; padding:12px 8px 8px; }
       .card-fav { opacity:1; }
-      .card-add-mini {
-        display:flex; align-items:center; justify-content:center; gap:6px;
-        margin:0 12px 12px; padding:10px;
-        font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
-        background:var(--rose); color:#fff; border-radius:2px;
-      }
-      .como { padding:0 16px 60px; }
-      .pasos { grid-template-columns:1fr; }
+      .cta-add { font-size:9px; padding:8px 6px; }
+      .cta-view { width:30px; height:30px; }
 
       .horarios { padding:0 16px 60px; grid-template-columns:1fr; }
       .hor-card { padding:28px 20px; }
@@ -1066,13 +1021,6 @@
       .modal { grid-template-columns:1fr; max-height:92vh; }
       .modal-photo { max-height:50vw; }
       .modal-info { padding:24px 20px; }
-    }
-
-    /* Móvil: nav limpia (las secciones viven en el menú hamburguesa) y rating compacto */
-    @media(max-width:760px) {
-      .nav-links { display:none; }
-      .stars { display:none; }
-      .rating-mini { display:inline-block; }
     }
 
     /* Móvil pequeño */
@@ -1157,13 +1105,12 @@
   <a href="#" class="logo">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
   <ul class="nav-links">
     <li><a href="#" data-tab="tienda" class="active">Tienda</a></li>
-    <li><a href="#" data-tab="como">Cómo funciona</a></li>
     <li><a href="#" data-tab="discrecion">Discreción</a></li>
     <li><a href="#" data-tab="testimonios">Reseñas</a></li>
     <li><a href="#" data-tab="contacto">Contacto</a></li>
   </ul>
   <div class="nav-actions">
-    <span class="tag-online si" id="tag-online"><span class="pto"></span><span id="tag-online-txt">Abierto ahora</span></span>
+    <span class="tag-online">Abierto ahora</span>
     <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menú">
       <span></span><span></span><span></span>
     </button>
@@ -1308,22 +1255,19 @@
       <a href="#" class="btn-fill" id="hero-tienda-btn" data-tab="tienda"><span>Ver productos</span><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       <a href="#" target="_blank" class="btn-ghost" id="hero-whatsapp">Consultar por WA</a>
     </div>
-    <div class="hero-nums">
-      <div class="hnum"><b>Hoy</b><span>Entrega en Tandil</span></div>
-      <div class="hnum"><b>9–23</b><span>Todos los días</span></div>
-      <div class="hnum"><b>100%</b><span>Caja neutra</span></div>
+    <div class="hero-chips">
+      <span class="chip-trust"><span class="dot"></span>Packaging discreto</span>
+      <span class="chip-trust"><span class="dot"></span>Entrega hoy</span>
+      <span class="chip-trust"><span class="dot"></span>Cuotas sin interés</span>
     </div>
   </div>
-  <div class="hero-r" aria-hidden="true">
-    <div class="caja-escena">
-      <div class="caja-glow"></div>
-      <div class="caja"></div>
-      <div class="caja-tapa"></div>
-      <div class="caja-sello">B</div>
-      <div class="caja-etiqueta">Contenido: — · Remitente: —</div>
-      <div class="caja-chip a"><span class="pto"></span><span>Caja neutra<small>sin logos ni etiquetas</small></span></div>
-      <div class="caja-chip b"><span class="pto"></span><span>Entrega hoy<small>coordinás por WhatsApp</small></span></div>
-    </div>
+  <div class="hero-r">
+    <div class="hero-r-bg-gradient"></div>
+    <img src="https://t4.ftcdn.net/jpg/06/22/76/41/360_F_622764197_LqqeWWVH338xUy8VpD7HCiVYf73DkdWZ.jpg" alt="Ambiente íntimo" class="hero-people-blur">
+    <div class="hero-r-blend"></div>
+    <div class="hero-r-veil"></div>
+    <div class="hero-big-b">B</div>
+    <svg class="hero-spin" viewBox="0 0 96 96"><path id="circle-path" d="M 48,48 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/><text><textPath href="#circle-path" startOffset="0%">EL LADO B · SEX SHOP · TANDIL · </textPath></text></svg>
   </div>
 </section>
 
@@ -1382,31 +1326,6 @@
         <h3>Sin resultados</h3>
         <p id="search-empty-msg">No encontramos productos para tu búsqueda.</p>
         <button class="search-empty-clear" onclick="clearSearch()">Limpiar búsqueda</button>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- ── Cómo funciona ── -->
-<div id="tab-como" class="section-tab">
-  <section class="como reveal">
-    <div style="font-family:'Inconsolata';font-size:10px;letter-spacing:3px;color:var(--rose);margin-bottom:8px;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:1px;background:var(--rose);display:inline-block;"></span>Cómo funciona</div>
-    <h2 class="section-h2">Así de <em>simple</em></h2>
-    <div class="pasos">
-      <div class="paso" data-n="1">
-        <div class="paso-ico"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
-        <h3>Elegí tranquilo</h3>
-        <p>Navegá el catálogo a tu ritmo, sin registrarte. Agregá al carrito lo que te guste.</p>
-      </div>
-      <div class="paso" data-n="2">
-        <div class="paso-ico"><svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg></div>
-        <h3>Coordiná por WhatsApp</h3>
-        <p>El pedido nos llega al chat. Te confirmamos stock, precio y forma de pago en minutos.</p>
-      </div>
-      <div class="paso" data-n="3">
-        <div class="paso-ico"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg></div>
-        <h3>Recibí sin miradas</h3>
-        <p>Caja neutra sin logos. Entrega hoy en Tandil o por correo a todo el país.</p>
       </div>
     </div>
   </section>
@@ -1667,18 +1586,6 @@ let configWhatsappNumber = '5492494639700'; // número real de El Lado B
   if (y) y.textContent = new Date().getFullYear();
 })();
 
-// Chip Abierto/Cerrado según la hora real (atención 9 a 23)
-(function() {
-  const chip = document.getElementById('tag-online');
-  const txt = document.getElementById('tag-online-txt');
-  if (!chip || !txt) return;
-  const h = new Date().getHours();
-  const abierto = h >= 9 && h < 23;
-  chip.classList.toggle('si', abierto);
-  chip.classList.toggle('no', !abierto);
-  txt.textContent = abierto ? 'Abierto ahora' : 'Abrimos 9 hs';
-})();
-
 // ── Helpers WhatsApp ──
 // Arma el mensaje completo; incluye la URL /producto/:id para que
 // WhatsApp muestre preview rico (imagen + título + precio) automáticamente.
@@ -1924,10 +1831,8 @@ function cardHTML(p) {
         <div class="card-foot">
           <div class="card-price">${escapeHtml(p.precio || '')}${p.precioAnterior ? `<del>${escapeHtml(p.precioAnterior)}</del>` : ''}</div>
           <div class="stars">${'★'.repeat(Math.floor(rating))}${rating % 1 ? '½' : ''}<span class="star-n">${rating}</span></div>
-          <div class="rating-mini">★ ${rating}</div>
         </div>
       </div>
-      <button class="card-add-mini" onclick="event.stopPropagation(); addToCartById('${id}')">+ Agregar al carrito</button>
     </article>`;
 }
 
@@ -2644,17 +2549,11 @@ document.getElementById('reviewForm').addEventListener('submit', e => {
   reviewRating = 0;
 });
 
-// ── Scroll reveal (con red de seguridad: nada queda invisible) ──
+// ── Scroll reveal ──
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
 }, { threshold: .08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-setTimeout(() => {
-  document.querySelectorAll('.reveal:not(.vis)').forEach(el => {
-    const r = el.getBoundingClientRect();
-    if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('vis');
-  });
-}, 1200);
 
 // ── Product data overrides (imagen, nombre, precio, categoria) ──
 let productOverrides = {};
