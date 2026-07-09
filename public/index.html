@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c0c10">
   <meta name="description" content="Sex shop online en Tandil. Envíos discretos a domicilio. Pagá con Mercado Pago, transferencia o efectivo. Atención por WhatsApp 9 a 23 hs.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="El Lado B · Sex Shop Tandil">
@@ -70,9 +71,21 @@
     }
     a { color:inherit; text-decoration:none; }
     button { font-family:inherit; border:none; background:none; cursor:pointer; }
+    /* Accesibilidad: foco visible al navegar con teclado */
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline:2px solid var(--rose); outline-offset:2px; border-radius:2px;
+    }
+    /* Compensar la nav sticky al hacer scroll a anclas */
+    section, .section-tab { scroll-margin-top:76px; }
+    /* Respetar preferencia de menos movimiento */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+      html { scroll-behavior:auto; }
+    }
 
     /* ── Ticker ── */
     .ticker-wrap { background:var(--rose); overflow:hidden; padding:10px 0; }
+    .ticker-wrap:hover .ticker-track { animation-play-state:paused; }
     .ticker-track { display:flex; animation:ticker 28s linear infinite; white-space:nowrap; }
     .ticker-item { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink); padding:0 36px; display:inline-flex; align-items:center; gap:14px; }
     .ticker-item::after { content:'·'; color:rgba(9,9,11,.4); }
@@ -89,7 +102,6 @@
     .logo em { font-style:italic; color:var(--rose); }
     .logo small { display:block; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
     .nav-links { display:flex; gap:28px; list-style:none; }
-    .nav-links a { font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); transition:color .25s; cursor:pointer; }
     .nav-links a { font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); transition:color .25s; cursor:pointer; display:inline-block; padding:4px 0; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
     .nav-links a:hover { color:var(--paper); }
     .nav-links a.active { color:var(--rose); border-bottom:2px solid var(--rose); padding-bottom:4px; }
@@ -167,11 +179,11 @@
     .hero-h1 .ghost { -webkit-text-stroke:1px rgba(238,242,245,.18); color:transparent; }
     .hero-p { font-size:15px; line-height:1.8; color:var(--muted); max-width:380px; margin-bottom:44px; }
     .hero-btns { display:flex; gap:14px; flex-wrap:wrap; }
-    .btn-fill { display:inline-flex; align-items:center; gap:10px; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; background:var(--rose); color:#fff; padding:15px 30px; position:relative; overflow:hidden; }
+    .btn-fill { display:inline-flex; align-items:center; gap:10px; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; background:var(--rose); color:#fff; padding:15px 30px; position:relative; overflow:hidden; border-radius:2px; }
     .btn-fill::before { content:''; position:absolute; inset:0; background:var(--rose-d); transform:translateX(-100%); transition:transform .3s ease; }
     .btn-fill span { position:relative; z-index:1; }
     .btn-fill:hover::before { transform:translateX(0); }
-    .btn-ghost { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); padding:15px 24px; border:1px solid var(--edge); transition:all .25s; }
+    .btn-ghost { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--muted); padding:15px 24px; border:1px solid var(--edge); transition:all .25s; border-radius:2px; }
     .btn-ghost:hover { border-color:rgba(238,242,245,.3); color:var(--paper); }
     .hero-chips { display:flex; gap:10px; margin-top:44px; flex-wrap:wrap; }
     .chip-trust { display:inline-flex; align-items:center; gap:8px; font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); background:var(--ink-3); border:1px solid var(--edge); padding:8px 14px; }
@@ -261,7 +273,8 @@
     .filters { display:flex; gap:8px; flex-wrap:wrap; }
     .filter-btn { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; padding:6px 14px; border:1px solid var(--edge); color:var(--muted); transition:all .25s; }
     .filter-btn.on, .filter-btn:hover { border-color:var(--rose); color:var(--rose); background:rgba(255,51,102,.06); }
-    .sort { font-family:'Inconsolata',monospace; background:var(--ink-3); border:1px solid var(--edge); color:var(--muted); padding:8px 14px; }
+    .sort { font-family:'Inconsolata',monospace; background:var(--ink-3); border:1px solid var(--edge); color:var(--muted); padding:8px 14px; border-radius:2px; cursor:pointer; transition:border-color .25s, color .25s; }
+    .sort:hover, .sort:focus { border-color:var(--rose); color:var(--paper); }
     .panel { display:none; animation:fadein .3s ease; }
     .panel.on { display:block; }
     @keyframes fadein { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
@@ -393,17 +406,38 @@
     /* ── Card ── */
     .card {
       display:flex; flex-direction:column;
-      transition:transform .3s, box-shadow .3s;
+      background:var(--ink-2);
+      transition:transform .3s, box-shadow .3s, border-color .3s;
       position:relative; overflow:hidden;
       cursor:pointer;
-      border:1px solid transparent;
+      border:1px solid var(--edge);
+      border-radius:6px;
     }
     .card:hover {
       transform:translateY(-6px);
       box-shadow:0 24px 48px rgba(0,0,0,.5);
-      border-color:var(--edge);
+      border-color:rgba(255,51,102,.35);
       z-index:2;
     }
+    /* Skeleton de carga */
+    @keyframes skShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+    .sk-shimmer, .sk-line {
+      background:linear-gradient(90deg, var(--ink-3) 25%, var(--ink-4) 50%, var(--ink-3) 75%);
+      background-size:200% 100%;
+      animation:skShimmer 1.4s ease infinite;
+    }
+    .sk-line { height:11px; border-radius:3px; margin-bottom:8px; }
+    .sk-line.w40 { width:40%; } .sk-line.w60 { width:60%; } .sk-line.w90 { width:90%; }
+    .card.sk { pointer-events:none; }
+    /* Botón "ver todo el catálogo" */
+    .btn-ver-mas {
+      grid-column:1/-1; margin-top:12px; padding:18px;
+      border:1px dashed rgba(255,51,102,.35); border-radius:6px;
+      color:var(--rose); font-family:'Inconsolata',monospace;
+      font-size:11px; letter-spacing:2px; text-transform:uppercase;
+      transition:all .25s;
+    }
+    .btn-ver-mas:hover { background:rgba(255,51,102,.06); border-style:solid; }
     .card-thumb { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--ink-3); }
     .card-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .7s ease, filter .4s; filter:grayscale(20%) brightness(.88); }
     .card:hover .card-thumb img { transform:scale(1.07); filter:grayscale(0) brightness(1); }
@@ -901,8 +935,30 @@
     .m-wa-consultar:hover { background:var(--wa-d); }
     .m-wa-consultar svg { flex-shrink:0; }
 
+    /* ── Botón flotante de WhatsApp ── */
+    .wa-fab {
+      position:fixed; bottom:22px; right:22px; z-index:750;
+      width:56px; height:56px; border-radius:50%;
+      background:var(--wa); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 8px 24px rgba(37,211,102,.4);
+      transition:transform .25s, box-shadow .25s;
+    }
+    .wa-fab:hover { transform:translateY(-3px) scale(1.06); box-shadow:0 12px 32px rgba(37,211,102,.5); background:var(--wa-d); }
+    .wa-fab::before {
+      content:''; position:absolute; inset:-4px; border-radius:50%;
+      border:2px solid rgba(37,211,102,.4);
+      animation:waPulse 2.4s ease-out infinite;
+    }
+    @keyframes waPulse {
+      0% { transform:scale(.9); opacity:.8; }
+      70% { transform:scale(1.35); opacity:0; }
+      100% { transform:scale(1.35); opacity:0; }
+    }
+    @media(max-width:960px){ .wa-fab { width:52px; height:52px; bottom:16px; right:16px; } }
+
     /* Toast */
-    .toast { position:fixed; bottom:24px; right:24px; z-index:9000; background:var(--ink-3); border:1px solid var(--lime); padding:14px 20px; display:flex; align-items:center; gap:10px; font-size:12px; font-weight:600; transform:translateY(80px); opacity:0; transition:all .35s ease; pointer-events:none; }
+    .toast { position:fixed; bottom:92px; right:24px; z-index:9000; background:var(--ink-3); border:1px solid var(--lime); padding:14px 20px; display:flex; align-items:center; gap:10px; font-size:12px; font-weight:600; transform:translateY(80px); opacity:0; transition:all .35s ease; pointer-events:none; }
     .toast.show { transform:none; opacity:1; }
     .toast-dot { width:8px; height:8px; border-radius:50%; background:var(--lime); }
 
@@ -939,6 +995,8 @@
 
       .trust-strip { grid-template-columns:1fr 1fr; }
       .ts-item { padding:20px 16px; }
+      /* Menos carga visual y mejor performance en móvil */
+      .petals { display:none; }
 
       .tienda { padding:48px 16px; }
       /* 2 columnas en tablet/móvil */
@@ -1029,7 +1087,7 @@
     .pdf-catalog .pdf-footer { position:absolute; bottom:32px; left:36px; right:36px; display:flex; justify-content:space-between; font-size:8px; color:#aaa; padding-top:12px; border-top:1px solid #eee; }
     .pdf-catalog .pdf-watermark { position:absolute; right:40px; bottom:68px; font-size:60px; font-weight:900; color:rgba(232,54,93,.04); pointer-events:none; letter-spacing:4px; text-transform:uppercase; }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -1056,7 +1114,7 @@
     <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menú">
       <span></span><span></span><span></span>
     </button>
-    <button id="cart-btn">
+    <button id="cart-btn" aria-label="Abrir carrito">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
       <span id="cart-n">0</span>
     </button>
@@ -1190,7 +1248,7 @@
 
 <section class="hero">
   <div class="hero-l">
-    <div class="hero-eyebrow">Sex Shop Tandil — 2025</div>
+    <div class="hero-eyebrow">Sex Shop Tandil · Envíos discretos</div>
     <h1 class="hero-h1">Todo lo que<br><em>deseás,</em><br><span class="ghost">en tu puerta.</span></h1>
     <p class="hero-p">La tienda de adultos más discreta de Tandil. Packaging sin logos, entrega el mismo día, atención real de 9 a 23 hs. Sin vergüenzas, sin complicaciones.</p>
     <div class="hero-btns">
@@ -1454,7 +1512,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span class="f-copy">© 2025 El Lado B · Sex Shop Tandil · Todos los derechos reservados</span>
+    <span class="f-copy">© <span id="f-year">2025</span> El Lado B · Sex Shop Tandil · Todos los derechos reservados</span>
     <div class="f-legal"><a href="#" onclick="showSection('privacidad')">Privacidad</a><a href="#" onclick="showSection('terminos')">Términos</a><a href="#" onclick="showSection('cookies')">Cookies</a></div>
   </div>
 </footer>
@@ -1466,6 +1524,14 @@
     <div id="info-content"></div>
   </div>
 </div>
+
+<!-- Botón flotante de WhatsApp -->
+<a href="#" id="wa-fab" class="wa-fab" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp">
+  <svg width="26" height="26" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.557 4.126 1.533 5.861L.057 23.197a.75.75 0 00.921.91l5.42-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.695 9.695 0 01-4.956-1.358l-.356-.213-3.686.994.989-3.604-.234-.373A9.692 9.692 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+  </svg>
+</a>
 
 <div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg"></span></div>
 
@@ -1484,7 +1550,7 @@
       <div id="m-badge"></div>
       <div class="modal-cat" id="m-cat"></div>
       <div class="modal-name" id="m-name"></div>
-      <div class="modal-price" id="m-price"><span id="m-old-price" style="font-size:14px;color:#ff6666;text-decoration:line-through;margin-left:10px;font-family:'Archivo',sans-serif;"></span></div>
+      <div class="modal-price"><span id="m-price"></span><span id="m-old-price" style="font-size:14px;color:#ff6666;text-decoration:line-through;margin-left:10px;font-family:'Archivo',sans-serif;"></span></div>
       <div class="modal-desc" id="m-desc"></div>
       <div class="modal-guarantees">
         <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Packaging 100% discreto, sin logos</div>
@@ -1510,9 +1576,14 @@ let configWhatsappNumber = '5492494639700'; // número real de El Lado B
 // ── Setear WhatsApp links al instante (sin esperar API) ──
 (function setWA() {
   const waBase = `https://wa.me/${configWhatsappNumber}`;
-  document.querySelectorAll('#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn')
-    .forEach(el => { if (el && el.href === '#') el.href = waBase; });
-  // El hero tienda-btn también apunta a tienda
+  document.querySelectorAll('#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab')
+    .forEach(el => { if (el) el.href = waBase; });
+})();
+
+// Año dinámico en el footer
+(function() {
+  const y = document.getElementById('f-year');
+  if (y) y.textContent = new Date().getFullYear();
 })();
 
 // ── Helpers WhatsApp ──
@@ -1568,7 +1639,7 @@ async function loadConfig() {
 
     const waBase = `https://wa.me/${configWhatsappNumber}`;
     document.querySelectorAll(
-      '#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn'
+      '#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab'
     ).forEach(el => { if (el) el.href = waBase; });
 
     // Ticker
@@ -1613,13 +1684,6 @@ function activateTab(tabId) {
   document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
   const activeLink = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
   if (activeLink) activeLink.classList.add('active');
-  localStorage.setItem('activeTab', tabId);
-}
-const savedTab = localStorage.getItem('activeTab');
-if (savedTab && ['tienda','discrecion','testimonios','contacto'].includes(savedTab)) {
-  activateTab(savedTab);
-} else {
-  activateTab('tienda');
 }
 
 // ── Event delegation global para TODOS los [data-tab] ──
@@ -1681,6 +1745,13 @@ let ordenActual = 'default';
 let busquedaActual = '';
 
 async function loadProducts() {
+  // Skeleton de carga mientras llega la respuesta
+  const grid = document.getElementById('products-container');
+  if (grid && !grid.querySelector('.card:not(.sk)')) {
+    grid.innerHTML = Array.from({ length: 8 }, () =>
+      `<div class="card sk"><div class="card-thumb sk-shimmer"></div><div class="card-body"><div class="sk-line w40"></div><div class="sk-line w90"></div><div class="sk-line w60"></div></div></div>`
+    ).join('');
+  }
   try {
     const res = await fetch('/api/products');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1729,6 +1800,52 @@ function renderTabs() {
   });
 }
 
+let showAllProducts = false;
+
+// ── Template único de card de producto (grilla + búsqueda) ──
+function cardHTML(p) {
+  const id = escapeAttr(String(p.id ?? ''));
+  const thumbSrc = escapeAttr(p.imagenes?.[0] || p.imagen || '');
+  const nombre = escapeHtml(p.nombre || '');
+  const descFull = p.descripcion || '';
+  const desc = escapeHtml(descFull.substring(0, 65)) + (descFull.length > 65 ? '…' : '');
+  const rating = p.rating || 4.5;
+  const badgeHTML = p.badge
+    ? `<span class="card-badge b-${p.badge}">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : 'Oferta'}</span>`
+    : '';
+  return `
+    <article class="card" data-id="${id}">
+      <div class="card-thumb" onclick="openModal('${id}')">
+        <img src="${thumbSrc}" alt="${escapeAttr(p.nombre || 'Producto')}" loading="lazy">
+        ${badgeHTML}
+        <button class="card-fav" aria-label="Marcar como favorito" onclick="event.stopPropagation(); this.textContent=this.textContent==='♡'?'♥':'♡'; this.style.color=this.textContent==='♥'?'var(--rose)':''">♡</button>
+        <div class="card-hover-cta">
+          <button class="cta-add" onclick="event.stopPropagation(); addToCartById('${id}')">Agregar al carrito</button>
+          <button class="cta-view" aria-label="Ver detalle" onclick="event.stopPropagation(); openModal('${id}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
+        </div>
+      </div>
+      <div class="card-body" onclick="openModal('${id}')">
+        <div class="card-cat">${escapeHtml(p.categoria || '')}</div>
+        <div class="card-name">${nombre}</div>
+        <div class="card-desc">${desc}</div>
+        <div class="card-foot">
+          <div class="card-price">${escapeHtml(p.precio || '')}${p.precioAnterior ? `<del>${escapeHtml(p.precioAnterior)}</del>` : ''}</div>
+          <div class="stars">${'★'.repeat(Math.floor(rating))}${rating % 1 ? '½' : ''}<span class="star-n">${rating}</span></div>
+        </div>
+      </div>
+    </article>`;
+}
+
+function escapeAttr(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/'/g,'&#39;');
+}
+
+function addToCartById(id) {
+  const p = getProductById(id);
+  if (p) addToCart(getEffectiveProduct(p));
+  else showToast('Error al agregar el producto', true);
+}
+
 const WA_SVG = `<svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.557 4.126 1.533 5.861L.057 23.197a.75.75 0 00.921.91l5.42-1.463A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.695 9.695 0 01-4.956-1.358l-.356-.213-3.686.994.989-3.604-.234-.373A9.692 9.692 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>`;
 
 function renderProducts(categoria = null) {
@@ -1749,9 +1866,11 @@ function renderProducts(categoria = null) {
     );
   }
 
-  // ── Limitar a ~34 productos en la pantalla principal ──
+  // ── Limitar la pantalla principal, con botón "ver todo" ──
   const INITIAL_LIMIT = 34;
-  if (!categoria && filtroActual === 'all' && !busquedaActual) {
+  const totalSinLimite = filtered.length;
+  const limitado = !categoria && filtroActual === 'all' && !busquedaActual && !showAllProducts;
+  if (limitado) {
     filtered = filtered.slice(0, INITIAL_LIMIT);
   }
 
@@ -1780,32 +1899,11 @@ function renderProducts(categoria = null) {
       countEl.innerHTML = '';
     }
   }
-  container.innerHTML = filtered.map((p_, i) => {
-    const p = getEffectiveProduct(p_);
-    const thumbSrc = p.imagenes?.[0] || p.imagen || '';
-    return `
-      <div class="card" data-id="${p.id || i}">
-        <div class="card-thumb" onclick="openModal('${p.id || i}')">
-          <img src="${thumbSrc}" alt="${p.nombre}" loading="lazy">
-          ${p.badge ? `<span class="card-badge b-${p.badge}">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : 'Oferta'}</span>` : ''}
-          <button class="card-fav" onclick="event.stopPropagation(); this.textContent=this.textContent==='♡'?'♥':'♡'; this.style.color=this.textContent==='♥'?'var(--rose)':''">♡</button>
-          <div class="card-hover-cta">
-            <button class="cta-add" onclick="event.stopPropagation(); addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">Agregar al carrito</button>
-            <button class="cta-view" onclick="event.stopPropagation(); openModal('${p.id || i}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
-          </div>
-        </div>
-        <div class="card-body" onclick="openModal('${p.id || i}')">
-          <div class="card-cat">${p.categoria}</div>
-          <div class="card-name">${p.nombre}</div>
-          <div class="card-desc">${p.descripcion.substring(0, 65)}${p.descripcion.length > 65 ? '…' : ''}</div>
-          <div class="card-foot">
-            <div class="card-price">${p.precio}${p.precioAnterior ? `<del>${p.precioAnterior}</del>` : ''}</div>
-            <div class="stars">${'★'.repeat(Math.floor(p.rating))}${p.rating % 1 ? '½' : ''}<span class="star-n">${p.rating}</span></div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+  container.innerHTML = filtered.map(p_ => cardHTML(getEffectiveProduct(p_))).join('');
+  if (limitado && totalSinLimite > INITIAL_LIMIT) {
+    container.insertAdjacentHTML('beforeend',
+      `<button class="btn-ver-mas" onclick="showAllProducts=true;renderProducts()">Ver todo el catálogo — ${totalSinLimite} productos ↓</button>`);
+  }
   if (categoria) {
     setTimeout(() => {
       const target = document.getElementById('products-container');
@@ -1817,13 +1915,6 @@ function renderProducts(categoria = null) {
     }, 80);
   }
 }
-
-// ── Card: botón Consultar rápido ──
-window.consultarWaCard = function(btn) {
-  const card = btn.closest('.card');
-  const p = JSON.parse(decodeURIComponent(card.dataset.p));
-  window.open(buildWaUrl(p), '_blank');
-};
 
 // ── Carrito ──
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -1839,23 +1930,26 @@ function cartTotal() {
   }, 0);
 }
 
+// Clave estable de un ítem del carrito (id de DB o nombre como fallback)
+function cartKey(i) { return String(i.id ?? i.nombre ?? ''); }
+
 function addToCart(producto, qty = 1) {
-  const key = producto.id || producto.nombre;
-  const ex = cart.find(i => (i.id || i.nombre) === key);
+  const key = String(producto.id ?? producto.nombre ?? '');
+  const ex = cart.find(i => cartKey(i) === key);
   if (ex) { ex.qty += qty; } else {
-    cart.push({ id: producto.id || null, nombre: producto.nombre, precio: producto.precio, imagen: producto.imagenes?.[0] || producto.imagen || '', qty });
+    cart.push({ id: producto.id ?? null, nombre: producto.nombre, precio: producto.precio, imagen: producto.imagenes?.[0] || producto.imagen || '', qty });
   }
   saveCart();
   showToast('✅ Agregado al carrito');
 }
 
-function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); }
+function removeFromCart(key) { cart = cart.filter(i => cartKey(i) !== String(key)); saveCart(); }
 
-function updateQty(id, delta) {
-  const item = cart.find(i => i.id === id);
+function updateQty(key, delta) {
+  const item = cart.find(i => cartKey(i) === String(key));
   if (!item) return;
   item.qty += delta;
-  if (item.qty <= 0) removeFromCart(id); else saveCart();
+  if (item.qty <= 0) removeFromCart(key); else saveCart();
 }
 
 function renderCart() {
@@ -1879,20 +1973,19 @@ function renderCart() {
   if (cartEmpty) cartEmpty.style.display = 'none';
   if (cartFooter) cartFooter.style.display = 'flex';
   cartList.innerHTML = cart.map(item => {
-    const pn = parseFloat(item.precio.replace(/[^0-9]/g, '')) || 0;
-    const sub = pn * item.qty;
+    const key = escapeAttr(cartKey(item));
     return `<div class="cart-item">
-      <img class="cart-item-img" src="${item.imagen || ''}" alt="${item.nombre}" onerror="this.style.display='none'">
+      <img class="cart-item-img" src="${escapeAttr(item.imagen || '')}" alt="${escapeAttr(item.nombre)}" onerror="this.style.display='none'">
       <div class="cart-item-info">
-        <div class="cart-item-name">${item.nombre}</div>
-        <div class="cart-item-price">${item.precio}</div>
+        <div class="cart-item-name">${escapeHtml(item.nombre)}</div>
+        <div class="cart-item-price">${escapeHtml(item.precio)}</div>
       </div>
       <div class="cart-item-qty">
-        <button class="cart-qty-btn" onclick="updateQty('${item.id}', -1)">−</button>
+        <button class="cart-qty-btn" data-qty="-1" data-key="${key}" aria-label="Restar uno">−</button>
         <span class="cart-qty-n">${item.qty}</span>
-        <button class="cart-qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
+        <button class="cart-qty-btn" data-qty="1" data-key="${key}" aria-label="Sumar uno">+</button>
       </div>
-      <button class="cart-item-remove" onclick="removeFromCart('${item.id}')">✕</button>
+      <button class="cart-item-remove" data-remove="${key}" aria-label="Quitar del carrito">✕</button>
     </div>`;
   }).join('');
   if (cartTotalEl) {
@@ -2008,6 +2101,14 @@ document.getElementById('cart-drawer-bg')?.addEventListener('click', () => {
   document.body.style.overflow = '';
 });
 document.getElementById('cart-checkout')?.addEventListener('click', checkoutWA);
+
+// Delegación de eventos del carrito (cantidad / quitar)
+document.getElementById('cart-list')?.addEventListener('click', e => {
+  const qtyBtn = e.target.closest('[data-qty]');
+  if (qtyBtn) { updateQty(qtyBtn.dataset.key, parseInt(qtyBtn.dataset.qty, 10)); return; }
+  const rmBtn = e.target.closest('[data-remove]');
+  if (rmBtn) removeFromCart(rmBtn.dataset.remove);
+});
 
 function getProductById(id) {
   return productos.find(p => (p.id || '') == id);
@@ -2127,29 +2228,7 @@ async function handleSearch(val) {
       }
     } else {
       if (emptyEl) emptyEl.classList.remove('visible');
-      container.innerHTML = results.map(p_ => {
-        const p = getEffectiveProduct(p_);
-        const thumbSrc = p.imagenes?.[0] || p.imagen || '';
-        return `<div class="card" data-id="${p.id}">
-          <div class="card-thumb" onclick="openModal('${p.id}')">
-            <img src="${thumbSrc}" alt="${p.nombre}" loading="lazy">
-            ${p.badge ? `<span class="card-badge b-${p.badge}">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : 'Oferta'}</span>` : ''}
-            <div class="card-hover-cta">
-              <button class="cta-add" onclick="event.stopPropagation(); addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">Agregar al carrito</button>
-              <button class="cta-view" onclick="event.stopPropagation(); openModal('${p.id}')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></button>
-            </div>
-          </div>
-          <div class="card-body" onclick="openModal('${p.id}')">
-            <div class="card-cat">${p.categoria}</div>
-            <div class="card-name">${p.nombre}</div>
-            <div class="card-desc">${(p.descripcion || '').substring(0, 65)}${p.descripcion && p.descripcion.length > 65 ? '…' : ''}</div>
-            <div class="card-foot">
-              <div class="card-price">${p.precio}${p.precioAnterior ? `<del>${p.precioAnterior}</del>` : ''}</div>
-              <div class="stars">${'★'.repeat(Math.floor(p.rating || 4.5))}${(p.rating || 4.5) % 1 ? '½' : ''}<span class="star-n">${p.rating || 4.5}</span></div>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
+      container.innerHTML = results.map(p_ => cardHTML(getEffectiveProduct(p_))).join('');
     }
   } catch (err) {
     showToast('Error en la búsqueda', true);
@@ -2209,7 +2288,7 @@ const infoContent = {
 
     <h3>1. Responsable del tratamiento</h3>
     <p><strong>El Lado B</strong> — Sex Shop Tandil<br>
-    Contacto: <a href="https://wa.me/5492494123456" target="_blank">WhatsApp</a> / <a href="mailto:elladobsexshop@gmail.com">elladobsexshop@gmail.com</a><br>
+    Contacto: <a href="https://wa.me/5492494639700" target="_blank">WhatsApp</a> / <a href="mailto:elladobsexshop@gmail.com">elladobsexshop@gmail.com</a><br>
     Responsable del tratamiento de datos: Santiago Araujo</p>
 
     <h3>2. Datos que recopilamos</h3>
@@ -2252,7 +2331,7 @@ const infoContent = {
       <li><strong>Cancelación:</strong> solicitar la eliminación de tus datos</li>
       <li><strong>Oposición:</strong> oponerte al tratamiento de tus datos</li>
     </ul>
-    <p>Podés ejercer estos derechos en cualquier momento escribiéndonos por <a href="https://wa.me/5492494123456" target="_blank">WhatsApp</a> o por <a href="mailto:elladobsexshop@gmail.com">email</a>. Responderemos tu solicitud en un plazo máximo de 10 días hábiles.</p>
+    <p>Podés ejercer estos derechos en cualquier momento escribiéndonos por <a href="https://wa.me/5492494639700" target="_blank">WhatsApp</a> o por <a href="mailto:elladobsexshop@gmail.com">email</a>. Responderemos tu solicitud en un plazo máximo de 10 días hábiles.</p>
 
     <h3>8. Discreción garantizada</h3>
     <p>No compartimos tu número de WhatsApp con nadie. Todos los envíos son en empaque neutro, sin logos ni referencias al contenido. No realizamos llamadas ni mensajes no solicitados. Tu privacidad es la base de nuestro servicio.</p>
@@ -2351,15 +2430,6 @@ function renderFooterCats() {
     });
   });
 }
-
-// ── Favoritos ──
-document.addEventListener('click', e => {
-  if (e.target.classList.contains('card-fav')) {
-    e.stopPropagation();
-    e.target.textContent = e.target.textContent === '♡' ? '♥' : '♡';
-    e.target.style.color = e.target.textContent === '♥' ? 'var(--rose)' : '';
-  }
-});
 
 // ── Drawer de navegación ──
 function renderDrawerCategories() {
@@ -2775,8 +2845,9 @@ function escapeHtml(str) {
 // ── Catálogo PDF ──
 async function downloadCatalogPDF() {
   closeSection();
-  const products = window._productos || [];
+  const products = (productos || []).map(getEffectiveProduct);
   if (!products.length) { showToast('No hay productos para generar el catálogo', true); return; }
+  if (typeof html2pdf === 'undefined') { showToast('El generador de PDF todavía está cargando, probá de nuevo', true); return; }
   showToast('Generando catálogo PDF...');
 
   const tree = loadCategoryTree();
@@ -2819,8 +2890,9 @@ async function downloadCatalogPDF() {
 
     const grid = page.querySelector('.pdf-grid');
     for (const p of items) {
-      const precioStr = p.precio != null ? `$${Number(p.precio).toLocaleString('es-AR')}` : '';
-      const precioAntStr = p.precioAnterior != null ? `$${Number(p.precioAnterior).toLocaleString('es-AR')}` : '';
+      // Los precios ya vienen formateados como string (ej: "$24.900")
+      const precioStr = p.precio || '';
+      const precioAntStr = p.precioAnterior || '';
       const badgeHtml = p.badge ? `<div class="pdf-card-badge">${escapeHtml(p.badge)}</div>` : '';
       const ratingHtml = p.rating ? `<div class="pdf-card-rating">${'★'.repeat(Math.round(p.rating))}</div>` : '';
       const card = document.createElement('div');
