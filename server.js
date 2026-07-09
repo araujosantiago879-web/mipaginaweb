@@ -118,6 +118,15 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Escapar texto que se inyecta en HTML/atributos (página OG de producto)
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // ─── Página de producto con Open Graph (para preview rico en WhatsApp) ───────
 // URL: /producto/:id
 // WhatsApp escanea esta página y muestra imagen + título + descripción en el chat
@@ -143,11 +152,11 @@ app.get('/producto/:id', async (req, res) => {
       ? `https://${process.env.VERCEL_URL}`
       : `http://localhost:${process.env.PORT || 3000}`;
 
-    const nombre    = producto.nombre      || 'Producto';
-    const precio    = producto.precio      || '';
-    const desc      = producto.descripcion || '';
-    const imagen    = producto.imagen      || '';
-    const categoria = producto.categoria   || '';
+    const nombre    = escapeHtml(producto.nombre      || 'Producto');
+    const precio    = escapeHtml(producto.precio      || '');
+    const desc      = escapeHtml(producto.descripcion || '');
+    const imagen    = escapeHtml(producto.imagen      || '');
+    const categoria = escapeHtml(producto.categoria   || '');
     const badge     = producto.badge       === 'new'  ? ' · 🆕 Nuevo'
                     : producto.badge       === 'hot'  ? ' · 🔥 Más vendido'
                     : producto.badge       === 'sale' ? ' · 🏷️ Oferta'
@@ -313,7 +322,8 @@ app.get('/api/config', async (req, res) => {
     const col = await getConfig().catch(() => null);
     if (!col) return res.json({ whatsappNumber: '5492494639700' });
     const cfg = await col.findOne({ _id: 'main' });
-    const { adminPassword, _id, ...publicConfig } = cfg;
+    // Nunca exponer credenciales ni datos de recuperación en la API pública
+    const { adminPassword, pageAccessPassword, recoveryQuestion, recoveryAnswer, _id, ...publicConfig } = cfg;
     res.json(publicConfig);
   } catch (err) {
     res.json({ whatsappNumber: '5492494639700' });
@@ -364,7 +374,6 @@ app.post('/api/verify-admin-access', async (req, res) => {
     const storedAdmin = (cfg.adminPassword || '').trim();
     const accessOk = accessPassword.trim() === storedAccess;
     const adminOk = adminPassword.trim() === storedAdmin;
-    console.log('LOGIN intento:', { recibido: accessPassword, accessOk, adminOk });
     if (accessOk && adminOk) {
       res.json({ success: true, token: storedAdmin });
     } else {
