@@ -766,6 +766,9 @@
     .cart-item-remove:hover { color:var(--rose); }
     .cart-footer { padding:16px 20px; display:flex; flex-direction:column; gap:12px; flex-shrink:0; }
     .cart-total { display:flex; justify-content:space-between; font-family:'Inconsolata',monospace; font-size:16px; color:var(--lime); }
+    .cart-cliente { display:flex; flex-direction:column; gap:6px; }
+    .cart-cliente-input { width:100%; padding:10px 12px; background:var(--ink-3); border:1px solid var(--edge); color:var(--paper); font-family:'Inconsolata',monospace; font-size:12px; border-radius:1px; outline:none; transition:border-color .2s; }
+    .cart-cliente-input:focus { border-color:var(--rose); }
     .cart-checkout { width:100%; padding:14px; background:var(--wa); color:var(--ink); font-weight:800; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:background .2s; display:flex; align-items:center; justify-content:center; gap:8px; border-radius:1px; }
     .cart-checkout:hover { background:var(--wa-d); }
     .cart-payment { display:flex; flex-direction:column; gap:8px; padding:16px 0; }
@@ -1125,6 +1128,10 @@
   <div class="cart-empty" id="cart-empty" style="display:block;">Tu carrito está vacío</div>
   <div class="cart-footer" id="cart-footer" style="display:none;">
     <div class="cart-total" id="cart-total"></div>
+    <div class="cart-cliente">
+      <input type="text" id="cart-nombre" class="cart-cliente-input" placeholder="Tu nombre (opcional)" autocomplete="name">
+      <input type="tel" id="cart-telefono" class="cart-cliente-input" placeholder="Tu teléfono (opcional)" autocomplete="tel">
+    </div>
     <div class="cart-payment" id="cart-payment" style="display:none;">
       <div class="cp-title">Medios de pago</div>
       <div class="pm clickable" id="pm-mp" style="display:none;">
@@ -2024,11 +2031,15 @@ function closeOtro() {
 function checkoutWA() {
   if (cart.length === 0) return;
 
+  const nombreCli = document.getElementById('cart-nombre')?.value.trim() || '';
+  const telCli = document.getElementById('cart-telefono')?.value.trim() || '';
+
   // Save order to server
   const orderData = {
     items: cart.map(item => ({ nombre: item.nombre, precio: item.precio, qty: item.qty })),
     total: `$${cartTotal().toLocaleString('es-AR')}`,
-    paymentMethod: 'No especificado'
+    paymentMethod: 'No especificado',
+    customerInfo: { nombre: nombreCli, telefono: telCli }
   };
   fetch('/api/orders', {
     method: 'POST',
@@ -2039,6 +2050,7 @@ function checkoutWA() {
   let msg = '🛒 *Nuevo pedido desde la web:*\n\n';
   cart.forEach((item, i) => { msg += `${i+1}. ${item.nombre} x${item.qty} — ${item.precio}\n`; });
   msg += `\n*Total: $${cartTotal().toLocaleString('es-AR')}*`;
+  if (nombreCli || telCli) msg += `\n\n👤 ${nombreCli}${telCli ? ` · 📱 ${telCli}` : ''}`;
 
   window.open(`https://wa.me/${configWhatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 }
