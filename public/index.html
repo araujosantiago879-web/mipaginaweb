@@ -102,12 +102,16 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
       html { scroll-behavior:auto; }
+      /* la cinta informativa sigue girando (más lenta) */
+      .ticker-track { animation-duration:42s !important; animation-iteration-count:infinite !important; }
     }
 
     /* ── Ticker ── */
     .ticker-wrap { background:var(--rose); overflow:hidden; padding:10px 0; }
-    .ticker-wrap:hover .ticker-track { animation-play-state:paused; }
-    .ticker-track { display:flex; animation:ticker 28s linear infinite; white-space:nowrap; }
+    @media (hover:hover) and (pointer:fine) {
+      .ticker-wrap:hover .ticker-track { animation-play-state:paused; }
+    }
+    .ticker-track { display:flex; width:max-content; animation:ticker 28s linear infinite; white-space:nowrap; }
     .ticker-item { font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink); padding:0 36px; display:inline-flex; align-items:center; gap:14px; }
     .ticker-item::after { content:'·'; color:rgba(9,9,11,.4); }
     @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
