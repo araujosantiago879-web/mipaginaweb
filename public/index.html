@@ -145,11 +145,19 @@
     .btn-wa-nav svg { flex-shrink:0; }
 
     /* ── Hamburguesa ── */
-    .hamburger-btn { display:flex; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer; padding:6px; }
-    .hamburger-btn span { width:20px; height:2px; background:var(--paper); border-radius:2px; transition:all .25s; }
-    .hamburger-btn.active span:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
-    .hamburger-btn.active span:nth-child(2) { opacity:0; }
-    .hamburger-btn.active span:nth-child(3) { transform:rotate(-45deg) translate(4px,-4px); }
+    .hamburger-btn {
+      display:inline-flex; align-items:center; gap:9px;
+      background:rgba(255,51,102,.09); border:1px solid rgba(255,51,102,.35);
+      cursor:pointer; padding:9px 14px; border-radius:2px; transition:all .25s;
+    }
+    .hamburger-btn:hover { background:rgba(255,51,102,.18); border-color:var(--rose); }
+    .hamburger-lines { display:flex; flex-direction:column; gap:4px; }
+    .hamburger-lines span { width:18px; height:2px; background:var(--rose); border-radius:2px; transition:all .25s; }
+    .hamburger-label { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--rose); white-space:nowrap; }
+    .hamburger-btn.active .hamburger-lines span:nth-child(1) { transform:rotate(45deg) translate(4px,4px); }
+    .hamburger-btn.active .hamburger-lines span:nth-child(2) { opacity:0; }
+    .hamburger-btn.active .hamburger-lines span:nth-child(3) { transform:rotate(-45deg) translate(4px,-4px); }
+    @media(max-width:360px){ .hamburger-label { display:none; } .hamburger-btn { padding:9px 11px; } }
 
     /* ── Drawer ── */
     .drawer-bg { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:600; opacity:0; pointer-events:none; transition:opacity .3s; }
@@ -1123,8 +1131,9 @@
   </ul>
   <div class="nav-actions">
     <span class="tag-online">Abierto ahora</span>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menú">
-      <span></span><span></span><span></span>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Ver categorías y productos">
+      <span class="hamburger-lines"><span></span><span></span><span></span></span>
+      <span class="hamburger-label">Categorías</span>
     </button>
     <button id="cart-btn" aria-label="Abrir carrito">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
