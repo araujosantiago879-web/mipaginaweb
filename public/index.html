@@ -9,18 +9,37 @@
   <meta property="og:site_name" content="El Lado B · Sex Shop Tandil">
   <meta property="og:title" content="El Lado B · Sex Shop Tandil">
   <meta property="og:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
-  <meta property="og:image" content="/og-image.svg">
+  <meta property="og:image" content="/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="es_AR">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="El Lado B · Sex Shop Tandil">
   <meta name="twitter:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
-  <title>El Lado B · Sex Shop Tandil</title>
+  <meta name="twitter:image" content="/og-image.png">
+  <title>Sex Shop en Tandil con envío discreto | El Lado B</title>
+  <!--seo:canonical-->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "El Lado B — Sex Shop Tandil",
+    "description": "Sex shop online en Tandil. Envíos discretos a domicilio el mismo día, packaging neutro sin logos y atención por WhatsApp de 9 a 23 hs.",
+    "telephone": "+5492494639700",
+    "priceRange": "$$",
+    "address": { "@type": "PostalAddress", "addressLocality": "Tandil", "addressRegion": "Buenos Aires", "addressCountry": "AR" },
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+      "opens": "09:00", "closes": "23:00"
+    }],
+    "sameAs": ["https://www.instagram.com/lado.bsexshop/", "https://www.tiktok.com/@ladobsex"]
+  }
+  </script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="image_src" href="/og-image.svg">
+  <link rel="image_src" href="/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Archivo:wght@400;500;600;700;900&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
@@ -166,6 +185,7 @@
     .drawer-cat-group.open .drawer-cat-subs { max-height:600px; }
     .drawer-cat-sub { display:block; width:100%; padding:10px 24px 10px 40px; font-family:'Archivo',sans-serif; font-size:14px; color:var(--muted); cursor:pointer; transition:color .2s, background .15s; background:none; border:none; text-align:left; }
     .drawer-cat-sub:hover { color:var(--paper); background:rgba(255,255,255,.02); }
+    .drawer-cat-todo { color:var(--rose); font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; }
     .drawer-products { flex:1; display:flex; flex-direction:column; overflow:hidden; }
     /* ── Hero ── */
     .hero {
@@ -1310,7 +1330,7 @@
 <div id="tab-discrecion" class="section-tab">
   <div class="discrecion reveal">
     <div class="disc-img">
-      <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80" alt="">
+      <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=800&q=80" alt="Paquete discreto sin logos ni etiquetas" loading="lazy">
       <div class="disc-img-veil"></div>
     </div>
     <div class="disc-content">
@@ -2408,7 +2428,7 @@ function renderDrawerCategories() {
   const el = document.getElementById('drawerCategories');
   el.innerHTML = categoryTree.map(p => `<div class="drawer-cat-group">
     <div class="drawer-cat-header">${p.name}</div>
-    <div class="drawer-cat-subs">${p.subs.map(s => `<button class="drawer-cat-sub" data-sub="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}</div>
+    <div class="drawer-cat-subs">${(p.subs.some(s => s.trim().toLowerCase() === p.name.trim().toLowerCase()) ? [`<button class="drawer-cat-sub drawer-cat-todo" data-sub="${p.name.replace(/"/g,'&quot;')}">Ver todo →</button>`] : []).concat(p.subs.filter(s => s.trim().toLowerCase() !== p.name.trim().toLowerCase()).map(s => `<button class="drawer-cat-sub" data-sub="${s.replace(/"/g,'&quot;')}">${s}</button>`)).join('')}</div>
   </div>`).join('');
   el.querySelectorAll('.drawer-cat-header').forEach(h => {
     h.addEventListener('click', () => {
@@ -2817,50 +2837,7 @@ function escapeHtml(str) {
 // ── Inicializar ──
 loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { renderFooterCats(); }); renderCart(); });
 
-// ── Canvas fallback para og:image (WhatsApp etc no siempre soportan SVG) ──
-(function() {
-  try {
-    const c = document.createElement('canvas');
-    c.width = 1200; c.height = 630;
-    const ctx = c.getContext('2d');
-    // Background
-    ctx.fillStyle = '#0c0c10'; ctx.fillRect(0, 0, 1200, 630);
-    // Glow
-    const grd = ctx.createRadialGradient(600, 300, 0, 600, 300, 380);
-    grd.addColorStop(0, 'rgba(255,51,102,.08)');
-    grd.addColorStop(1, 'rgba(255,51,102,0)');
-    ctx.fillStyle = grd; ctx.fillRect(0, 0, 1200, 630);
-    // Top line
-    ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
-    ctx.beginPath(); ctx.moveTo(520, 110); ctx.lineTo(680, 110); ctx.stroke();
-    ctx.globalAlpha = 1;
-    // LB side by side
-    ctx.fillStyle = '#ff3366'; ctx.textAlign = 'center';
-    ctx.font = 'bold 160px "Cormorant Garamond", Georgia, serif';
-    ctx.fillText('L', 520, 320);
-    ctx.fillText('B', 690, 320);
-    // Brand name
-    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-    ctx.font = 'bold 44px "Cormorant Garamond", Georgia, serif';
-    ctx.fillText('EL LADO B', 600, 370);
-    // Subtitle
-    ctx.fillStyle = '#888'; ctx.font = '20px "Cormorant Garamond", Georgia, serif';
-    ctx.fillText('SEX SHOP · TANDIL', 600, 415);
-    // Bottom line
-    ctx.strokeStyle = '#ff3366'; ctx.lineWidth = 2; ctx.globalAlpha = .4;
-    ctx.beginPath(); ctx.moveTo(540, 460); ctx.lineTo(660, 460); ctx.stroke();
-    ctx.globalAlpha = 1;
-    // CTA
-    ctx.fillStyle = '#444'; ctx.font = '11px Georgia, serif';
-    ctx.fillText('PACKAGING DISCRETO · ENTREGA EN EL DÍA', 600, 525);
-
-    const dataUrl = c.toDataURL('image/png');
-    const og = document.querySelector('meta[property="og:image"]');
-    if (og && dataUrl.length < 500000) {
-      og.setAttribute('content', dataUrl);
-    }
-  } catch(e) { console.warn('og:image canvas fallback failed', e); }
-})();
+// (el og:image ahora es un PNG real servido con URL absoluta)
 </script>
 </body>
 </html>
