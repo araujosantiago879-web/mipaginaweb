@@ -451,6 +451,8 @@
     .sk-line { height:11px; border-radius:3px; margin-bottom:8px; }
     .sk-line.w40 { width:40%; } .sk-line.w60 { width:60%; } .sk-line.w90 { width:90%; }
     .card.sk { pointer-events:none; }
+    .card-add-mini { display:none; }
+    .rating-mini { display:none; font-family:'Inconsolata',monospace; font-size:11px; color:#f5c518; white-space:nowrap; }
     .card-thumb { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--ink-3); }
     .card-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .7s ease, filter .4s; filter:grayscale(20%) brightness(.88); }
     .card:hover .card-thumb img { transform:scale(1.07); filter:grayscale(0) brightness(1); }
@@ -999,15 +1001,15 @@
       .btn-wa-nav { padding:8px 12px; font-size:10px; }
       .btn-wa-nav .btn-wa-label { display:none; }
 
-      .hero { grid-template-columns:1fr; }
-      .hero-r { min-height:320px; background:var(--ink); }
+      .hero { grid-template-columns:1fr; min-height:0; }
+      .hero-r { min-height:0; height:180px; background:var(--ink); }
       .hero-r-bg-gradient { opacity:.4; }
       .hero-people-blur { filter:brightness(.85) saturate(1.1); transform:none; opacity:.9; }
       .hero-r-blend { display:none; }
       .hero-r-veil { background:linear-gradient(to top,rgba(5,5,8,.6) 0%,transparent 40%),linear-gradient(to bottom,rgba(5,5,8,.3) 0%,transparent 30%); }
       .hero-big-b { display:none; }
       .hero-spin { bottom:20px; right:20px; width:72px; height:72px; }
-      .hero-l { padding:60px 20px 50px; }
+      .hero-l { padding:52px 20px 42px; }
 
       .trust-strip { grid-template-columns:1fr 1fr; }
       .ts-item { padding:20px 16px; }
@@ -1017,10 +1019,14 @@
       .tienda { padding:48px 16px; }
       /* 2 columnas en tablet/móvil */
       .products { grid-template-columns:repeat(2, 1fr); gap:12px; }
-      .card-hover-cta { transform:none; padding:12px 8px 8px; }
+      .card-hover-cta { display:none; }
       .card-fav { opacity:1; }
-      .cta-add { font-size:9px; padding:8px 6px; }
-      .cta-view { width:30px; height:30px; }
+      .card-add-mini {
+        display:flex; align-items:center; justify-content:center; gap:6px;
+        margin:0 10px 12px; padding:10px;
+        font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+        background:var(--rose); color:#fff; border-radius:2px;
+      }
 
       .horarios { padding:0 16px 60px; grid-template-columns:1fr; }
       .hor-card { padding:28px 20px; }
@@ -1037,6 +1043,16 @@
       .modal { grid-template-columns:1fr; max-height:92vh; }
       .modal-photo { max-height:50vw; }
       .modal-info { padding:24px 20px; }
+    }
+
+    /* Móvil ≤760: nav limpia (las secciones viven en la hamburguesa),
+       rating compacto e inputs a 16px para que iOS no haga zoom al tocar */
+    @media(max-width:760px) {
+      .nav-links { display:none; }
+      .stars { display:none; }
+      .rating-mini { display:inline-block; }
+      .search-input, .drawer-input, .cart-cliente-input, .review-input, .review-textarea { font-size:16px; }
+      .card-foot { padding-top:8px; }
     }
 
     /* Móvil pequeño */
@@ -1824,8 +1840,10 @@ function cardHTML(p) {
         <div class="card-foot">
           <div class="card-price">${escapeHtml(p.precio || '')}${p.precioAnterior ? `<del>${escapeHtml(p.precioAnterior)}</del>` : ''}</div>
           <div class="stars">${'★'.repeat(Math.floor(rating))}${rating % 1 ? '½' : ''}<span class="star-n">${rating}</span></div>
+          <div class="rating-mini">★ ${rating}</div>
         </div>
       </div>
+      <button class="card-add-mini" onclick="event.stopPropagation(); addToCartById('${id}')">+ Agregar al carrito</button>
     </article>`;
 }
 
