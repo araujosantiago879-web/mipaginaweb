@@ -15,8 +15,8 @@ app.get('/admin.html', async (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Carpetas públicas
-app.use(express.static(path.join(__dirname, 'public')));
+// Carpetas públicas (index:false para poder inyectar SEO en "/")
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // ─── MongoDB ────────────────────────────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI; // variable de entorno en Vercel
@@ -113,10 +113,63 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ─── Ruta principal ──────────────────────────────────────────────────────────
+// Origen absoluto del sitio (dominio real detrás del proxy de Vercel)
+function siteOrigin(req) {
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:3000';
+  return `${host.startsWith('localhost') ? 'http' : proto}://${host}`;
+}
+
+// ─── Ruta principal (inyecta canonical / og absolutos para SEO) ─────────────
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  try {
+    const origin = siteOrigin(req);
+    let html = require('fs').readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+    html = html
+      .replace('<meta property="og:image" content="/og-image.png">',
+               `<meta property="og:image" content="${origin}/og-image.png">`)
+      .replace('<meta name="twitter:image" content="/og-image.png">',
+               `<meta name="twitter:image" content="${origin}/og-image.png">`)
+      .replace('<!--seo:canonical-->',
+               `<link rel="canonical" href="${origin}/">\n  <meta property="og:url" content="${origin}/">`);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(html);
+  } catch (err) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
 });
+
+// ─── robots.txt y sitemap.xml ────────────────────────────────────────────────
+app.get('/robots.txt', (req, res) => {
+  const origin = siteOrigin(req);
+  res.type('text/plain').send(
+`User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: ${origin}/sitemap.xml
+`);
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+  const origin = siteOrigin(req);
+  let urls = [`  <url><loc>${origin}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>`];
+  try {
+    const col = await getProducts();
+    const products = await col.find({ pausado: { $ne: true } }).project({ _id: 1 }).toArray();
+    urls = urls.concat(products.map(p =>
+      `  <url><loc>${origin}/producto/${p._id}</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`));
+  } catch (_) {
+    // sin DB: solo la home
+  }
+  res.type('application/xml').send(
+`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>
+`);
+});
+
 
 // Escapar texto que se inyecta en HTML/atributos (página OG de producto)
 function escapeHtml(str) {
@@ -148,9 +201,7 @@ app.get('/producto/:id', async (req, res) => {
       return res.redirect('/');
     }
 
-    const siteUrl   = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : `http://localhost:${process.env.PORT || 3000}`;
+    const siteUrl   = siteOrigin(req);
 
     const nombre    = escapeHtml(producto.nombre      || 'Producto');
     const precio    = escapeHtml(producto.precio      || '');
@@ -165,14 +216,38 @@ app.get('/producto/:id', async (req, res) => {
     const ogTitle       = `${nombre} — ${precio}${badge}`;
     const ogDescription = `${desc} | 📦 Envío discreto · Atención 9 a 23 hs · El Lado B Sex Shop Tandil`;
     const ogUrl         = `${siteUrl}/producto/${req.params.id}`;
+    const precioNum     = parseInt(String(producto.precio || '').replace(/[^0-9]/g, ''), 10) || 0;
+    const waNumber      = '5492494639700';
+    const waMsg         = encodeURIComponent(`¡Hola! Quiero consultar por: ${producto.nombre} (${producto.precio})\n${ogUrl}`);
 
-    // HTML mínimo con todas las meta OG que WhatsApp necesita
+    // Datos estructurados para Google (Product + Offer)
+    const jsonLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: producto.nombre || 'Producto',
+      description: producto.descripcion || '',
+      image: producto.imagen ? [producto.imagen] : [],
+      category: producto.categoria || '',
+      url: ogUrl,
+      ...(producto.rating ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: producto.rating, reviewCount: 1, bestRating: 5 } } : {}),
+      offers: {
+        '@type': 'Offer',
+        price: precioNum,
+        priceCurrency: 'ARS',
+        availability: 'https://schema.org/InStock',
+        url: ogUrl
+      }
+    });
+
+    // Página real e indexable (antes redirigía al instante y Google la ignoraba)
     const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${ogTitle} — El Lado B · Sex Shop Tandil</title>
+  <meta name="description" content="${ogDescription}">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
   <!-- Open Graph (WhatsApp, Facebook, Telegram) -->
   <meta property="og:type"        content="product">
@@ -189,28 +264,45 @@ app.get('/producto/:id', async (req, res) => {
   <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:title"       content="${ogTitle}">
   <meta name="twitter:description" content="${ogDescription}">
-  <meta name="twitter:image"       content="${imagen}">
+  <meta name="twitter:image"      content="${imagen}">
 
-  <!-- WhatsApp usa canonical para identificar la URL -->
   <link rel="canonical" href="${ogUrl}">
-
-  <!-- Redirige al visitante humano a la tienda -->
-  <meta http-equiv="refresh" content="0; url=/">
+  <script type="application/ld+json">${jsonLd}</script>
   <style>
-    body { margin:0; background:#050508; color:#eef2f5; font-family:sans-serif;
-           display:flex; align-items:center; justify-content:center; min-height:100vh;
-           flex-direction:column; gap:16px; text-align:center; padding:20px; }
-    img  { max-width:260px; border-radius:4px; }
-    h1   { font-size:20px; margin:0; }
-    p    { color:#66ffcc; font-size:18px; font-weight:700; margin:0; }
-    a    { color:#ff3366; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0c0c10; color:#eef2f5; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+           min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px 20px 48px; }
+    .marca { font-family:Georgia,serif; font-size:22px; margin-bottom:4px; }
+    .marca em { font-style:italic; color:#ff3366; }
+    .marca small { display:block; font-family:monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:rgba(200,215,230,.4); margin-top:2px; text-align:center; }
+    .tarjeta { max-width:420px; width:100%; margin-top:28px; background:#111116; border:1px solid rgba(255,255,255,.07); border-radius:10px; overflow:hidden; }
+    .tarjeta img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; background:#18181e; }
+    .cuerpo { padding:22px; display:flex; flex-direction:column; gap:10px; }
+    .cat { font-family:monospace; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:#ff3366; }
+    h1 { font-family:Georgia,serif; font-size:26px; line-height:1.15; }
+    .precio { font-family:monospace; font-size:26px; color:#66ffcc; }
+    .desc { font-size:14px; line-height:1.7; color:rgba(200,215,230,.65); }
+    .garantias { font-size:12px; color:rgba(200,215,230,.5); line-height:1.9; border-top:1px solid rgba(255,255,255,.07); padding-top:12px; }
+    .btn-wa { display:flex; align-items:center; justify-content:center; gap:8px; background:#25d366; color:#06220f;
+              font-weight:800; font-size:13px; letter-spacing:1px; text-transform:uppercase; padding:16px; border-radius:4px; text-decoration:none; margin-top:6px; }
+    .btn-tienda { display:block; text-align:center; color:rgba(200,215,230,.6); font-size:13px; text-decoration:none; padding:12px; }
+    .btn-tienda:hover, .btn-wa:hover { opacity:.9; }
   </style>
 </head>
 <body>
-  <img src="${imagen}" alt="${nombre}">
-  <h1>${nombre}</h1>
-  <p>${precio}</p>
-  <a href="/">← Ir a la tienda</a>
+  <a href="/" class="marca" style="text-decoration:none;">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
+  <div class="tarjeta">
+    ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ''}
+    <div class="cuerpo">
+      ${categoria ? `<span class="cat">${categoria}</span>` : ''}
+      <h1>${nombre}</h1>
+      <div class="precio">${precio}</div>
+      ${desc ? `<p class="desc">${desc}</p>` : ''}
+      <div class="garantias">📦 Packaging 100% discreto, sin logos<br>⚡ Entrega hoy en Tandil · envíos a todo el país<br>💳 Todos los medios de pago</div>
+      <a class="btn-wa" href="https://wa.me/${waNumber}?text=${waMsg}">Consultar por WhatsApp</a>
+      <a class="btn-tienda" href="/">← Ver toda la tienda</a>
+    </div>
+  </div>
 </body>
 </html>`;
 

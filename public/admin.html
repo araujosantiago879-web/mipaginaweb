@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Admin · El Lado B</title>
+  <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -1059,7 +1060,7 @@ function renderDrawerCategories() {
   if (!tree) tree = DEFAULT_TREE.map(p => ({ ...p, subs: [...p.subs] }));
   el.innerHTML = tree.map(p => `<div class="drawer-cat-group">
     <div class="drawer-cat-header">${p.name}</div>
-    <div class="drawer-cat-subs">${p.subs.map(s => `<button class="drawer-cat-sub" data-sub="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}</div>
+    <div class="drawer-cat-subs">${p.subs.filter((s, i) => p.subs.indexOf(s) === i).map(s => `<button class="drawer-cat-sub" data-sub="${s.replace(/"/g,'&quot;')}">${s}</button>`).join('')}</div>
   </div>`).join('');
   el.querySelectorAll('.drawer-cat-header').forEach(h => {
     h.addEventListener('click', () => {
