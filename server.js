@@ -62,16 +62,16 @@ async function connectDB() {
       _id: 'main',
       whatsappNumber: WA_NUMBER,
       horarios: {
-        lunesViernes: '9:00 — 23:00 hs',
-        sabados: '9:00 — 23:00 hs',
-        domingos: '10:00 — 22:00 hs',
+        lunesViernes: '10:00 — 21:00 hs',
+        sabados: '10:00 — 21:00 hs',
+        domingos: '10:00 — 21:00 hs',
         feriados: '10:00 — 21:00 hs'
       },
       tickerItems: [
         '📦 Packaging discreto',
         '⚡ Entrega hoy en Tandil',
         '💳 Todos los medios de pago',
-        '📲 Atención 9 a 23 hs',
+        '📲 Atención 10 a 21 hs',
         '✅ Productos certificados',
         '🔒 Compra 100% privada'
       ],
@@ -282,7 +282,7 @@ app.get('/producto/:id', async (req, res) => {
                     : '';
 
     const ogTitle       = `${nombre} — ${precio}${badge}`;
-    const ogDescription = `${desc} | 📦 Envío discreto · Atención 9 a 23 hs · El Lado B Sex Shop Tandil`;
+    const ogDescription = `${desc} | 📦 Envío discreto · Atención 10 a 21 hs · El Lado B Sex Shop Tandil`;
     const ogUrl         = `${siteUrl}/producto/${req.params.id}`;
     const precioNum     = parseInt(String(producto.precio || '').replace(/[^0-9]/g, ''), 10) || 0;
     const waNumber      = '5492494639700';
