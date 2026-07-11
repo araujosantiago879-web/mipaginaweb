@@ -528,6 +528,41 @@
     .ib-link { display:inline-flex; align-items:center; gap:8px; font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--lime); transition:gap .2s; }
     .ib-link:hover { gap:14px; }
 
+    /* ── Guía para principiantes ── */
+    .guia { padding:96px 48px; }
+    .guia-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:48px; }
+    .guia-card { border:1px solid var(--edge); background:var(--ink-2); padding:34px 28px; display:flex; flex-direction:column; gap:14px; }
+    .guia-icon { width:46px; height:46px; background:rgba(255,51,102,.08); border:1px solid rgba(255,51,102,.15); display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .guia-card h3 { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; }
+    .guia-card p { font-size:13px; color:var(--muted); line-height:1.75; }
+    .guia-card ul { list-style:none; display:flex; flex-direction:column; gap:8px; margin-top:2px; }
+    .guia-card li { font-size:12.5px; color:var(--muted); line-height:1.6; display:flex; gap:9px; }
+    .guia-card li::before { content:'·'; color:var(--rose); font-weight:700; }
+    .edu-banner {
+      margin-top:48px; padding:52px 48px;
+      background:linear-gradient(135deg, rgba(255,51,102,.09) 0%, #0c070a 55%, var(--ink-2) 100%);
+      border:1px solid rgba(255,51,102,.18);
+      display:grid; grid-template-columns:1.3fr .7fr; gap:40px; align-items:center;
+    }
+    .edu-banner h3 { font-family:'Cormorant Garamond',serif; font-size:clamp(26px,3vw,38px); font-weight:700; line-height:1.1; margin-bottom:14px; }
+    .edu-banner h3 em { font-style:italic; color:var(--rose); }
+    .edu-banner p { font-size:13.5px; color:var(--muted); line-height:1.8; }
+    .edu-banner p + p { margin-top:10px; }
+    .edu-cta { display:flex; flex-direction:column; gap:12px; }
+    .btn-guia-wa {
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      font-size:12px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase;
+      background:var(--wa); color:var(--ink); padding:17px 28px;
+      transition:all .25s;
+    }
+    .btn-guia-wa:hover { background:var(--wa-d); transform:translateY(-2px); }
+    .edu-nota { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:.5px; color:var(--muted-2); line-height:1.7; text-align:center; }
+    @media(max-width:900px){
+      .guia { padding:56px 16px; }
+      .guia-grid { grid-template-columns:1fr; gap:10px; }
+      .edu-banner { grid-template-columns:1fr; padding:32px 22px; gap:24px; }
+    }
+
     /* ── Discreción ── */
     .discrecion { display:grid; grid-template-columns:1fr 1fr; }
     .disc-img { position:relative; min-height:420px; overflow:hidden; }
@@ -1136,6 +1171,7 @@
   <a href="#" class="logo">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
   <ul class="nav-links">
     <li><a href="#" data-tab="tienda" class="active">Tienda</a></li>
+    <li><a href="#" data-tab="guia">Guía</a></li>
     <li><a href="#" data-tab="discrecion">Discreción</a></li>
     <li><a href="#" data-tab="testimonios">Reseñas</a></li>
     <li><a href="#" data-tab="contacto">Contacto</a></li>
@@ -1357,11 +1393,99 @@
     </div>
     <div class="panel on" id="panel-todo">
       <div class="products" id="products-container"></div>
+      <a class="inline-banner" data-tab="guia" style="margin-top:44px;cursor:pointer;">
+        <div class="ib-title">¿Primera vez? Tranqui, es acá.</div>
+        <p class="ib-p">Armamos una guía sin vergüenzas ni tecnicismos para que elijas bien tu primer producto: materiales, higiene, mitos y todo lo que da cosa preguntar.</p>
+        <span class="ib-link">Leer la guía para principiantes →</span>
+      </a>
       <div class="search-empty" id="search-empty">
         <div class="search-empty-icon">🔍</div>
         <h3>Sin resultados</h3>
         <p id="search-empty-msg">No encontramos productos para tu búsqueda.</p>
         <button class="search-empty-clear" onclick="clearSearch()">Limpiar búsqueda</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="tab-guia" class="section-tab">
+  <section class="guia reveal">
+    <div style="font-family:'Inconsolata';font-size:10px;letter-spacing:3px;color:var(--rose);margin-bottom:10px;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:1px;background:var(--rose);display:inline-block;"></span>Sin vergüenzas · Sin juicios</div>
+    <h2 class="section-h2">¿Primera vez? <em>Tranqui.</em></h2>
+    <p style="font-size:14.5px;color:var(--muted);line-height:1.8;max-width:640px;margin-top:18px;">Todos empezamos sin saber nada, y ninguna pregunta es tonta. Esta guía es para vos que tenés curiosidad pero te da cosa preguntar: lo básico, dicho claro y sin tecnicismos. Y si querés que te acompañemos en la elección, escribinos — atendemos con la misma discreción con la que enviamos.</p>
+
+    <div class="guia-grid">
+      <div class="guia-card">
+        <div class="guia-icon">🌱</div>
+        <h3>Empezá por lo simple</h3>
+        <p>El error más común es arrancar por lo más grande o lo más complejo. Menos es más:</p>
+        <ul>
+          <li>Elegí algo chico, suave y fácil de usar.</li>
+          <li>Los estimuladores externos y las balas vibradoras son el mejor primer paso.</li>
+          <li>Probá con calma, sin expectativas: conocerse lleva tiempo.</li>
+        </ul>
+      </div>
+      <div class="guia-card">
+        <div class="guia-icon">🧪</div>
+        <h3>Materiales que importan</h3>
+        <p>Tu cuerpo merece materiales seguros. Antes de comprar en cualquier lado, fijate esto:</p>
+        <ul>
+          <li>Buscá silicona de grado corporal, ABS o vidrio templado.</li>
+          <li>Evitá materiales porosos o gomas sin certificar: acumulan bacterias.</li>
+          <li>Todos nuestros productos son certificados — si tenés dudas de alguno, preguntanos.</li>
+        </ul>
+      </div>
+      <div class="guia-card">
+        <div class="guia-icon">💧</div>
+        <h3>Lubricante: tu mejor aliado</h3>
+        <p>No es un extra, es parte de la experiencia — y la regla de oro es que nada debe doler.</p>
+        <ul>
+          <li>El de base de agua es compatible con todo: juguetes y preservativos.</li>
+          <li>Usalo siempre, aunque creas que no hace falta.</li>
+          <li>Si algo molesta o duele, pará. El placer no duele.</li>
+        </ul>
+      </div>
+      <div class="guia-card">
+        <div class="guia-icon">🧼</div>
+        <h3>Higiene y cuidado</h3>
+        <p>Un juguete bien cuidado dura años y te cuida a vos:</p>
+        <ul>
+          <li>Lavalo antes y después de cada uso con agua tibia y jabón neutro.</li>
+          <li>Secalo bien y guardalo limpio, separado de otros juguetes.</li>
+          <li>Si lo compartís, usá preservativo sobre el juguete o lavalo entre usos.</li>
+        </ul>
+      </div>
+      <div class="guia-card">
+        <div class="guia-icon">💬</div>
+        <h3>Hablalo en pareja</h3>
+        <p>Los juguetes suman, no compiten. La clave es la comunicación:</p>
+        <ul>
+          <li>Proponerlo no es un reproche: es ganas de explorar juntos.</li>
+          <li>Acuerden qué les da curiosidad y qué no, sin presión.</li>
+          <li>El consentimiento y el respeto van primero, siempre.</li>
+        </ul>
+      </div>
+      <div class="guia-card">
+        <div class="guia-icon">🚫</div>
+        <h3>Mitos, afuera</h3>
+        <p>Cosas que escuchaste y no son así:</p>
+        <ul>
+          <li>«Es porque falta algo en la pareja» — falso: la mayoría los usa en pareja.</li>
+          <li>«Generan dependencia» — falso: no reemplazan nada ni a nadie.</li>
+          <li>«Es cosa de jóvenes» — el placer no tiene edad ni vencimiento.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="edu-banner reveal">
+      <div>
+        <h3>El placer también es <em>salud</em></h3>
+        <p>Creemos en la educación sexual como base de una sexualidad plena, segura y sin culpas. Conocer tu cuerpo, comunicar lo que te gusta y respetar los tiempos —tuyos y del otro— es tan importante como cualquier producto que te llevemos a tu puerta.</p>
+        <p>Esta guía es orientativa y no reemplaza la consulta profesional: ante dudas médicas, dolor persistente o lo que sea que te preocupe, consultá con tu médico, ginecólogo/a o un sexólogo/a de confianza. Preguntar es cuidarse.</p>
+      </div>
+      <div class="edu-cta">
+        <a href="#" target="_blank" rel="noopener" class="btn-guia-wa" id="guia-wa-btn">💬 Asesorate sin vergüenza</a>
+        <span class="edu-nota">Te respondemos por WhatsApp con total discreción.<br>Nadie más ve tu consulta. Sin juicios, de verdad.</span>
       </div>
     </div>
   </section>
@@ -1526,6 +1650,7 @@
       <div class="f-col-title">Info</div>
       <ul class="f-links">
         <li><a href="#" onclick="showSection('como-funciona')">Cómo funciona</a></li>
+        <li><a data-tab="guia" style="cursor:pointer;">Guía para principiantes</a></li>
         <li><a data-tab="contacto">Envíos y entregas</a></li>
         <li><a href="#" onclick="showSection('cambios')">Cambios y devoluciones</a></li>
         <li><a data-tab="contacto">Medios de pago</a></li>
@@ -1611,7 +1736,7 @@ let configWhatsappNumber = '5492494639700'; // número real de El Lado B
 // ── Setear WhatsApp links al instante (sin esperar API) ──
 (function setWA() {
   const waBase = `https://wa.me/${configWhatsappNumber}`;
-  document.querySelectorAll('#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab')
+  document.querySelectorAll('#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab, #guia-wa-btn')
     .forEach(el => { if (el) el.href = waBase; });
 })();
 
@@ -1678,7 +1803,7 @@ async function loadConfig() {
 
     const waBase = `https://wa.me/${configWhatsappNumber}`;
     document.querySelectorAll(
-      '#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab'
+      '#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab, #guia-wa-btn'
     ).forEach(el => { if (el) el.href = waBase; });
 
     // Ticker
