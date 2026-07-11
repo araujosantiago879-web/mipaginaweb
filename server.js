@@ -46,6 +46,10 @@ let db;
 
 async function connectDB() {
   if (db) return db;
+  if (!MONGO_URI) {
+    console.log('ℹ️  MONGO_URI no definida, operando sin DB');
+    return null;
+  }
   const client = new MongoClient(MONGO_URI);
   await client.connect();
   db = client.db('eladob'); // nombre de tu base de datos
@@ -430,7 +434,8 @@ app.get('/api/products', async (req, res) => {
 // Seed automático: si no hay productos, cargar desde data/products.json
 async function autoSeed() {
   try {
-    const col = await getProducts();
+    const col = await getProducts().catch(() => null);
+    if (!col) return;
     const count = await col.countDocuments();
     if (count === 0) {
       const products = require('./data/products.json');
