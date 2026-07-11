@@ -41,6 +41,8 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="image_src" href="/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <script defer src="/_vercel/insights/script.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Archivo:wght@400;500;600;700;900&family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     /* ===== TOKENS ===== */
@@ -92,6 +94,13 @@
     }
     a { color:inherit; text-decoration:none; }
     button { font-family:inherit; border:none; background:none; cursor:pointer; }
+    /* Accesibilidad: skip-link (visible solo al tabular) */
+    .skip-link {
+      position:absolute; left:12px; top:-60px; z-index:9999;
+      background:var(--rose); color:#fff; font-weight:700; font-size:13px;
+      padding:10px 18px; border-radius:3px; transition:top .2s;
+    }
+    .skip-link:focus { top:12px; }
     /* Accesibilidad: foco visible al navegar con teclado */
     a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
       outline:2px solid var(--rose); outline-offset:2px; border-radius:2px;
@@ -1111,7 +1120,9 @@
 </head>
 <body>
 
-<svg id="concrete-noise" xmlns="http://www.w3.org/2000/svg" width="256" height="256" preserveAspectRatio="none">
+<a class="skip-link" href="#tienda">Saltar al catálogo</a>
+
+<svg id="concrete-noise" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="256" height="256" preserveAspectRatio="none">
   <filter id="concrete-grain" x="0" y="0" width="100%" height="100%">
     <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"/>
     <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.04 0"/>
@@ -1131,7 +1142,7 @@
   </ul>
   <div class="nav-actions">
     <span class="tag-online">Abierto ahora</span>
-    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Ver categorías y productos">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Ver categorías y productos" aria-expanded="false">
       <span class="hamburger-lines"><span></span><span></span><span></span></span>
       <span class="hamburger-label">Categorías</span>
     </button>
@@ -1151,7 +1162,7 @@
 
 <!-- ── Drawer de navegación ── -->
 <div class="drawer-bg" id="drawerBg"></div>
-<div class="drawer" id="drawer">
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Categorías y productos">
   <div class="drawer-header">
     <div class="drawer-tabs">
       <button class="drawer-tab on" data-drawer-view="categories">Categorías</button>
@@ -1170,7 +1181,7 @@
 
 <!-- ── Cart drawer ── -->
 <div class="drawer-bg" id="cart-drawer-bg"></div>
-<div class="drawer" id="cart-drawer" style="width:420px;">
+<div class="drawer" id="cart-drawer" style="width:420px;" role="dialog" aria-modal="true" aria-label="Carrito de compras">
   <div class="drawer-header">
     <span class="drawer-title">Carrito</span>
     <button class="drawer-close" id="cart-drawer-close">✕</button>
@@ -1288,7 +1299,7 @@
   </div>
   <div class="hero-r">
     <div class="hero-r-bg-gradient"></div>
-    <img src="https://t4.ftcdn.net/jpg/06/22/76/41/360_F_622764197_LqqeWWVH338xUy8VpD7HCiVYf73DkdWZ.jpg" alt="Ambiente íntimo" class="hero-people-blur">
+    <img src="https://t4.ftcdn.net/jpg/06/22/76/41/360_F_622764197_LqqeWWVH338xUy8VpD7HCiVYf73DkdWZ.jpg" alt="Ambiente íntimo" class="hero-people-blur" fetchpriority="high" decoding="async">
     <div class="hero-r-blend"></div>
     <div class="hero-r-veil"></div>
     <div class="hero-big-b">B</div>
@@ -1563,7 +1574,7 @@
 <!-- Admin toast (creado dinámicamente por JS si se necesita) -->
 
 <!-- Modal producto -->
-<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Detalle del producto">
   <button class="modal-close-btn" id="modal-close">✕</button>
   <div class="modal">
     <div class="modal-photo" style="position:relative;">
@@ -1603,6 +1614,10 @@ let configWhatsappNumber = '5492494639700'; // número real de El Lado B
   document.querySelectorAll('#hero-whatsapp, #wpp-block-link, #footer-wa, #footer-wa-link, #nav-wpp-btn, #wa-fab')
     .forEach(el => { if (el) el.href = waBase; });
 })();
+
+// Aviso de conexión perdida / recuperada
+window.addEventListener('offline', () => showToast('📡 Sin conexión a internet', true));
+window.addEventListener('online', () => showToast('✅ Conexión recuperada'));
 
 // Año dinámico en el footer
 (function() {
@@ -2520,6 +2535,7 @@ function openDrawer(view) {
   document.getElementById('drawerBg').classList.add('open');
   document.getElementById('drawer').classList.add('open');
   document.getElementById('hamburgerBtn').classList.add('active');
+  document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'true');
   document.body.style.overflow = 'hidden';
   switchDrawerView(view || 'categories');
 }
@@ -2527,6 +2543,7 @@ function closeDrawer() {
   document.getElementById('drawerBg').classList.remove('open');
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('hamburgerBtn').classList.remove('active');
+  document.getElementById('hamburgerBtn').setAttribute('aria-expanded', 'false');
   document.body.style.overflow = '';
 }
 document.getElementById('hamburgerBtn').addEventListener('click', () => {

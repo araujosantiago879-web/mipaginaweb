@@ -8,7 +8,19 @@ const { MongoClient, ObjectId } = require('mongodb');
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '200kb' }));
+
+// ─── Cabeceras de seguridad ──────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if ((req.headers['x-forwarded-proto'] || '') === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  next();
+});
 
 // ─── Admin panel (protegido) ────────────────────────────────────────────────
 app.get('/admin.html', async (req, res) => {
@@ -16,7 +28,17 @@ app.get('/admin.html', async (req, res) => {
 });
 
 // Carpetas públicas (index:false para poder inyectar SEO en "/")
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+// Imágenes e íconos con caché de 7 días; HTML siempre revalidado
+app.use(express.static(path.join(__dirname, 'public'), {
+  index: false,
+  setHeaders(res, filePath) {
+    if (/\.(png|jpe?g|svg|webp|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800');
+    } else if (/\.html$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
 
 // ─── MongoDB ────────────────────────────────────────────────────────────────
 const MONGO_URI = process.env.MONGO_URI; // variable de entorno en Vercel
@@ -120,8 +142,30 @@ function siteOrigin(req) {
   return `${host.startsWith('localhost') ? 'http' : proto}://${host}`;
 }
 
-// ─── Ruta principal (inyecta canonical / og absolutos para SEO) ─────────────
-app.get('/', (req, res) => {
+// Card de producto renderizada en el servidor (para crawlers sin JS y
+// primer pintado instantáneo; el frontend la re-renderiza al hidratar)
+function ssrCard(p) {
+  const img = escapeHtml((p.imagenes && p.imagenes[0]) || p.imagen || '');
+  const rating = p.rating != null ? p.rating : 4.5;
+  const badgeTxt = p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : p.badge === 'sale' ? 'Oferta' : '';
+  const desc = (p.descripcion || '');
+  return `<article class="card" data-id="${escapeHtml(String(p.id ?? ''))}">
+    <div class="card-thumb"><img src="${img}" alt="${escapeHtml(p.nombre || 'Producto')}" loading="lazy" decoding="async">${badgeTxt ? `<span class="card-badge b-${p.badge}">${badgeTxt}</span>` : ''}</div>
+    <div class="card-body">
+      <div class="card-cat">${escapeHtml(p.categoria || '')}</div>
+      <div class="card-name">${escapeHtml(p.nombre || '')}</div>
+      <div class="card-desc">${escapeHtml(desc.substring(0, 65))}${desc.length > 65 ? '…' : ''}</div>
+      <div class="card-foot">
+        <div class="card-price">${escapeHtml(p.precio || '')}</div>
+        <div class="stars">${'★'.repeat(Math.floor(rating))}<span class="star-n">${rating}</span></div>
+        <div class="rating-mini">★ ${rating}</div>
+      </div>
+    </div>
+  </article>`;
+}
+
+// ─── Ruta principal (inyecta canonical / og absolutos + productos para SEO) ──
+app.get('/', async (req, res) => {
   try {
     const origin = siteOrigin(req);
     let html = require('fs').readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
@@ -132,11 +176,35 @@ app.get('/', (req, res) => {
                `<meta name="twitter:image" content="${origin}/og-image.png">`)
       .replace('<!--seo:canonical-->',
                `<link rel="canonical" href="${origin}/">\n  <meta property="og:url" content="${origin}/">`);
+
+    // Incrustar los primeros 29 productos (mismo límite que la vista "Todo")
+    try {
+      let prods = [];
+      try {
+        const col = await getProducts();
+        prods = (await col.find({ pausado: { $ne: true } }).limit(29).toArray())
+          .map(({ _id, ...p }) => ({ id: _id, ...p }));
+      } catch (_) {
+        prods = getProductsFromJSON().filter(p => !p.pausado).slice(0, 29);
+      }
+      if (prods.length) {
+        html = html.replace('<div class="products" id="products-container"></div>',
+          `<div class="products" id="products-container">${prods.map(ssrCard).join('')}</div>`);
+      }
+    } catch (_) {}
+
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
   }
+});
+
+// ─── Monitoreo simple ────────────────────────────────────────────────────────
+app.get('/api/health', async (req, res) => {
+  let db = 'sin conexión';
+  try { const col = await getProducts(); await col.estimatedDocumentCount(); db = 'ok'; } catch (_) {}
+  res.json({ ok: true, db, uptime: Math.round(process.uptime()) });
 });
 
 // ─── robots.txt y sitemap.xml ────────────────────────────────────────────────
@@ -697,12 +765,23 @@ async function getOrders() {
 // POST /api/orders (sin auth — lo usa el frontend público)
 app.post('/api/orders', async (req, res) => {
   try {
+    const b = req.body || {};
+    const items = Array.isArray(b.items) ? b.items.slice(0, 50).map(i => ({
+      nombre: String((i && i.nombre) || '').slice(0, 200),
+      precio: String((i && i.precio) || '').slice(0, 40),
+      qty: Math.max(1, Math.min(99, parseInt(i && i.qty, 10) || 1))
+    })) : [];
+    if (!items.length) return res.status(400).json({ error: 'Pedido vacío' });
     const col = await getOrders();
+    const ci = (b.customerInfo && typeof b.customerInfo === 'object') ? b.customerInfo : {};
     const order = {
-      items: req.body.items || [],
-      total: req.body.total || '',
-      paymentMethod: req.body.paymentMethod || '',
-      customerInfo: req.body.customerInfo || {},
+      items,
+      total: String(b.total || '').slice(0, 40),
+      paymentMethod: String(b.paymentMethod || '').slice(0, 60),
+      customerInfo: {
+        nombre: String(ci.nombre || '').slice(0, 120),
+        telefono: String(ci.telefono || '').slice(0, 40)
+      },
       createdAt: new Date(),
       status: 'pendiente'
     };
