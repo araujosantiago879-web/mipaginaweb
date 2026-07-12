@@ -999,7 +999,12 @@
     .modal-cat { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--rose); }
     .modal-name { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:700; line-height:1.1; }
     .modal-price { font-family:'Inconsolata',monospace; font-size:28px; color:var(--lime); }
-    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; }
+    .modal-desc-section { border-top:1px solid var(--edge); border-bottom:1px solid var(--edge); padding:16px 0; }
+    .modal-desc-title { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); font-weight:700; margin-bottom:10px; }
+    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; white-space:pre-line; }
+    .modal-desc.clamped { display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+    .modal-desc-toggle { margin-top:10px; font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--rose); font-weight:700; border-bottom:1px solid transparent; transition:border-color .2s; }
+    .modal-desc-toggle:hover { border-bottom-color:var(--rose); }
 
     .modal-guarantees { display:flex; flex-direction:column; gap:10px; }
     .mg { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
@@ -1712,7 +1717,11 @@
       <div class="modal-cat" id="m-cat"></div>
       <div class="modal-name" id="m-name"></div>
       <div class="modal-price"><span id="m-price"></span><span id="m-old-price" style="font-size:14px;color:#ff6666;text-decoration:line-through;margin-left:10px;font-family:'Archivo',sans-serif;"></span></div>
-      <div class="modal-desc" id="m-desc"></div>
+      <div class="modal-desc-section">
+        <div class="modal-desc-title">Descripción</div>
+        <div class="modal-desc" id="m-desc"></div>
+        <button type="button" class="modal-desc-toggle" id="m-desc-toggle" style="display:none;">Ver descripción completa</button>
+      </div>
       <div class="modal-guarantees">
         <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Packaging 100% discreto, sin logos</div>
         <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Entrega hoy en Tandil</div>
@@ -2320,7 +2329,23 @@ function openModal(id) {
     oldPrice.textContent = p.precioAnterior || '';
     oldPrice.style.display = p.precioAnterior ? '' : 'none';
   }
-  if (desc) desc.textContent = p.descripcion || '';
+  if (desc) {
+    desc.textContent = p.descripcion || '';
+    desc.classList.add('clamped');
+    const toggle = document.getElementById('m-desc-toggle');
+    if (toggle) {
+      toggle.textContent = 'Ver descripción completa';
+      toggle.style.display = 'none';
+      // Medir tras el layout: si el texto colapsado desborda, mostrar el botón
+      requestAnimationFrame(() => {
+        if (desc.scrollHeight > desc.clientHeight + 2) toggle.style.display = '';
+      });
+      toggle.onclick = () => {
+        const expandido = desc.classList.toggle('clamped') === false;
+        toggle.textContent = expandido ? 'Ver menos' : 'Ver descripción completa';
+      };
+    }
+  }
   if (badgeEl) {
     badgeEl.textContent = p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Más vendido' : p.badge === 'sale' ? '💰 Oferta' : '';
     badgeEl.style.display = p.badge ? '' : 'none';
