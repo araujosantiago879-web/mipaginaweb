@@ -647,11 +647,12 @@
         </div>
         <div class="form-group">
           <input type="file" id="prod-imagenes" accept="image/*" multiple style="display:none">
-          <label>URL de imagen</label>
+          <label>URL de imagen <span id="img-contador" style="color:var(--muted-2);font-weight:400;">(0/4)</span></label>
           <div style="display:flex; gap:6px;">
             <input type="text" id="prod-imagen-url" class="form-input" placeholder="https://ejemplo.com/imagen.jpg" style="flex:1;">
             <button type="button" class="btn btn-sm" id="btn-agregar-url" style="background:var(--ink-4);color:var(--paper);padding:8px 14px;border-radius:4px;font-size:12px;white-space:nowrap;">+ Agregar</button>
           </div>
+          <div id="img-limite-msg" style="display:none;font-family:'Inconsolata',monospace;font-size:10.5px;color:var(--amber);margin-top:6px;">Llegaste al máximo de 4 imágenes. Quitá una para agregar otra.</div>
         </div>
         <div id="preview-imagenes" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;"></div>
         <div class="modal-actions">
@@ -795,6 +796,8 @@ if (storedToken) {
     .catch(() => { localStorage.removeItem('adminToken'); token = null; location.reload(); });
 }
 
+const MAX_IMAGENES = 4;
+
 function renderPreviewImagenes() {
   const container = document.getElementById('preview-imagenes');
   if (!container) return;
@@ -802,6 +805,16 @@ function renderPreviewImagenes() {
   container.innerHTML = urls.length
     ? urls.map(url => `<div class="img-item"><img src="${url}"><button class="img-remove" data-url="${url}" onclick="marcarRemover(this)" title="Eliminar">✕</button></div>`).join('')
     : '<span style="color:var(--muted);font-size:12px;">Sin imágenes</span>';
+
+  const contador = document.getElementById('img-contador');
+  const msg = document.getElementById('img-limite-msg');
+  const urlInput = document.getElementById('prod-imagen-url');
+  const addBtn = document.getElementById('btn-agregar-url');
+  const alTope = urls.length >= MAX_IMAGENES;
+  if (contador) contador.textContent = `(${urls.length}/${MAX_IMAGENES})`;
+  if (msg) msg.style.display = alTope ? 'block' : 'none';
+  if (urlInput) urlInput.disabled = alTope;
+  if (addBtn) addBtn.disabled = alTope;
 }
 
 function marcarRemover(btn) {
@@ -814,6 +827,8 @@ document.getElementById('btn-agregar-url').addEventListener('click', () => {
   const inp = document.getElementById('prod-imagen-url');
   const url = inp.value.trim();
   if (!url) return;
+  const actuales = imagenesExistentes.filter(u => !imagenesARemover.includes(u));
+  if (actuales.length >= MAX_IMAGENES) { showToast(`Máximo ${MAX_IMAGENES} imágenes por producto`, true); return; }
   if (!imagenesExistentes.includes(url)) {
     imagenesExistentes.push(url);
     renderPreviewImagenes();
@@ -881,7 +896,12 @@ document.getElementById('productForm').addEventListener('submit', async e => {
   if (precioAnterior) formData.append('precioAnterior', precioAnterior);
   formData.append('descripcion', descripcion);
   if (badge) formData.append('badge', badge);
-  for (const file of fileInput.files) formData.append('imagenes', file);
+  const conservarCount = imagenesExistentes.filter(u => !imagenesARemover.includes(u)).length;
+  const espacioDisponible = Math.max(0, MAX_IMAGENES - conservarCount);
+  if (fileInput.files.length > espacioDisponible) {
+    showToast(`Máximo ${MAX_IMAGENES} imágenes por producto — se suben las primeras ${espacioDisponible}`, true);
+  }
+  Array.from(fileInput.files).slice(0, espacioDisponible).forEach(file => formData.append('imagenes', file));
   const conservar = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
   if (conservar.length) formData.append('imagenesConservar', JSON.stringify(conservar));
   if (editandoId && imagenesARemover.length) formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
