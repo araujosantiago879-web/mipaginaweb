@@ -442,24 +442,23 @@
     /* ── Grilla de productos ── */
     .products {
       display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
-      gap:20px;
+      grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+      gap:24px;
     }
 
     /* ── Card ── */
     .card {
       display:flex; flex-direction:column;
       background:var(--ink-2);
-      transition:transform .3s, box-shadow .3s, border-color .3s;
+      transition:box-shadow .3s, border-color .3s;
       position:relative; overflow:hidden;
       cursor:pointer;
-      border:1px solid var(--edge);
-      border-radius:6px;
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px;
     }
     .card:hover {
-      transform:translateY(-6px);
-      box-shadow:0 24px 48px rgba(0,0,0,.5);
-      border-color:rgba(255,51,102,.35);
+      box-shadow:0 8px 30px rgba(0,0,0,.4);
+      border-color:rgba(255,255,255,0.12);
       z-index:2;
     }
     /* Skeleton de carga */
@@ -474,10 +473,10 @@
     .card.sk { pointer-events:none; }
     .card-add-mini { display:none; }
     .rating-mini { display:none; font-family:'Inconsolata',monospace; font-size:11px; color:#f5c518; white-space:nowrap; }
-    .card-thumb { aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--ink-3); }
-    .card-thumb img { width:100%; height:100%; object-fit:cover; transition:transform .7s ease, filter .4s; filter:grayscale(20%) brightness(.88); }
-    .card:hover .card-thumb img { transform:scale(1.07); filter:grayscale(0) brightness(1); }
-    .card-badge { position:absolute; top:12px; left:12px; z-index:2; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:4px 10px; }
+    .card-thumb { aspect-ratio:1/1; overflow:hidden; position:relative; background:var(--ink-3); border-radius:12px 12px 0 0; }
+    .card-thumb img { width:100%; height:100%; object-fit:cover; transition:filter .4s; }
+    .card:hover .card-thumb img { filter:brightness(1.05); }
+    .card-badge { position:absolute; top:12px; left:12px; z-index:2; font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:1.5px; text-transform:uppercase; padding:5px 12px; border-radius:20px; }
     .b-new { background:var(--rose); color:#fff; }
     .b-hot { background:var(--amber); color:var(--ink); }
     .b-sale { background:var(--lime); color:var(--ink); }
@@ -485,18 +484,18 @@
       position:absolute; top:12px; right:12px; z-index:2;
       width:32px; height:32px; border-radius:50%;
       background:rgba(5,5,8,.7); border:1px solid var(--edge);
-      display:flex; align-items:center; justify-content:center;
+      display:none; align-items:center; justify-content:center;
       font-size:15px; color:var(--muted);
       opacity:0; transition:all .25s;
     }
-    .card:hover .card-fav { opacity:1; }
+    .card:hover .card-fav { opacity:1; display:flex; }
 
     /* Overlay consultar que aparece al hacer hover */
     .card-hover-overlay {
       position:absolute; bottom:0; left:0; right:0; z-index:3;
       background:linear-gradient(to top, rgba(5,5,8,.97) 60%, transparent);
       padding:20px 16px 16px;
-      display:flex; align-items:center; justify-content:center;
+      display:none; align-items:center; justify-content:center;
       transform:translateY(100%); transition:transform .35s ease;
     }
     .card:hover .card-hover-overlay { transform:translateY(0); }
@@ -511,17 +510,18 @@
     .cta-consultar:hover { background:var(--wa-d); }
     .cta-consultar svg { flex-shrink:0; }
 
-    .card-body { padding:18px 16px 20px; flex:1; display:flex; flex-direction:column; gap:6px; }
-    .card-cat { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--rose); }
-    .card-name { font-size:14px; font-weight:700; line-height:1.3; }
-    .card-desc { font-size:11.5px; color:var(--muted); line-height:1.5; }
-    .card-foot { margin-top:auto; padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    .card-price { font-family:'Inconsolata',monospace; font-size:16px; color:var(--lime); }
+    .card-body { padding:16px 16px 18px; flex:1; display:flex; flex-direction:column; gap:6px; }
+    .card-cat { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+    .card-name { font-size:15px; font-weight:600; line-height:1.35; }
+    .card-desc { font-size:12px; color:var(--muted); line-height:1.5; display:none; }
+    .card-foot { margin-top:auto; padding-top:10px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .card-price { font-family:'Inconsolata',monospace; font-size:20px; font-weight:700; color:var(--lime); }
     .card-price del { font-size:12px; color:#ff6666; opacity:0.85; margin-left:8px; text-decoration:line-through; }
-    .stars { display:flex; gap:2px; align-items:center; flex-shrink:0; }
+    .card-envio { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--wa); margin-top:4px; }
+    .stars { display:flex; gap:1px; align-items:center; flex-shrink:0; }
     .star { font-size:11px; color:#f5c518; }
-    .star-n { font-family:'Inconsolata',monospace; font-size:9px; color:var(--muted); margin-left:4px; }
-    .inline-banner { background:linear-gradient(135deg,rgba(255,51,102,.08) 0%,#0a0a10 60%); border:1px solid rgba(255,51,102,.12); padding:36px 28px; display:flex; flex-direction:column; gap:14px; }
+    .star-n { font-family:'Inconsolata',monospace; font-size:10px; color:var(--muted); margin-left:3px; }
+    .inline-banner { background:linear-gradient(135deg,rgba(255,51,102,.08) 0%,#0a0a10 60%); border:1px solid rgba(255,51,102,.12); padding:36px 28px; display:flex; flex-direction:column; gap:14px; border-radius:12px; }
     @media(min-width:960px){ .inline-banner { grid-column:span 2; } }
     .ib-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-style:italic; }
     .ib-p { font-size:12px; color:var(--muted); max-width:300px; }
@@ -923,10 +923,10 @@
       position:absolute; bottom:0; left:0; right:0; z-index:3;
       background:linear-gradient(to top, rgba(5,5,8,.97) 60%, transparent);
       padding:20px 12px 12px;
-      display:flex; gap:6px;
+      display:none; gap:6px;
       transform:translateY(100%); transition:transform .35s ease;
     }
-    .card:hover .card-hover-cta { transform:translateY(0); }
+    .card:hover .card-hover-cta { transform:translateY(0); display:flex; }
     .cta-add {
       flex:1; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
       color:var(--ink); background:var(--rose); padding:10px 8px;
@@ -1076,12 +1076,12 @@
       /* 2 columnas en tablet/móvil */
       .products { grid-template-columns:repeat(2, 1fr); gap:12px; }
       .card-hover-cta { display:none; }
-      .card-fav { opacity:1; }
+      .card-fav { display:none; }
       .card-add-mini {
         display:flex; align-items:center; justify-content:center; gap:6px;
         margin:0 10px 12px; padding:10px;
         font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
-        background:var(--rose); color:#fff; border-radius:2px;
+        background:var(--rose); color:#fff; border-radius:6px;
       }
 
       .horarios { padding:0 16px 60px; grid-template-columns:1fr; }
@@ -1120,10 +1120,11 @@
 
       .products { grid-template-columns:repeat(2, 1fr); gap:8px; }
       .card-body { padding:12px 10px 14px; gap:4px; }
-      .card-name { font-size:12px; }
+      .card-name { font-size:13px; }
       .card-desc { display:none; }
-      .card-price { font-size:13px; }
+      .card-price { font-size:15px; }
       .card-thumb { aspect-ratio:1/1; }
+      .card-envio { font-size:9px; }
 
       .tabs-bar { margin-bottom:24px; }
       .tab { padding:10px 14px; font-size:10px; }
@@ -1907,7 +1908,7 @@ async function loadProducts() {
   const grid = document.getElementById('products-container');
   if (grid && !grid.querySelector('.card:not(.sk)')) {
     grid.innerHTML = Array.from({ length: 8 }, () =>
-      `<div class="card sk"><div class="card-thumb sk-shimmer"></div><div class="card-body"><div class="sk-line w40"></div><div class="sk-line w90"></div><div class="sk-line w60"></div></div></div>`
+      `<div class="card sk"><div class="card-thumb sk-shimmer" style="aspect-ratio:1/1;"></div><div class="card-body"><div class="sk-line w40"></div><div class="sk-line w90"></div><div class="sk-line w60"></div></div></div>`
     ).join('');
   }
   try {
@@ -1963,12 +1964,11 @@ function cardHTML(p) {
   const id = escapeAttr(String(p.id ?? ''));
   const thumbSrc = escapeAttr(p.imagenes?.[0] || p.imagen || '');
   const nombre = escapeHtml(p.nombre || '');
-  const descFull = p.descripcion || '';
-  const desc = escapeHtml(descFull.substring(0, 65)) + (descFull.length > 65 ? '…' : '');
   const rating = p.rating || 4.5;
   const badgeHTML = p.badge
     ? `<span class="card-badge b-${p.badge}">${p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : 'Oferta'}</span>`
     : '';
+  const envioHTML = `<div class="card-envio">Consultar por WhatsApp</div>`;
   return `
     <article class="card" data-id="${id}">
       <div class="card-thumb" onclick="openModal('${id}')">
@@ -1983,12 +1983,12 @@ function cardHTML(p) {
       <div class="card-body" onclick="openModal('${id}')">
         <div class="card-cat">${escapeHtml(p.categoria || '')}</div>
         <div class="card-name">${nombre}</div>
-        <div class="card-desc">${desc}</div>
         <div class="card-foot">
           <div class="card-price">${escapeHtml(p.precio || '')}${p.precioAnterior ? `<del>${escapeHtml(p.precioAnterior)}</del>` : ''}</div>
           <div class="stars">${'★'.repeat(Math.floor(rating))}${rating % 1 ? '½' : ''}<span class="star-n">${rating}</span></div>
           <div class="rating-mini">★ ${rating}</div>
         </div>
+        ${envioHTML}
       </div>
       <button class="card-add-mini" onclick="event.stopPropagation(); addToCartById('${id}')">+ Agregar al carrito</button>
     </article>`;
