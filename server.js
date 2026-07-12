@@ -73,7 +73,7 @@ async function connectDB() {
       },
       tickerItems: [
         '📦 Packaging discreto',
-        '⚡ Entrega hoy en Tandil',
+        '⚡ Entrega hoy mismo',
         '💳 Todos los medios de pago',
         '📲 Atención 10 a 21 hs',
         '✅ Productos certificados',
@@ -149,12 +149,14 @@ function siteOrigin(req) {
 // Card de producto renderizada en el servidor (para crawlers sin JS y
 // primer pintado instantáneo; el frontend la re-renderiza al hidratar)
 function ssrCard(p) {
-  const img = escapeHtml((p.imagenes && p.imagenes[0]) || p.imagen || '');
+  const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+  const img = escapeHtml(imgs[0] || '');
   const rating = p.rating != null ? p.rating : 4.5;
   const badgeTxt = p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : p.badge === 'sale' ? 'Oferta' : '';
   const desc = (p.descripcion || '');
+  const fotosCountTxt = imgs.length > 1 ? `<span class="card-fotos-count">📷 ${imgs.length}</span>` : '';
   return `<article class="card" data-id="${escapeHtml(String(p.id ?? ''))}">
-    <div class="card-thumb"><img src="${img}" alt="${escapeHtml(p.nombre || 'Producto')}" loading="lazy" decoding="async">${badgeTxt ? `<span class="card-badge b-${p.badge}">${badgeTxt}</span>` : ''}</div>
+    <div class="card-thumb"><img src="${img}" alt="${escapeHtml(p.nombre || 'Producto')}" loading="lazy" decoding="async">${badgeTxt ? `<span class="card-badge b-${p.badge}">${badgeTxt}</span>` : ''}${fotosCountTxt}</div>
     <div class="card-body">
       <div class="card-cat">${escapeHtml(p.categoria || '')}</div>
       <div class="card-name">${escapeHtml(p.nombre || '')}</div>
@@ -286,7 +288,7 @@ app.get('/producto/:id', async (req, res) => {
                     : '';
 
     const ogTitle       = `${nombre} — ${precio}${badge}`;
-    const ogDescription = `${desc} | 📦 Envío discreto · Atención 10 a 21 hs · El Lado B Sex Shop Tandil`;
+    const ogDescription = `${desc} | 📦 Envío discreto · Atención 10 a 21 hs · El Lado B Sex Shop`;
     const ogUrl         = `${siteUrl}/producto/${req.params.id}`;
     const precioNum     = parseInt(String(producto.precio || '').replace(/[^0-9]/g, ''), 10) || 0;
     const waNumber      = '5492494639700';
@@ -317,13 +319,13 @@ app.get('/producto/:id', async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${ogTitle} — El Lado B · Sex Shop Tandil</title>
+  <title>${ogTitle} — El Lado B · Sex Shop</title>
   <meta name="description" content="${ogDescription}">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
   <!-- Open Graph (WhatsApp, Facebook, Telegram) -->
   <meta property="og:type"        content="product">
-  <meta property="og:site_name"   content="El Lado B · Sex Shop Tandil">
+  <meta property="og:site_name"   content="El Lado B · Sex Shop">
   <meta property="og:url"         content="${ogUrl}">
   <meta property="og:title"       content="${ogTitle}">
   <meta property="og:description" content="${ogDescription}">
@@ -362,7 +364,7 @@ app.get('/producto/:id', async (req, res) => {
   </style>
 </head>
 <body>
-  <a href="/" class="marca" style="text-decoration:none;">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
+  <a href="/" class="marca" style="text-decoration:none;">El <em>Lado B</em><small>Sex Shop</small></a>
   <div class="tarjeta">
     ${imagen ? `<img src="${imagen}" alt="${nombre}">` : ''}
     <div class="cuerpo">
@@ -370,7 +372,7 @@ app.get('/producto/:id', async (req, res) => {
       <h1>${nombre}</h1>
       <div class="precio">${precio}</div>
       ${desc ? `<p class="desc">${desc}</p>` : ''}
-      <div class="garantias">📦 Packaging 100% discreto, sin logos<br>⚡ Entrega hoy en Tandil · envíos a todo el país<br>💳 Todos los medios de pago</div>
+      <div class="garantias">📦 Packaging 100% discreto, sin logos<br>⚡ Entrega hoy mismo · envíos a todo el país<br>💳 Todos los medios de pago</div>
       <a class="btn-wa" href="https://wa.me/${waNumber}?text=${waMsg}">Consultar por WhatsApp</a>
       <a class="btn-tienda" href="/">← Ver toda la tienda</a>
     </div>

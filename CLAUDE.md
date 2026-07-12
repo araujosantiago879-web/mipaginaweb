@@ -1,4 +1,4 @@
-# El Lado B — Sex Shop Tandil
+# El Lado B — Sex Shop
 
 Tienda online con carrito por WhatsApp y panel de administración.
 **⚠️ EN PRODUCCIÓN en Vercel: todo push a `main` deploya automáticamente.**

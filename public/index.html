@@ -4,30 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0c0c10">
-  <meta name="description" content="Sex shop online en Tandil. Envíos discretos a domicilio. Pagá con Mercado Pago, transferencia o efectivo. Atención por WhatsApp 10 a 21 hs.">
+  <meta name="description" content="Sex shop online con envíos discretos a domicilio. Pagá con Mercado Pago, transferencia o efectivo. Atención por WhatsApp 10 a 21 hs.">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="El Lado B · Sex Shop Tandil">
-  <meta property="og:title" content="El Lado B · Sex Shop Tandil">
-  <meta property="og:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
+  <meta property="og:site_name" content="El Lado B · Sex Shop">
+  <meta property="og:title" content="El Lado B · Sex Shop">
+  <meta property="og:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a domicilio.">
   <meta property="og:image" content="/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="es_AR">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="El Lado B · Sex Shop Tandil">
-  <meta name="twitter:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a todo Tandil.">
+  <meta name="twitter:title" content="El Lado B · Sex Shop">
+  <meta name="twitter:description" content="Todo lo que deseás, en tu puerta. Envíos discretos a domicilio.">
   <meta name="twitter:image" content="/og-image.png">
-  <title>Sex Shop en Tandil con envío discreto | El Lado B</title>
+  <title>Sex Shop online con envío discreto | El Lado B</title>
   <!--seo:canonical-->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Store",
-    "name": "El Lado B — Sex Shop Tandil",
-    "description": "Sex shop online en Tandil. Envíos discretos a domicilio el mismo día, packaging neutro sin logos y atención por WhatsApp de 10 a 21 hs.",
+    "name": "El Lado B — Sex Shop",
+    "description": "Sex shop online. Envíos discretos a domicilio el mismo día, packaging neutro sin logos y atención por WhatsApp de 10 a 21 hs.",
     "telephone": "+5492494639700",
     "priceRange": "$$",
-    "address": { "@type": "PostalAddress", "addressLocality": "Tandil", "addressRegion": "Buenos Aires", "addressCountry": "AR" },
+    "address": { "@type": "PostalAddress", "addressCountry": "AR" },
     "openingHoursSpecification": [{
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
@@ -178,6 +178,16 @@
     @supports(height:-moz-available) { .drawer { height:-moz-available; } }
     .drawer.open { transform:translateX(0); }
     .drawer-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; flex-shrink:0; }
+    .drawer-nav-links {
+      display:flex; flex-wrap:wrap; gap:8px;
+      padding:0 24px 18px; border-bottom:1px solid var(--edge); flex-shrink:0;
+    }
+    .drawer-nav-links a {
+      font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted); padding:8px 13px; border:1px solid var(--edge); border-radius:99px;
+      transition:all .2s;
+    }
+    .drawer-nav-links a:hover, .drawer-nav-links a.active { color:var(--rose); border-color:var(--rose); background:rgba(255,51,102,.06); }
     .drawer-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; }
     .drawer-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:4px; }
     .drawer-close:hover { color:var(--paper); }
@@ -480,6 +490,13 @@
     .b-new { background:var(--rose); color:#fff; }
     .b-hot { background:var(--amber); color:var(--ink); }
     .b-sale { background:var(--lime); color:var(--ink); }
+    .card-fotos-count {
+      position:absolute; bottom:10px; right:10px; z-index:2;
+      font-family:'Inconsolata',monospace; font-size:10px; font-weight:700; letter-spacing:.5px;
+      padding:4px 9px; background:rgba(5,5,8,.72); backdrop-filter:blur(4px);
+      border:1px solid rgba(255,255,255,.15); color:var(--paper); border-radius:99px;
+      display:flex; align-items:center; gap:5px;
+    }
     .card-fav {
       position:absolute; top:12px; right:12px; z-index:2;
       width:32px; height:32px; border-radius:50%;
@@ -977,8 +994,37 @@
       max-height:90vh; overflow:auto;
       border-radius:2px;
     }
-    .modal-photo { overflow:hidden; background:var(--ink-2); position:relative; }
+    .modal-photo { overflow:hidden; background:var(--ink-2); position:relative; cursor:zoom-in; }
     .modal-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .modal-zoom-hint {
+      display:none; align-items:center; gap:6px;
+      position:absolute; top:12px; left:12px; z-index:4;
+      font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:.5px;
+      padding:6px 11px; background:rgba(5,5,8,.65); backdrop-filter:blur(4px);
+      border:1px solid rgba(255,255,255,.15); color:var(--paper); border-radius:99px;
+      pointer-events:none;
+    }
+
+    /* ── Visor de zoom a pantalla completa ── */
+    .zoom-bg {
+      position:fixed; inset:0; z-index:1000;
+      background:#000;
+      display:none; align-items:center; justify-content:center;
+    }
+    .zoom-bg.open { display:flex; }
+    .zoom-scroll {
+      width:100%; height:100%; overflow:auto;
+      touch-action:pinch-zoom pan-x pan-y;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .zoom-scroll img { max-width:100%; max-height:100%; object-fit:contain; display:block; }
+    .zoom-close {
+      position:fixed; top:20px; right:20px; z-index:1001;
+      width:44px; height:44px; border-radius:50%;
+      background:rgba(20,20,24,.85); border:1px solid var(--edge);
+      color:var(--paper); font-size:18px;
+      display:flex; align-items:center; justify-content:center;
+    }
     .modal-close-btn {
       position:fixed; top:20px; right:20px; z-index:801;
       width:40px; height:40px; border-radius:50%;
@@ -992,7 +1038,12 @@
     .modal-cat { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--rose); }
     .modal-name { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:700; line-height:1.1; }
     .modal-price { font-family:'Inconsolata',monospace; font-size:28px; color:var(--lime); }
-    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; }
+    .modal-desc-section { border-top:1px solid var(--edge); border-bottom:1px solid var(--edge); padding:16px 0; }
+    .modal-desc-title { font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); font-weight:700; margin-bottom:10px; }
+    .modal-desc { font-size:13px; color:var(--muted); line-height:1.75; white-space:pre-line; }
+    .modal-desc.clamped { display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+    .modal-desc-toggle { margin-top:10px; font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--rose); font-weight:700; border-bottom:1px solid transparent; transition:border-color .2s; }
+    .modal-desc-toggle:hover { border-bottom-color:var(--rose); }
 
     .modal-guarantees { display:flex; flex-direction:column; gap:10px; }
     .mg { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
@@ -1097,8 +1148,9 @@
       footer { padding:40px 16px 28px; }
       .footer-grid { grid-template-columns:1fr 1fr; gap:24px; }
       .modal { grid-template-columns:1fr; max-height:92vh; }
-      .modal-photo { max-height:50vw; }
+      .modal-photo { max-height:none; aspect-ratio:1/1; }
       .modal-info { padding:24px 20px; }
+      .modal-zoom-hint { display:flex; }
     }
 
     /* Móvil ≤760: nav limpia (las secciones viven en la hamburguesa),
@@ -1135,7 +1187,6 @@
       .filter-btn { font-size:9px; padding:5px 10px; }
 
       .modal { max-height:95vh; }
-      .modal-photo { max-height:45vw; }
       .modal-name { font-size:22px; }
       .modal-price { font-size:22px; }
       .modal-info { padding:16px 16px 20px; gap:10px; }
@@ -1169,7 +1220,7 @@
 <div class="ticker-wrap"><div class="ticker-track" id="ticker-track"></div></div>
 
 <nav>
-  <a href="#" class="logo">El <em>Lado B</em><small>Sex Shop · Tandil</small></a>
+  <a href="#" class="logo">El <em>Lado B</em><small>Sex Shop</small></a>
   <ul class="nav-links">
     <li><a href="#" data-tab="tienda" class="active">Tienda</a></li>
     <li><a href="#" data-tab="guia">Guía</a></li>
@@ -1207,6 +1258,13 @@
     </div>
     <button class="drawer-close" id="drawerClose">✕</button>
   </div>
+  <nav class="drawer-nav-links">
+    <a href="#" data-tab="tienda" onclick="closeDrawer()">Tienda</a>
+    <a href="#" data-tab="guia" onclick="closeDrawer()">Guía</a>
+    <a href="#" data-tab="discrecion" onclick="closeDrawer()">Discreción</a>
+    <a href="#" data-tab="testimonios" onclick="closeDrawer()">Reseñas</a>
+    <a href="#" data-tab="contacto" onclick="closeDrawer()">Contacto</a>
+  </nav>
   <div class="drawer-categories" id="drawerCategories"></div>
   <div class="drawer-products" id="drawerProducts" style="display:none;">
     <div class="drawer-search">
@@ -1321,9 +1379,9 @@
 
 <section class="hero">
   <div class="hero-l">
-    <div class="hero-eyebrow">Sex Shop Tandil · Envíos discretos</div>
+    <div class="hero-eyebrow">Sex Shop · Envíos discretos</div>
     <h1 class="hero-h1">Todo lo que<br><em>deseás,</em><br><span class="ghost">en tu puerta.</span></h1>
-    <p class="hero-p">La tienda de adultos más discreta de Tandil. Packaging sin logos, entrega el mismo día, atención real de 10 a 21 hs. Sin vergüenzas, sin complicaciones.</p>
+    <p class="hero-p">La tienda de adultos más discreta. Packaging sin logos, entrega el mismo día, atención real de 10 a 21 hs. Sin vergüenzas, sin complicaciones.</p>
     <div class="hero-btns">
       <a href="#" class="btn-fill" id="hero-tienda-btn" data-tab="tienda"><span>Ver productos</span><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
       <a href="#" target="_blank" class="btn-ghost" id="hero-whatsapp">Consultar por WA</a>
@@ -1340,13 +1398,13 @@
     <div class="hero-r-blend"></div>
     <div class="hero-r-veil"></div>
     <div class="hero-big-b">B</div>
-    <svg class="hero-spin" viewBox="0 0 96 96"><path id="circle-path" d="M 48,48 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/><text><textPath href="#circle-path" startOffset="0%">EL LADO B · SEX SHOP · TANDIL · </textPath></text></svg>
+    <svg class="hero-spin" viewBox="0 0 96 96"><path id="circle-path" d="M 48,48 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0"/><text><textPath href="#circle-path" startOffset="0%">EL LADO B · SEX SHOP · DISCRETO · </textPath></text></svg>
   </div>
 </section>
 
 <div class="trust-strip reveal">
   <div class="ts-item"><div class="ts-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><h4>Packaging discreto</h4><p>Caja neutra sin logos<br>sin indicios del contenido</p></div></div>
-  <div class="ts-item"><div class="ts-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><h4>Entrega el mismo día</h4><p>En toda la ciudad de Tandil<br>sin cargo adicional</p></div></div>
+  <div class="ts-item"><div class="ts-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><h4>Entrega el mismo día</h4><p>Envío a domicilio<br>sin cargo adicional</p></div></div>
   <div class="ts-item"><div class="ts-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div><div><h4>Todos los medios de pago</h4><p>Débito · Crédito · Mercado Pago<br>Efectivo · Cuotas sin interés</p></div></div>
   <div class="ts-item"><div class="ts-icon"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.04 1.18 2 2 0 012 .02h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div><div><h4>Atención 10 a 21 hs</h4><p>Por WhatsApp todos los días<br>incluidos fines de semana</p></div></div>
 </div>
@@ -1513,7 +1571,7 @@
     <div class="testi-grid">
       <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Pedí un vibrador y llegó en menos de dos horas, en una bolsa completamente discreta. La atención por WhatsApp fue re amable y sin hacerme sentir incómoda.</div><div class="testi-foot"><div class="testi-av">M</div><div><div class="testi-name">María G.</div><div class="testi-when">Mayo 2025 · Compra verificada ✓</div></div></div></div>
       <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Me asesoraron sin juzgarme para nada. El producto llegó al día siguiente exactamente como lo describían. Voy a volver a comprar sin dudas.</div><div class="testi-foot"><div class="testi-av">L</div><div><div class="testi-name">Lucía R.</div><div class="testi-when">Abril 2025 · Compra verificada ✓</div></div></div></div>
-      <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Compré un kit de regalo y llegó en una caja súper prolija sin que nadie supiera qué había adentro. Los precios son muy buenos comparado con otros lugares de Tandil.</div><div class="testi-foot"><div class="testi-av">C</div><div><div class="testi-name">Carlos M.</div><div class="testi-when">Marzo 2025 · Compra verificada ✓</div></div></div></div>
+      <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Compré un kit de regalo y llegó en una caja súper prolija sin que nadie supiera qué había adentro. Los precios son muy buenos comparado con otros lugares.</div><div class="testi-foot"><div class="testi-av">C</div><div><div class="testi-name">Carlos M.</div><div class="testi-when">Marzo 2025 · Compra verificada ✓</div></div></div></div>
     </div>
 
     <!-- ── Formulario de reseña ── -->
@@ -1550,7 +1608,7 @@
       <h3>Formas de recibir tu pedido</h3>
       <p>Elegís cómo recibís tu compra. Sin complicaciones, sin preguntas incómodas, sin juicios.</p>
       <div class="hor-rows">
-        <div class="hor-row"><span>🏍️ Entrega a domicilio</span><span>Sin cargo en Tandil</span></div>
+        <div class="hor-row"><span>🏍️ Entrega a domicilio</span><span>Sin cargo adicional</span></div>
         <div class="hor-row"><span>🏠 Retiro personal</span><span>Coordinás por WA</span></div>
         <div class="hor-row"><span>📦 Correo Argentino</span><span>Interior del país</span></div>
         <div class="hor-row"><span>⚡ Envío express</span><span>En menos de 2 hs</span></div>
@@ -1630,7 +1688,7 @@
   <div class="footer-grid">
     <div>
       <div class="f-brand">El <em>Lado B</em></div>
-      <p class="f-desc">La tienda de adultos más discreta de Tandil. Packaging neutro, entrega el mismo día, atención real de personas.</p>
+      <p class="f-desc">La tienda de adultos más discreta. Packaging neutro, entrega el mismo día, atención real de personas.</p>
       <div class="f-socials">
         <a href="https://www.instagram.com/lado.bsexshop/" target="_blank" rel="noopener" class="fsoc">IG</a>
         <a href="https://www.tiktok.com/@ladobsex" target="_blank" rel="noopener" class="fsoc">TK</a>
@@ -1667,7 +1725,7 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <span class="f-copy">© <span id="f-year">2025</span> El Lado B · Sex Shop Tandil · Todos los derechos reservados</span>
+    <span class="f-copy">© <span id="f-year">2025</span> El Lado B · Sex Shop · Todos los derechos reservados</span>
     <div class="f-legal"><a href="#" onclick="showSection('privacidad')">Privacidad</a><a href="#" onclick="showSection('terminos')">Términos</a><a href="#" onclick="showSection('cookies')">Cookies</a></div>
   </div>
 </footer>
@@ -1697,8 +1755,9 @@
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Detalle del producto">
   <button class="modal-close-btn" id="modal-close">✕</button>
   <div class="modal">
-    <div class="modal-photo" style="position:relative;">
+    <div class="modal-photo" style="position:relative;" id="m-photo-wrap">
       <img id="m-photo" src="" alt="">
+      <div class="modal-zoom-hint" id="modal-zoom-hint">🔍 Tocá para ampliar</div>
       <div id="m-gallery"></div>
     </div>
     <div class="modal-info">
@@ -1706,10 +1765,14 @@
       <div class="modal-cat" id="m-cat"></div>
       <div class="modal-name" id="m-name"></div>
       <div class="modal-price"><span id="m-price"></span><span id="m-old-price" style="font-size:14px;color:#ff6666;text-decoration:line-through;margin-left:10px;font-family:'Archivo',sans-serif;"></span></div>
-      <div class="modal-desc" id="m-desc"></div>
+      <div class="modal-desc-section">
+        <div class="modal-desc-title">Descripción</div>
+        <div class="modal-desc" id="m-desc"></div>
+        <button type="button" class="modal-desc-toggle" id="m-desc-toggle" style="display:none;">Ver descripción completa</button>
+      </div>
       <div class="modal-guarantees">
         <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Packaging 100% discreto, sin logos</div>
-        <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Entrega hoy en Tandil</div>
+        <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Entrega hoy mismo</div>
         <div class="mg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Todos los medios de pago</div>
       </div>
       <div class="modal-actions">
@@ -1720,6 +1783,14 @@
         </a>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Visor de zoom a pantalla completa (pinch-to-zoom nativo) -->
+<div class="zoom-bg" id="zoom-bg" onclick="if(event.target===this)closeZoom()">
+  <button class="zoom-close" id="zoom-close" aria-label="Cerrar ampliación">✕</button>
+  <div class="zoom-scroll" id="zoom-scroll">
+    <img id="zoom-img" src="" alt="">
   </div>
 </div>
 
@@ -1840,9 +1911,9 @@ function activateTab(tabId) {
   document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
   const target = document.getElementById(`tab-${tabId}`);
   if (target) target.classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  const activeLink = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
-  if (activeLink) activeLink.classList.add('active');
+  document.querySelectorAll('.nav-links a, .drawer-nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll(`.nav-links a[data-tab="${tabId}"], .drawer-nav-links a[data-tab="${tabId}"]`)
+    .forEach(a => a.classList.add('active'));
 }
 
 // ── Event delegation global para TODOS los [data-tab] ──
@@ -1962,7 +2033,8 @@ function renderTabs() {
 // ── Template único de card de producto (grilla + búsqueda) ──
 function cardHTML(p) {
   const id = escapeAttr(String(p.id ?? ''));
-  const thumbSrc = escapeAttr(p.imagenes?.[0] || p.imagen || '');
+  const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+  const thumbSrc = escapeAttr(imgs[0] || '');
   const nombre = escapeHtml(p.nombre || '');
   const rating = p.rating || 4.5;
   const badgeHTML = p.badge
@@ -1974,6 +2046,7 @@ function cardHTML(p) {
       <div class="card-thumb" onclick="openModal('${id}')">
         <img src="${thumbSrc}" alt="${escapeAttr(p.nombre || 'Producto')}" loading="lazy">
         ${badgeHTML}
+        ${imgs.length > 1 ? `<span class="card-fotos-count">📷 ${imgs.length}</span>` : ''}
         <button class="card-fav" aria-label="Marcar como favorito" onclick="event.stopPropagation(); this.textContent=this.textContent==='♡'?'♥':'♡'; this.style.color=this.textContent==='♥'?'var(--rose)':''">♡</button>
         <div class="card-hover-cta">
           <button class="cta-add" onclick="event.stopPropagation(); addToCartById('${id}')">Agregar al carrito</button>
@@ -2311,7 +2384,23 @@ function openModal(id) {
     oldPrice.textContent = p.precioAnterior || '';
     oldPrice.style.display = p.precioAnterior ? '' : 'none';
   }
-  if (desc) desc.textContent = p.descripcion || '';
+  if (desc) {
+    desc.textContent = p.descripcion || '';
+    desc.classList.add('clamped');
+    const toggle = document.getElementById('m-desc-toggle');
+    if (toggle) {
+      toggle.textContent = 'Ver descripción completa';
+      toggle.style.display = 'none';
+      // Medir tras el layout: si el texto colapsado desborda, mostrar el botón
+      requestAnimationFrame(() => {
+        if (desc.scrollHeight > desc.clientHeight + 2) toggle.style.display = '';
+      });
+      toggle.onclick = () => {
+        const expandido = desc.classList.toggle('clamped') === false;
+        toggle.textContent = expandido ? 'Ver menos' : 'Ver descripción completa';
+      };
+    }
+  }
   if (badgeEl) {
     badgeEl.textContent = p.badge === 'new' ? '🆕 Nuevo' : p.badge === 'hot' ? '🔥 Más vendido' : p.badge === 'sale' ? '💰 Oferta' : '';
     badgeEl.style.display = p.badge ? '' : 'none';
@@ -2342,6 +2431,29 @@ function closeModal(e) {
 document.getElementById('modal-close').addEventListener('click', () => {
   document.getElementById('modal-bg').classList.remove('open');
   document.body.style.overflow = '';
+});
+
+// ── Visor de zoom a pantalla completa (pinch-to-zoom nativo del navegador) ──
+function openZoom(src) {
+  if (!src) return;
+  document.getElementById('zoom-img').src = src;
+  document.getElementById('zoom-bg').classList.add('open');
+  const scroll = document.getElementById('zoom-scroll');
+  scroll.scrollTop = 0;
+  scroll.scrollLeft = 0;
+  document.body.style.overflow = 'hidden';
+}
+function closeZoom() {
+  document.getElementById('zoom-bg').classList.remove('open');
+  // Si el modal de producto sigue abierto detrás, mantener el scroll bloqueado
+  if (!document.getElementById('modal-bg').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+document.getElementById('m-photo')?.addEventListener('click', () => openZoom(document.getElementById('m-photo').src));
+document.getElementById('zoom-close')?.addEventListener('click', closeZoom);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('zoom-bg').classList.contains('open')) closeZoom();
 });
 
 // handleNL eliminado — reemplazado por canal de WhatsApp
@@ -2432,7 +2544,7 @@ const infoContent = {
     <h3>¿Hay garantía?</h3>
     <p>Sí. Todos los productos tienen garantía contra defectos de fábrica. Si algo no funciona correctamente, lo reemplazamos sin costo.</p>
     <h3>¿Puedo retirar personalmente?</h3>
-    <p>Sí. Coordinamos por WhatsApp un punto de encuentro en Tandil para que retires tu pedido de forma totalmente discreta.</p>
+    <p>Sí. Coordinamos por WhatsApp un punto de encuentro para que retires tu pedido de forma totalmente discreta.</p>
     <h3>¿Hacen envíos al interior?</h3>
     <p>Sí, hacemos envíos a todo el país a través de Correo Argentino. El paquete viaja en las mismas condiciones de discreción.</p>
 
@@ -2444,7 +2556,7 @@ const infoContent = {
     <p>En <strong>El Lado B</strong> nos tomamos tu privacidad muy en serio. Esta política describe qué datos personales recopilamos, con qué fin, cómo los protegemos y cuáles son tus derechos, en cumplimiento de la <strong>Ley 25.326</strong> de Protección de Datos Personales de la República Argentina y su Decreto Reglamentario 1558/2001.</p>
 
     <h3>1. Responsable del tratamiento</h3>
-    <p><strong>El Lado B</strong> — Sex Shop Tandil<br>
+    <p><strong>El Lado B</strong> — Sex Shop<br>
     Contacto: <a href="https://wa.me/5492494639700" target="_blank">WhatsApp</a> / <a href="mailto:elladobsexshop@gmail.com">elladobsexshop@gmail.com</a><br>
     Responsable del tratamiento de datos: Santiago Araujo</p>
 
@@ -2509,9 +2621,9 @@ const infoContent = {
     <h3>Precios y disponibilidad</h3>
     <p>Los precios publicados pueden variar sin previo aviso. La disponibilidad de productos está sujeta al stock real. En caso de falta de stock, te informaremos y ofreceremos alternativas o reembolso.</p>
     <h3>Envíos</h3>
-    <p>Los envíos a domicilio en Tandil se realizan sin cargo. Los envíos al interior del país tienen un costo adicional que se informa antes de confirmar la compra. No nos hacemos responsables por demoras del correo.</p>
+    <p>Los envíos a domicilio se realizan sin cargo. Los envíos al interior del país tienen un costo adicional que se informa antes de confirmar la compra. No nos hacemos responsables por demoras del correo.</p>
     <h3>Legislación</h3>
-    <p>Estos términos se rigen por la legislación de la República Argentina. Cualquier controversia será resuelta en los tribunales de la Ciudad de Tandil, Provincia de Buenos Aires.</p>
+    <p>Estos términos se rigen por la legislación de la República Argentina. Cualquier controversia será resuelta en los tribunales ordinarios competentes de la República Argentina.</p>
   `,
   'cookies': `
     <h2>Política de <em>Cookies</em></h2>

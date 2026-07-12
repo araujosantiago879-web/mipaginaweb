@@ -399,6 +399,7 @@
     .prev-thumb img { width:100%; height:100%; object-fit:cover; }
     .prev-thumb .ph { font-family:'Inconsolata',monospace; font-size:9px; color:var(--muted-2); border:1px dashed var(--muted-2); padding:5px 9px; }
     .prev-badge { position:absolute; top:10px; left:10px; font-family:'Inconsolata',monospace; font-size:8.5px; letter-spacing:2px; text-transform:uppercase; padding:3px 8px; background:var(--rose); color:#fff; z-index:2; }
+    .prev-fotos-count { position:absolute; bottom:10px; right:10px; font-family:'Inconsolata',monospace; font-size:10px; font-weight:700; letter-spacing:.5px; padding:4px 9px; background:rgba(5,5,8,.75); backdrop-filter:blur(4px); border:1px solid rgba(255,255,255,.15); color:var(--paper); border-radius:99px; z-index:2; display:flex; align-items:center; gap:5px; }
     .prev-body { padding:12px; }
     .prev-cat { font-family:'Inconsolata',monospace; font-size:8.5px; letter-spacing:2px; text-transform:uppercase; color:var(--rose); min-height:11px; }
     .prev-name { font-size:13px; font-weight:700; margin:4px 0; }
@@ -647,11 +648,12 @@
         </div>
         <div class="form-group">
           <input type="file" id="prod-imagenes" accept="image/*" multiple style="display:none">
-          <label>URL de imagen</label>
+          <label>URL de imagen <span id="img-contador" style="color:var(--muted-2);font-weight:400;">(0/4)</span></label>
           <div style="display:flex; gap:6px;">
             <input type="text" id="prod-imagen-url" class="form-input" placeholder="https://ejemplo.com/imagen.jpg" style="flex:1;">
             <button type="button" class="btn btn-sm" id="btn-agregar-url" style="background:var(--ink-4);color:var(--paper);padding:8px 14px;border-radius:4px;font-size:12px;white-space:nowrap;">+ Agregar</button>
           </div>
+          <div id="img-limite-msg" style="display:none;font-family:'Inconsolata',monospace;font-size:10.5px;color:var(--amber);margin-top:6px;">Llegaste al máximo de 4 imágenes. Quitá una para agregar otra.</div>
         </div>
         <div id="preview-imagenes" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:4px;"></div>
         <div class="modal-actions">
@@ -664,6 +666,7 @@
         <div class="prev-card">
           <div class="prev-thumb">
             <span class="prev-badge" id="prev-badge" style="display:none;"></span>
+            <span class="prev-fotos-count" id="prev-fotos-count" style="display:none;"></span>
             <img id="prev-img" alt="" style="display:none;" onerror="this.style.display='none';document.getElementById('prev-ph').style.display='';">
             <span class="ph" id="prev-ph">Sin imagen</span>
           </div>
@@ -795,6 +798,8 @@ if (storedToken) {
     .catch(() => { localStorage.removeItem('adminToken'); token = null; location.reload(); });
 }
 
+const MAX_IMAGENES = 4;
+
 function renderPreviewImagenes() {
   const container = document.getElementById('preview-imagenes');
   if (!container) return;
@@ -802,6 +807,16 @@ function renderPreviewImagenes() {
   container.innerHTML = urls.length
     ? urls.map(url => `<div class="img-item"><img src="${url}"><button class="img-remove" data-url="${url}" onclick="marcarRemover(this)" title="Eliminar">✕</button></div>`).join('')
     : '<span style="color:var(--muted);font-size:12px;">Sin imágenes</span>';
+
+  const contador = document.getElementById('img-contador');
+  const msg = document.getElementById('img-limite-msg');
+  const urlInput = document.getElementById('prod-imagen-url');
+  const addBtn = document.getElementById('btn-agregar-url');
+  const alTope = urls.length >= MAX_IMAGENES;
+  if (contador) contador.textContent = `(${urls.length}/${MAX_IMAGENES})`;
+  if (msg) msg.style.display = alTope ? 'block' : 'none';
+  if (urlInput) urlInput.disabled = alTope;
+  if (addBtn) addBtn.disabled = alTope;
 }
 
 function marcarRemover(btn) {
@@ -814,6 +829,8 @@ document.getElementById('btn-agregar-url').addEventListener('click', () => {
   const inp = document.getElementById('prod-imagen-url');
   const url = inp.value.trim();
   if (!url) return;
+  const actuales = imagenesExistentes.filter(u => !imagenesARemover.includes(u));
+  if (actuales.length >= MAX_IMAGENES) { showToast(`Máximo ${MAX_IMAGENES} imágenes por producto`, true); return; }
   if (!imagenesExistentes.includes(url)) {
     imagenesExistentes.push(url);
     renderPreviewImagenes();
@@ -881,7 +898,12 @@ document.getElementById('productForm').addEventListener('submit', async e => {
   if (precioAnterior) formData.append('precioAnterior', precioAnterior);
   formData.append('descripcion', descripcion);
   if (badge) formData.append('badge', badge);
-  for (const file of fileInput.files) formData.append('imagenes', file);
+  const conservarCount = imagenesExistentes.filter(u => !imagenesARemover.includes(u)).length;
+  const espacioDisponible = Math.max(0, MAX_IMAGENES - conservarCount);
+  if (fileInput.files.length > espacioDisponible) {
+    showToast(`Máximo ${MAX_IMAGENES} imágenes por producto — se suben las primeras ${espacioDisponible}`, true);
+  }
+  Array.from(fileInput.files).slice(0, espacioDisponible).forEach(file => formData.append('imagenes', file));
   const conservar = imagenesExistentes.filter(url => !imagenesARemover.includes(url));
   if (conservar.length) formData.append('imagenesConservar', JSON.stringify(conservar));
   if (editandoId && imagenesARemover.length) formData.append('imagenesARemover', JSON.stringify(imagenesARemover));
@@ -1438,6 +1460,11 @@ function actualizarPreview() {
   const ph = document.getElementById('prev-ph');
   if (urls.length) { img.src = urls[0]; img.style.display = ''; ph.style.display = 'none'; }
   else { img.style.display = 'none'; ph.style.display = ''; }
+  const fotosCount = document.getElementById('prev-fotos-count');
+  if (fotosCount) {
+    if (urls.length > 1) { fotosCount.textContent = `📷 ${urls.length}/${MAX_IMAGENES}`; fotosCount.style.display = 'flex'; }
+    else fotosCount.style.display = 'none';
+  }
 }
 ['prod-nombre', 'prod-categoria', 'prod-precio', 'prod-badge'].forEach(id => {
   const el = document.getElementById(id);
