@@ -904,6 +904,7 @@ document.getElementById('productForm').addEventListener('submit', async e => {
 });
 
 async function cargarProductos() {
+  const scrollY = window.scrollY;
   const loadingDiv = document.getElementById('productos-loading');
   const gridDiv = document.getElementById('productos-list');
   loadingDiv.style.display = 'block';
@@ -917,6 +918,7 @@ async function cargarProductos() {
     actualizarStatsProductos();
     loadingDiv.style.display = 'none';
     gridDiv.style.display = 'flex';
+    window.scrollTo(0, scrollY);
   } catch (err) {
     loadingDiv.innerHTML = '❌ Error al cargar productos. Verificá que el servidor esté corriendo.';
     showToast('Error al cargar productos', true);
