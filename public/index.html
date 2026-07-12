@@ -984,8 +984,37 @@
       max-height:90vh; overflow:auto;
       border-radius:2px;
     }
-    .modal-photo { overflow:hidden; background:var(--ink-2); position:relative; }
+    .modal-photo { overflow:hidden; background:var(--ink-2); position:relative; cursor:zoom-in; }
     .modal-photo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .modal-zoom-hint {
+      display:none; align-items:center; gap:6px;
+      position:absolute; top:12px; right:12px; z-index:4;
+      font-family:'Inconsolata',monospace; font-size:10px; letter-spacing:.5px;
+      padding:6px 11px; background:rgba(5,5,8,.65); backdrop-filter:blur(4px);
+      border:1px solid rgba(255,255,255,.15); color:var(--paper); border-radius:99px;
+      pointer-events:none;
+    }
+
+    /* ── Visor de zoom a pantalla completa ── */
+    .zoom-bg {
+      position:fixed; inset:0; z-index:1000;
+      background:#000;
+      display:none; align-items:center; justify-content:center;
+    }
+    .zoom-bg.open { display:flex; }
+    .zoom-scroll {
+      width:100%; height:100%; overflow:auto;
+      touch-action:pinch-zoom pan-x pan-y;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .zoom-scroll img { max-width:100%; max-height:100%; object-fit:contain; display:block; }
+    .zoom-close {
+      position:fixed; top:20px; right:20px; z-index:1001;
+      width:44px; height:44px; border-radius:50%;
+      background:rgba(20,20,24,.85); border:1px solid var(--edge);
+      color:var(--paper); font-size:18px;
+      display:flex; align-items:center; justify-content:center;
+    }
     .modal-close-btn {
       position:fixed; top:20px; right:20px; z-index:801;
       width:40px; height:40px; border-radius:50%;
@@ -1109,8 +1138,9 @@
       footer { padding:40px 16px 28px; }
       .footer-grid { grid-template-columns:1fr 1fr; gap:24px; }
       .modal { grid-template-columns:1fr; max-height:92vh; }
-      .modal-photo { max-height:50vw; }
+      .modal-photo { max-height:none; aspect-ratio:1/1; }
       .modal-info { padding:24px 20px; }
+      .modal-zoom-hint { display:flex; }
     }
 
     /* Móvil ≤760: nav limpia (las secciones viven en la hamburguesa),
@@ -1146,7 +1176,6 @@
       .filter-btn { font-size:9px; padding:5px 10px; }
 
       .modal { max-height:95vh; }
-      .modal-photo { max-height:45vw; }
       .modal-name { font-size:22px; }
       .modal-price { font-size:22px; }
       .modal-info { padding:16px 16px 20px; gap:10px; }
@@ -1708,8 +1737,9 @@
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-label="Detalle del producto">
   <button class="modal-close-btn" id="modal-close">✕</button>
   <div class="modal">
-    <div class="modal-photo" style="position:relative;">
+    <div class="modal-photo" style="position:relative;" id="m-photo-wrap">
       <img id="m-photo" src="" alt="">
+      <div class="modal-zoom-hint" id="modal-zoom-hint">🔍 Tocá para ampliar</div>
       <div id="m-gallery"></div>
     </div>
     <div class="modal-info">
@@ -1735,6 +1765,14 @@
         </a>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Visor de zoom a pantalla completa (pinch-to-zoom nativo) -->
+<div class="zoom-bg" id="zoom-bg" onclick="if(event.target===this)closeZoom()">
+  <button class="zoom-close" id="zoom-close" aria-label="Cerrar ampliación">✕</button>
+  <div class="zoom-scroll" id="zoom-scroll">
+    <img id="zoom-img" src="" alt="">
   </div>
 </div>
 
@@ -2376,6 +2414,29 @@ function closeModal(e) {
 document.getElementById('modal-close').addEventListener('click', () => {
   document.getElementById('modal-bg').classList.remove('open');
   document.body.style.overflow = '';
+});
+
+// ── Visor de zoom a pantalla completa (pinch-to-zoom nativo del navegador) ──
+function openZoom(src) {
+  if (!src) return;
+  document.getElementById('zoom-img').src = src;
+  document.getElementById('zoom-bg').classList.add('open');
+  const scroll = document.getElementById('zoom-scroll');
+  scroll.scrollTop = 0;
+  scroll.scrollLeft = 0;
+  document.body.style.overflow = 'hidden';
+}
+function closeZoom() {
+  document.getElementById('zoom-bg').classList.remove('open');
+  // Si el modal de producto sigue abierto detrás, mantener el scroll bloqueado
+  if (!document.getElementById('modal-bg').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+document.getElementById('m-photo')?.addEventListener('click', () => openZoom(document.getElementById('m-photo').src));
+document.getElementById('zoom-close')?.addEventListener('click', closeZoom);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('zoom-bg').classList.contains('open')) closeZoom();
 });
 
 // handleNL eliminado — reemplazado por canal de WhatsApp
