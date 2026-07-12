@@ -481,6 +481,13 @@
     .b-new { background:var(--rose); color:#fff; }
     .b-hot { background:var(--amber); color:var(--ink); }
     .b-sale { background:var(--lime); color:var(--ink); }
+    .card-fotos-count {
+      position:absolute; bottom:10px; right:10px; z-index:2;
+      font-family:'Inconsolata',monospace; font-size:10px; font-weight:700; letter-spacing:.5px;
+      padding:4px 9px; background:rgba(5,5,8,.72); backdrop-filter:blur(4px);
+      border:1px solid rgba(255,255,255,.15); color:var(--paper); border-radius:99px;
+      display:flex; align-items:center; gap:5px;
+    }
     .card-fav {
       position:absolute; top:12px; right:12px; z-index:2;
       width:32px; height:32px; border-radius:50%;
@@ -1961,7 +1968,8 @@ function renderTabs() {
 // ── Template único de card de producto (grilla + búsqueda) ──
 function cardHTML(p) {
   const id = escapeAttr(String(p.id ?? ''));
-  const thumbSrc = escapeAttr(p.imagenes?.[0] || p.imagen || '');
+  const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+  const thumbSrc = escapeAttr(imgs[0] || '');
   const nombre = escapeHtml(p.nombre || '');
   const descFull = p.descripcion || '';
   const desc = escapeHtml(descFull.substring(0, 65)) + (descFull.length > 65 ? '…' : '');
@@ -1974,6 +1982,7 @@ function cardHTML(p) {
       <div class="card-thumb" onclick="openModal('${id}')">
         <img src="${thumbSrc}" alt="${escapeAttr(p.nombre || 'Producto')}" loading="lazy">
         ${badgeHTML}
+        ${imgs.length > 1 ? `<span class="card-fotos-count">📷 ${imgs.length}</span>` : ''}
         <button class="card-fav" aria-label="Marcar como favorito" onclick="event.stopPropagation(); this.textContent=this.textContent==='♡'?'♥':'♡'; this.style.color=this.textContent==='♥'?'var(--rose)':''">♡</button>
         <div class="card-hover-cta">
           <button class="cta-add" onclick="event.stopPropagation(); addToCartById('${id}')">Agregar al carrito</button>
