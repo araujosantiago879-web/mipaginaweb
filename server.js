@@ -149,12 +149,14 @@ function siteOrigin(req) {
 // Card de producto renderizada en el servidor (para crawlers sin JS y
 // primer pintado instantáneo; el frontend la re-renderiza al hidratar)
 function ssrCard(p) {
-  const img = escapeHtml((p.imagenes && p.imagenes[0]) || p.imagen || '');
+  const imgs = p.imagenes && p.imagenes.length ? p.imagenes : (p.imagen ? [p.imagen] : []);
+  const img = escapeHtml(imgs[0] || '');
   const rating = p.rating != null ? p.rating : 4.5;
   const badgeTxt = p.badge === 'new' ? 'Nuevo' : p.badge === 'hot' ? '🔥 Hot' : p.badge === 'sale' ? 'Oferta' : '';
   const desc = (p.descripcion || '');
+  const fotosCountTxt = imgs.length > 1 ? `<span class="card-fotos-count">📷 ${imgs.length}</span>` : '';
   return `<article class="card" data-id="${escapeHtml(String(p.id ?? ''))}">
-    <div class="card-thumb"><img src="${img}" alt="${escapeHtml(p.nombre || 'Producto')}" loading="lazy" decoding="async">${badgeTxt ? `<span class="card-badge b-${p.badge}">${badgeTxt}</span>` : ''}</div>
+    <div class="card-thumb"><img src="${img}" alt="${escapeHtml(p.nombre || 'Producto')}" loading="lazy" decoding="async">${badgeTxt ? `<span class="card-badge b-${p.badge}">${badgeTxt}</span>` : ''}${fotosCountTxt}</div>
     <div class="card-body">
       <div class="card-cat">${escapeHtml(p.categoria || '')}</div>
       <div class="card-name">${escapeHtml(p.nombre || '')}</div>
