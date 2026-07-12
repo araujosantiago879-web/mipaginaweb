@@ -907,8 +907,11 @@ async function cargarProductos() {
   const scrollY = window.scrollY;
   const loadingDiv = document.getElementById('productos-loading');
   const gridDiv = document.getElementById('productos-list');
-  loadingDiv.style.display = 'block';
-  gridDiv.style.display = 'none';
+  const esRecarga = productos.length > 0;
+  if (!esRecarga) {
+    loadingDiv.style.display = 'block';
+    gridDiv.style.display = 'none';
+  }
   try {
     const res = await fetch('/api/products?todos=1');
     if (!res.ok) throw new Error();
@@ -1179,7 +1182,13 @@ async function eliminarProducto(id) {
   if (!ok) return;
   try {
     const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { 'Authorization': token } });
-    if (res.ok) { showToast('✅ Producto eliminado'); cargarProductos(); }
+    if (res.ok) {
+      showToast('✅ Producto eliminado');
+      productos = productos.filter(x => String(x.id) !== String(id));
+      renderProductosFiltrados();
+      actualizarStatsProductos();
+      poblarFiltroCategorias();
+    }
     else showToast('❌ Error al eliminar', true);
   } catch (err) { showToast('Error de red', true); }
 }
