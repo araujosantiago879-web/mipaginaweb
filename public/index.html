@@ -178,6 +178,16 @@
     @supports(height:-moz-available) { .drawer { height:-moz-available; } }
     .drawer.open { transform:translateX(0); }
     .drawer-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; flex-shrink:0; }
+    .drawer-nav-links {
+      display:flex; flex-wrap:wrap; gap:8px;
+      padding:0 24px 18px; border-bottom:1px solid var(--edge); flex-shrink:0;
+    }
+    .drawer-nav-links a {
+      font-family:'Inconsolata',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted); padding:8px 13px; border:1px solid var(--edge); border-radius:99px;
+      transition:all .2s;
+    }
+    .drawer-nav-links a:hover, .drawer-nav-links a.active { color:var(--rose); border-color:var(--rose); background:rgba(255,51,102,.06); }
     .drawer-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; }
     .drawer-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:4px; }
     .drawer-close:hover { color:var(--paper); }
@@ -1247,6 +1257,13 @@
     </div>
     <button class="drawer-close" id="drawerClose">✕</button>
   </div>
+  <nav class="drawer-nav-links">
+    <a href="#" data-tab="tienda" onclick="closeDrawer()">Tienda</a>
+    <a href="#" data-tab="guia" onclick="closeDrawer()">Guía</a>
+    <a href="#" data-tab="discrecion" onclick="closeDrawer()">Discreción</a>
+    <a href="#" data-tab="testimonios" onclick="closeDrawer()">Reseñas</a>
+    <a href="#" data-tab="contacto" onclick="closeDrawer()">Contacto</a>
+  </nav>
   <div class="drawer-categories" id="drawerCategories"></div>
   <div class="drawer-products" id="drawerProducts" style="display:none;">
     <div class="drawer-search">
@@ -1893,9 +1910,9 @@ function activateTab(tabId) {
   document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
   const target = document.getElementById(`tab-${tabId}`);
   if (target) target.classList.add('active');
-  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-  const activeLink = document.querySelector(`.nav-links a[data-tab="${tabId}"]`);
-  if (activeLink) activeLink.classList.add('active');
+  document.querySelectorAll('.nav-links a, .drawer-nav-links a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll(`.nav-links a[data-tab="${tabId}"], .drawer-nav-links a[data-tab="${tabId}"]`)
+    .forEach(a => a.classList.add('active'));
 }
 
 // ── Event delegation global para TODOS los [data-tab] ──
