@@ -868,6 +868,23 @@
     .cart-cliente-input:focus { border-color:var(--rose); }
     .cart-checkout { width:100%; padding:14px; background:var(--wa); color:var(--ink); font-weight:800; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; border:none; cursor:pointer; transition:background .2s; display:flex; align-items:center; justify-content:center; gap:8px; border-radius:1px; }
     .cart-checkout:hover { background:var(--wa-d); }
+    .cart-footer > div { display:flex; flex-direction:column; gap:12px; }
+    .checkout-section { display:flex; flex-direction:column; gap:6px; }
+    .checkout-label { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+    .checkout-row { display:flex; gap:6px; }
+    .checkout-row .cart-cliente-input { flex:1; }
+    .cart-input-sm { flex:0 0 auto !important; width:80px !important; }
+    .checkout-shipping { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:4px; padding:10px 12px; display:flex; flex-direction:column; gap:4px; }
+    .shipping-info-row { display:flex; justify-content:space-between; font-size:12px; color:rgba(200,215,230,.7); }
+    .shipping-info-row span:last-child { color:var(--paper); font-weight:500; }
+    .checkout-btns { display:flex; gap:8px; }
+    .checkout-confirm { text-align:center; padding:20px 0; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .checkout-confirm .order-num { font-family:'Inconsolata',monospace; font-size:18px; letter-spacing:3px; color:var(--lime); }
+    .checkout-confirm .confirm-msg { font-size:13px; color:rgba(200,215,230,.6); line-height:1.6; }
+    .checkout-confirm .btn-track { display:inline-block; padding:10px 20px; background:var(--rose); color:#fff; font-weight:700; font-size:12px; letter-spacing:1px; text-decoration:none; border-radius:4px; margin-top:4px; }
+    .checkout-confirm .btn-track:hover { opacity:.85; }
+    .checkout-confirm .btn-wa-confirm { display:inline-block; padding:10px 20px; background:var(--wa); color:var(--ink); font-weight:700; font-size:12px; letter-spacing:1px; text-decoration:none; border-radius:4px; }
+    .cart-cliente-input.error { border-color:#ff5050; }
     .cart-payment { display:flex; flex-direction:column; gap:8px; padding:16px 0; }
     .cp-title { font-family:'Inconsolata',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
     .pm { background:linear-gradient(135deg, rgba(255,51,102,.03), rgba(255,51,102,.01)); border:1px solid rgba(255,51,102,.08); padding:12px 14px; display:flex; flex-direction:column; gap:6px; transition:all .3s ease; border-left:2px solid rgba(255,51,102,.15); position:relative; overflow:hidden; }
@@ -1286,50 +1303,72 @@
   <div class="cart-list" id="cart-list"></div>
   <div class="cart-empty" id="cart-empty" style="display:block;">Tu carrito está vacío</div>
   <div class="cart-footer" id="cart-footer" style="display:none;">
-    <div class="cart-total" id="cart-total"></div>
-    <div class="cart-cliente">
-      <input type="text" id="cart-nombre" class="cart-cliente-input" placeholder="Tu nombre (opcional)" autocomplete="name">
-      <input type="tel" id="cart-telefono" class="cart-cliente-input" placeholder="Tu teléfono (opcional)" autocomplete="tel">
+    <!-- PASO 1: Revisión del carrito -->
+    <div id="cart-step1">
+      <div class="cart-total" id="cart-total"></div>
+      <button class="cart-checkout" id="cart-continue" style="background:var(--rose);">
+        Continuar →
+      </button>
     </div>
-    <div class="cart-payment" id="cart-payment" style="display:none;">
-      <div class="cp-title">Medios de pago</div>
-      <div class="pm clickable" id="pm-mp" style="display:none;">
-        <div class="pm-header">
-          <div class="pm-icon mp">⬡</div>
-          <div class="pm-body">
-            <div class="pm-name">Mercado Pago</div>
-            <div class="pm-desc">Pagá con tu cuenta de Mercado Pago</div>
-          </div>
-        </div>
-        <a href="#" target="_blank" class="pm-btn mp" id="cp-mp">Pagar con Mercado Pago →</a>
+
+    <!-- PASO 2: Dirección + email -->
+    <div id="cart-step2" style="display:none;">
+      <div class="cart-total" id="cart-total2"></div>
+
+      <div class="checkout-section">
+        <div class="checkout-label">📧 Email (para seguimiento del pedido)</div>
+        <input type="email" id="cart-email" class="cart-cliente-input" placeholder="tu@email.com" required autocomplete="email">
       </div>
 
-      <div class="pm clickable" id="pm-efectivo" style="display:none;" onclick="window.open('https://wa.me/'+configWhatsappNumber+'?text='+encodeURIComponent('Hola, quiero pagar en efectivo. ¿Cómo coordinamos?'), '_blank')">
-        <div class="pm-header">
-          <div class="pm-icon cash">💵</div>
-          <div class="pm-body">
-            <div class="pm-name">Efectivo</div>
-            <div class="pm-desc" id="cp-efectivo-texto"></div>
-          </div>
+      <div class="checkout-section">
+        <div class="checkout-label">📍 Dirección de envío</div>
+        <div class="checkout-row">
+          <input type="text" id="cart-street" class="cart-cliente-input" placeholder="Calle" required autocomplete="street-address">
+          <input type="text" id="cart-number" class="cart-cliente-input cart-input-sm" placeholder="Nº" required>
+        </div>
+        <div class="checkout-row">
+          <input type="text" id="cart-floor" class="cart-cliente-input cart-input-sm" placeholder="Piso (opc)" autocomplete="address-line-2">
+          <input type="text" id="cart-dept" class="cart-cliente-input cart-input-sm" placeholder="Dto (opc)">
+        </div>
+        <input type="text" id="cart-city" class="cart-cliente-input" placeholder="Ciudad" required autocomplete="address-level2">
+        <input type="text" id="cart-province" class="cart-cliente-input" placeholder="Provincia" required autocomplete="address-level1">
+        <input type="text" id="cart-postal-code" class="cart-cliente-input" placeholder="Código postal" required autocomplete="postal-code">
+        <input type="text" id="cart-instructions" class="cart-cliente-input" placeholder="Indicaciones de entrega (opcional)">
+      </div>
+
+      <!-- Resultado del envío -->
+      <div class="checkout-shipping" id="checkout-shipping" style="display:none;">
+        <div class="shipping-info-row"><span>🚚 Envío:</span><span id="shipping-zone-name"></span></div>
+        <div class="shipping-info-row"><span>Costo:</span><span id="shipping-cost-val"></span></div>
+        <div class="shipping-info-row" id="shipping-date-row" style="display:none;"><span>Estimado:</span><span id="shipping-est-date"></span></div>
+      </div>
+      <div class="checkout-shipping" id="checkout-free-shipping" style="display:none;">
+        <div class="shipping-info-row" style="color:var(--lime);">🚚 ¡Envío gratis!</div>
+      </div>
+
+      <!-- Datos legacy (compatibilidad) -->
+      <div class="checkout-section" style="opacity:.5;margin-top:4px;">
+        <div class="checkout-row">
+          <input type="text" id="cart-nombre2" class="cart-cliente-input" placeholder="Tu nombre (opcional)" autocomplete="name">
+          <input type="tel" id="cart-telefono2" class="cart-cliente-input" placeholder="Teléfono (opcional)" autocomplete="tel">
         </div>
       </div>
 
-      <div class="pm clickable" id="pm-otro" style="display:none;" onclick="openOtroModal()">
-        <div class="pm-header">
-          <div class="pm-icon bank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,51,102,.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-4 7 4"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></div>
-          <div class="pm-body">
-            <div class="pm-name" id="cp-otro-titulo">Transferencias</div>
-            <div class="pm-desc" id="cp-otro-texto"></div>
-          </div>
-          <span style="color:var(--rose);font-size:14px;opacity:.5;">→</span>
-        </div>
+      <div class="checkout-btns">
+        <button class="cart-checkout" id="cart-back" style="background:rgba(255,255,255,.08);color:var(--paper);flex:0 0 auto;padding:12px 18px;">
+          ← Volver
+        </button>
+        <button class="cart-checkout" id="cart-confirm" style="flex:1;">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
+          Confirmar pedido
+        </button>
       </div>
-
     </div>
-    <button class="cart-checkout" id="cart-checkout">
-      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>
-      Consultar por WhatsApp
-    </button>
+
+    <!-- PASO 3: Confirmación -->
+    <div id="cart-step3" style="display:none;">
+      <div class="checkout-confirm" id="checkout-confirm-content"></div>
+    </div>
   </div>
 </div>
 
@@ -2189,6 +2228,8 @@ function renderCart() {
   if (cartN) cartN.textContent = count;
   if (cartBtn) cartBtn.style.display = count > 0 ? 'flex' : 'none';
   if (!cartList) return;
+  // Reset checkout step
+  if (typeof showCartStep === 'function') showCartStep(1);
   if (cart.length === 0) {
     cartList.innerHTML = '';
     if (cartEmpty) cartEmpty.style.display = 'block';
@@ -2315,6 +2356,166 @@ function checkoutWA() {
 
   window.open(`https://wa.me/${configWhatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
 }
+
+// ── Checkout de dos pasos ─────────────────────────────────────────────────
+let currentShippingCost = 0;
+let currentShippingZone = '';
+let currentEstimatedDate = '';
+
+function showCartStep(step) {
+  document.getElementById('cart-step1').style.display = step === 1 ? 'flex' : 'none';
+  document.getElementById('cart-step2').style.display = step === 2 ? 'flex' : 'none';
+  document.getElementById('cart-step3').style.display = step === 3 ? 'flex' : 'none';
+}
+
+// Botón "Continuar" → paso 2
+document.getElementById('cart-continue')?.addEventListener('click', () => {
+  // Validate: at least 1 item
+  if (cart.length === 0) return showToast('El carrito está vacío', true);
+
+  // Pre-fill total in step 2
+  const t = cartTotal();
+  const total2 = document.getElementById('cart-total2');
+  if (total2) total2.innerHTML = `<span>Total</span><span>$${t.toLocaleString('es-AR')}</span>`;
+
+  showCartStep(2);
+});
+
+// Botón "Volver" → paso 1
+document.getElementById('cart-back')?.addEventListener('click', () => showCartStep(1));
+
+// Calcular envío al salir del CP
+document.getElementById('cart-postal-code')?.addEventListener('blur', function() {
+  const cp = this.value.trim();
+  if (cp.length < 3) return;
+  const subtotal = cartTotal();
+  fetch(`/api/shipping/calculate?cp=${encodeURIComponent(cp)}&subtotal=${subtotal}`)
+    .then(r => r.json())
+    .then(data => {
+      const shipDiv = document.getElementById('checkout-shipping');
+      const freeDiv = document.getElementById('checkout-free-shipping');
+      if (data.error || !data.zone) {
+        shipDiv.style.display = 'none';
+        freeDiv.style.display = 'none';
+        currentShippingCost = 0;
+        return;
+      }
+      currentShippingCost = data.shipping_cost;
+      currentShippingZone = data.zone;
+      currentEstimatedDate = data.estimated_date || '';
+      if (data.free_shipping) {
+        shipDiv.style.display = 'none';
+        freeDiv.style.display = 'flex';
+      } else {
+        freeDiv.style.display = 'none';
+        shipDiv.style.display = 'flex';
+        document.getElementById('shipping-zone-name').textContent = data.zone;
+        document.getElementById('shipping-cost-val').textContent = data.shipping_cost === 0 ? 'Gratis' : `$${data.shipping_cost.toLocaleString('es-AR')}`;
+        const dateRow = document.getElementById('shipping-date-row');
+        if (data.estimated_date) {
+          dateRow.style.display = 'flex';
+          const d = new Date(data.estimated_date + 'T00:00:00');
+          document.getElementById('shipping-est-date').textContent = d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+        } else {
+          dateRow.style.display = 'none';
+        }
+      }
+    })
+    .catch(() => {});
+});
+
+// Botón "Confirmar pedido"
+document.getElementById('cart-confirm')?.addEventListener('click', async () => {
+  if (cart.length === 0) return showToast('El carrito está vacío', true);
+
+  const email = document.getElementById('cart-email')?.value.trim() || '';
+  const street = document.getElementById('cart-street')?.value.trim() || '';
+  const number = document.getElementById('cart-number')?.value.trim() || '';
+  const floor = document.getElementById('cart-floor')?.value.trim() || '';
+  const dept = document.getElementById('cart-dept')?.value.trim() || '';
+  const city = document.getElementById('cart-city')?.value.trim() || '';
+  const province = document.getElementById('cart-province')?.value.trim() || '';
+  const postalCode = document.getElementById('cart-postal-code')?.value.trim() || '';
+  const instructions = document.getElementById('cart-instructions')?.value.trim() || '';
+
+  // Validación
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return showToast('Ingresá un email válido', true);
+  }
+  if (!street) return showToast('Ingresá la calle', true);
+  if (!number) return showToast('Ingresá el número', true);
+  if (!city) return showToast('Ingresá la ciudad', true);
+  if (!province) return showToast('Ingresá la provincia', true);
+  if (!postalCode) return showToast('Ingresá el código postal', true);
+
+  const confirmBtn = document.getElementById('cart-confirm');
+  confirmBtn.textContent = 'Procesando...';
+  confirmBtn.disabled = true;
+
+  const orderData = {
+    items: cart.map(item => ({
+      product_id: item.id || '',
+      nombre: item.nombre,
+      precio: item.precio,
+      imagen: item.imagen || '',
+      qty: item.qty
+    })),
+    email,
+    shipping_address: { street, number, floor, dept, city, province, postalCode, instructions },
+    customerInfo: {
+      nombre: document.getElementById('cart-nombre2')?.value.trim() || '',
+      telefono: document.getElementById('cart-telefono2')?.value.trim() || ''
+    },
+    paymentMethod: 'transferencia',
+    total: `$${(cartTotal() + currentShippingCost).toLocaleString('es-AR')}`
+  };
+
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast(data.error || 'Error al crear pedido', true);
+      confirmBtn.textContent = 'Confirmar pedido';
+      confirmBtn.disabled = false;
+      return;
+    }
+
+    // Éxito: mostrar paso 3
+    const orderNum = data.order_number || '';
+    const waMsg = encodeURIComponent(`Hola! Quiero confirmar mi pedido ${orderNum}. Adjunto comprobante de pago.`);
+    const waLink = `https://wa.me/${configWhatsappNumber}?text=${waMsg}`;
+    const trackLink = `/pedido/${orderNum}?email=${encodeURIComponent(email)}`;
+
+    document.getElementById('checkout-confirm-content').innerHTML = `
+      <div style="font-size:32px;">✅</div>
+      <div class="order-num">${orderNum}</div>
+      <div class="confirm-msg">
+        Tu pedido fue registrado exitosamente.<br>
+        Te enviamos un email a <strong>${escapeHtml(email)}</strong> con los detalles.
+      </div>
+      <a href="${trackLink}" class="btn-track" target="_blank">📍 Seguir mi pedido</a>
+      <a href="${waLink}" class="btn-wa-confirm" target="_blank">📲 Enviar comprobante por WhatsApp</a>
+      <div class="confirm-msg" style="font-size:11px;margin-top:8px;">
+        Recordá enviarnos el comprobante de transferencia por WhatsApp para confirmar tu pedido.
+      </div>
+    `;
+    showCartStep(3);
+
+    // Limpiar carrito
+    cart = [];
+    saveCart();
+  } catch (err) {
+    console.error('Error:', err);
+    showToast('Error de conexión', true);
+    confirmBtn.textContent = 'Confirmar pedido';
+    confirmBtn.disabled = false;
+  }
+});
 
 document.getElementById('cart-btn')?.addEventListener('click', () => {
   document.getElementById('cart-drawer-bg')?.classList.add('open');
