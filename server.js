@@ -17,7 +17,7 @@ function getResend() {
     return resendClient;
   } catch (_) { return null; }
 }
-const RESEND_FROM = 'El Lado B <onboarding@resend.dev>';
+const RESEND_FROM = process.env.RESEND_FROM || 'El Lado B <onboarding@resend.dev>';
 
 function emailBase(titleHtml, bodyHtml) {
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
@@ -87,6 +87,22 @@ function sendOrderConfirmedEmail(order) {
   return sendEmail(order.email, 'Tu pedido #' + num + ' fue confirmado', html);
 }
 
+function sendOrderPreparingEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> se está preparando</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Tu pedido está siendo preparado para su despacho. Pronto recibirás la confirmación de envío.</p>
+     <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:14px;margin-bottom:18px;">
+       <div style="color:rgba(200,215,230,.5);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Discreción</div>
+       <div style="color:rgba(200,215,230,.7);font-size:13px;">Tu pedido llega en paquete discreto, sin logos ni descripción del contenido.</div>
+     </div>
+     <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Seguir mi pedido</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' se está preparando', html);
+}
+
 function sendOrderShippedEmail(order) {
   if (!order.email) return Promise.resolve();
   const num = order.order_number || '';
@@ -148,6 +164,7 @@ function sendOrderDelayedEmail(order) {
 function sendEmailForStatus(order) {
   const status = order.status;
   if (status === 'confirmed') return sendOrderConfirmedEmail(order);
+  if (status === 'preparando') return sendOrderPreparingEmail(order);
   if (status === 'shipped') return sendOrderShippedEmail(order);
   if (status === 'delivered') return sendOrderDeliveredEmail(order);
   if (status === 'cancelled') return sendOrderCancelledEmail(order);
@@ -741,6 +758,63 @@ app.get('/api/shipping/zones', async (req, res) => {
   }
 });
 
+// ─── calcularEnvio(): función aislada para calcular costo y tiempo de envío ──
+// Actualmente usa la tabla de zonas interna. Para integrar un correo real
+// (Andreani, Correo Argentino, OCA) en el futuro, reemplazar la lógica interna
+// de esta función sin tocar el resto del checkout ni el admin.
+// Parámetros: cp (string), subtotal (number)
+// Retorna: { zone, shipping_cost, estimated_days, estimated_date, free_shipping }
+const FREE_SHIPPING_THRESHOLD = 50000;
+async function calcularEnvio(cp, subtotal) {
+  const cpUpper = String(cp || '').toUpperCase().trim();
+  if (!cpUpper || cpUpper.length < 2) {
+    return { zone: null, shipping_cost: 0, estimated_days: null, estimated_date: null, free_shipping: false };
+  }
+
+  // Intentar desde DB, fallback a defaults
+  let zones = DEFAULT_SHIPPING_ZONES;
+  try {
+    const col = await getShippingZones();
+    const dbZones = await col.find({ activa: true }).toArray();
+    if (dbZones.length) zones = dbZones;
+  } catch (_) {}
+
+  // Buscar zona por prefijo del CP (matchea los primeros caracteres alfabéticos)
+  const match = zones.find(z => {
+    const from = (z.cp_from || '').toUpperCase();
+    const to = (z.cp_to || '').toUpperCase();
+    return cpUpper >= from && cpUpper <= to;
+  }) || zones.find(z => z.zone_name === 'Interior General');
+
+  if (!match) {
+    return { zone: null, shipping_cost: 0, estimated_days: null, estimated_date: null, free_shipping: false };
+  }
+
+  const freeShipping = (subtotal || 0) >= FREE_SHIPPING_THRESHOLD;
+  const cost = freeShipping ? 0 : (match.price || 0);
+
+  // Calcular fecha estimada (días hábiles aproximados)
+  let estimatedDate = null;
+  if (match.estimated_days) {
+    const d = new Date();
+    let added = 0;
+    while (added < match.estimated_days) {
+      d.setDate(d.getDate() + 1);
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) added++;
+    }
+    estimatedDate = d.toISOString().split('T')[0];
+  }
+
+  return {
+    zone: match.zone_name,
+    shipping_cost: cost,
+    estimated_days: match.estimated_days || null,
+    estimated_date: estimatedDate,
+    free_shipping: freeShipping
+  };
+}
+
 // GET /api/shipping/calculate?cp=XXXX&subtotal=NNN
 app.get('/api/shipping/calculate', rateLimit(20, 60 * 1000), async (req, res) => {
   try {
@@ -749,53 +823,8 @@ app.get('/api/shipping/calculate', rateLimit(20, 60 * 1000), async (req, res) =>
     if (!cp || cp.length < 2) {
       return res.status(400).json({ error: 'Código postal requerido' });
     }
-
-    const cpUpper = cp.toUpperCase();
-
-    // Intentar desde DB, fallback a defaults
-    let zones = DEFAULT_SHIPPING_ZONES;
-    try {
-      const col = await getShippingZones();
-      const dbZones = await col.find({ activa: true }).toArray();
-      if (dbZones.length) zones = dbZones;
-    } catch (_) {}
-
-    // Buscar zona por prefijo del CP (matchea los primeros caracteres)
-    const match = zones.find(z => {
-      const from = (z.cp_from || '').toUpperCase();
-      const to = (z.cp_to || '').toUpperCase();
-      return cpUpper >= from && cpUpper <= to;
-    }) || zones.find(z => z.zone_name === 'Interior General');
-
-    if (!match) {
-      return res.json({ zone: null, shipping_cost: 0, estimated_days: null, free_shipping: false });
-    }
-
-    // Envío gratis si subtotal >= 50.000
-    const FREE_THRESHOLD = 50000;
-    const freeShipping = subtotal >= FREE_THRESHOLD;
-    const cost = freeShipping ? 0 : (match.price || 0);
-
-    // Calcular fecha estimada (días hábiles aproximados)
-    let estimatedDate = null;
-    if (match.estimated_days) {
-      const d = new Date();
-      let added = 0;
-      while (added < match.estimated_days) {
-        d.setDate(d.getDate() + 1);
-        const day = d.getDay();
-        if (day !== 0 && day !== 6) added++;
-      }
-      estimatedDate = d.toISOString().split('T')[0];
-    }
-
-    res.json({
-      zone: match.zone_name,
-      shipping_cost: cost,
-      estimated_days: match.estimated_days || null,
-      estimated_date: estimatedDate,
-      free_shipping: freeShipping
-    });
+    const result = await calcularEnvio(cp, subtotal);
+    res.json(result);
   } catch (err) {
     console.error('Error en /api/shipping/calculate:', err);
     res.status(500).json({ error: 'Error al calcular envío' });
@@ -1164,7 +1193,7 @@ app.post('/api/orders', rateLimit(10, 60 * 1000), async (req, res) => {
       return res.status(400).json({ error: 'Faltan datos de dirección (calle, ciudad, provincia, CP)' });
     }
 
-    // ── Calcular envío server-side ──
+    // ── Calcular envío server-side (usar función aislada) ──
     const subtotal = items.reduce((sum, i) => sum + (i.precioNum * i.qty), 0);
     let shippingZone = null;
     let shippingCost = 0;
@@ -1172,24 +1201,11 @@ app.post('/api/orders', rateLimit(10, 60 * 1000), async (req, res) => {
     let estimatedDate = null;
 
     try {
-      const zones = DEFAULT_SHIPPING_ZONES;
-      const cpUpper = shipping_address.postalCode.toUpperCase();
-      const match = zones.find(z => {
-        const from = (z.cp_from || '').toUpperCase();
-        const to = (z.cp_to || '').toUpperCase();
-        return cpUpper >= from && cpUpper <= to;
-      }) || zones.find(z => z.zone_name === 'Interior General');
-      if (match) {
-        shippingZone = match.zone_name;
-        const FREE_THRESHOLD = 50000;
-        shippingCost = subtotal >= FREE_THRESHOLD ? 0 : (match.price || 0);
-        estimatedDays = match.estimated_days || null;
-        if (estimatedDays) {
-          const d = new Date(); let added = 0;
-          while (added < estimatedDays) { d.setDate(d.getDate() + 1); const day = d.getDay(); if (day !== 0 && day !== 6) added++; }
-          estimatedDate = d.toISOString().split('T')[0];
-        }
-      }
+      const envio = await calcularEnvio(shipping_address.postalCode, subtotal);
+      shippingZone = envio.zone;
+      shippingCost = envio.shipping_cost;
+      estimatedDays = envio.estimated_days;
+      estimatedDate = envio.estimated_date;
     } catch (_) {}
 
     // ── Generar número de orden atómico ──
@@ -1304,9 +1320,11 @@ function getStatusDescription(status) {
   const descriptions = {
     pending_payment: 'Esperando confirmación de pago',
     confirmed:       'Pago confirmado, preparando envío',
+    preparando:      'Preparando pedido para despacho',
     shipped:         'Pedido despachado',
     delivered:       'Pedido entregado',
-    cancelled:       'Pedido cancelado'
+    cancelled:       'Pedido cancelado',
+    delayed:         'Pedido demorado'
   };
   return descriptions[status] || 'Estado actualizado';
 }
@@ -1347,7 +1365,9 @@ app.get('/pedido/:order_number', rateLimit(10, 60 * 1000), async (req, res) => {
     const statusLabels = {
       pending_payment: 'Esperando pago',
       confirmed: 'Pago confirmado',
-      shipped: 'En camino',
+      preparando: 'Preparando',
+      shipped: 'Despachado',
+      in_transit: 'En camino',
       delivered: 'Entregado',
       cancelled: 'Cancelado',
       delayed: 'Demorado'
@@ -1355,27 +1375,39 @@ app.get('/pedido/:order_number', rateLimit(10, 60 * 1000), async (req, res) => {
     const statusIcons = {
       pending_payment: '💳',
       confirmed: '✅',
+      preparando: '📦',
       shipped: '🚚',
-      delivered: '📦',
+      in_transit: '🏍️',
+      delivered: '📬',
       cancelled: '❌',
       delayed: '⚠️'
     };
 
-    const statusOrder = ['pending_payment', 'confirmed', 'shipped', 'delivered'];
+    const statusOrder = ['pending_payment', 'confirmed', 'preparando', 'shipped', 'in_transit', 'delivered'];
     const currentIdx = order.status === 'delayed' ? -1 : statusOrder.indexOf(order.status);
     const isCancelled = order.status === 'cancelled';
     const isDelayed = order.status === 'delayed';
 
-    // Construir timeline
+    // Construir timeline vertical
     const timelineHtml = statusOrder.map((st, i) => {
       let cls = 'timeline-step';
       if (isCancelled) cls += (st === 'pending_payment') ? ' active' : '';
       else if (isDelayed && i <= currentIdx) cls += i === currentIdx ? ' active delayed' : ' done';
       else if (i < currentIdx) cls += ' done';
       else if (i === currentIdx) cls += ' active';
+
+      // Buscar fecha del evento para este step
+      const matchingEvent = (order.tracking_events || []).find(ev => ev.status === st);
+      const dateStr = matchingEvent
+        ? new Date(matchingEvent.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+        : '';
+
       return `<div class="${cls}">
         <div class="step-icon">${statusIcons[st]}</div>
-        <div class="step-label">${statusLabels[st]}</div>
+        <div class="step-content">
+          <div class="step-label">${statusLabels[st]}</div>
+          ${dateStr ? `<div class="step-date">${dateStr}</div>` : ''}
+        </div>
       </div>`;
     }).join('');
 
@@ -1405,11 +1437,12 @@ app.get('/pedido/:order_number', rateLimit(10, 60 * 1000), async (req, res) => {
       `).join('');
     }
 
-    // Dirección (solo si email matchea)
+    // Dirección (solo si email matchea) — enmascarada parcialmente
     let addressHtml = '';
     if (emailMatch && order.shipping_address) {
       const a = order.shipping_address;
-      const parts = [a.street + (a.number ? ' ' + a.number : '')];
+      const maskedNumber = a.number ? a.number.replace(/./g, '*').slice(0, -2) + (a.number.slice(-2) || a.number) : '';
+      const parts = [a.street + (maskedNumber ? ' ' + maskedNumber : '')];
       if (a.floor) parts.push('Piso ' + a.floor + (a.dept ? ' ' + a.dept : ''));
       parts.push(a.city + ', ' + a.province);
       parts.push('CP: ' + a.postalCode);
@@ -1461,19 +1494,35 @@ app.get('/pedido/:order_number', rateLimit(10, 60 * 1000), async (req, res) => {
     .brand em { color:#ff3366; font-style:italic; }
     .order-num { font-family:monospace; font-size:14px; color:rgba(200,215,230,.5); margin-top:8px; letter-spacing:2px; }
     .status-badge { display:inline-block; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:600; margin-top:12px; background:rgba(255,51,102,.15); color:#ff3366; }
+    .status-badge.preparando { background:rgba(123,159,255,.15); color:#7b9fff; }
     .status-badge.confirmed { background:rgba(102,255,204,.15); color:#66ffcc; }
     .status-badge.shipped { background:rgba(37,211,102,.15); color:#25d366; }
     .status-badge.delivered { background:rgba(102,255,204,.15); color:#66ffcc; }
     .status-badge.cancelled { background:rgba(255,80,80,.15); color:#ff5050; }
-    .timeline { display:flex; justify-content:space-between; margin:28px 0; position:relative; }
-    .timeline::before { content:''; position:absolute; top:18px; left:10%; right:10%; height:2px; background:rgba(255,255,255,.1); }
-    .timeline-step { display:flex; flex-direction:column; align-items:center; flex:1; position:relative; z-index:1; opacity:.35; }
-    .timeline-step.done { opacity:.7; }
+    .status-badge.delayed { background:rgba(255,136,68,.15); color:#ff8844; }
+
+    /* Timeline vertical estilo Mercado Libre */
+    .timeline { position:relative; margin:28px 0; padding-left:28px; }
+    .timeline::before { content:''; position:absolute; left:13px; top:4px; bottom:4px; width:2px; background:rgba(255,255,255,.1); }
+    .timeline-step { display:flex; align-items:flex-start; gap:12px; position:relative; padding:10px 0; opacity:.35; }
+    .timeline-step.done { opacity:.6; }
     .timeline-step.active { opacity:1; }
-    .step-icon { width:36px; height:36px; border-radius:50%; background:#111116; border:2px solid rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .timeline-step.delayed { opacity:1; }
+    .step-icon { width:28px; height:28px; min-width:28px; border-radius:50%; background:#111116; border:2px solid rgba(255,255,255,.15); display:flex; align-items:center; justify-content:center; font-size:13px; position:relative; z-index:1; }
     .timeline-step.active .step-icon { border-color:#ff3366; background:rgba(255,51,102,.15); }
     .timeline-step.done .step-icon { border-color:#66ffcc; background:rgba(102,255,204,.15); }
-    .step-label { font-size:10px; margin-top:6px; text-align:center; color:rgba(200,215,230,.6); }
+    .timeline-step.delayed .step-icon { border-color:#ff8844; background:rgba(255,136,68,.15); }
+    .step-content { flex:1; }
+    .step-label { font-size:13px; font-weight:500; color:rgba(200,215,230,.8); }
+    .step-date { font-size:11px; color:rgba(200,215,230,.4); margin-top:2px; }
+
+    .delay-banner { background:rgba(255,136,68,.1); border:1px solid rgba(255,136,68,.3); border-radius:10px; padding:16px; margin:16px 0; }
+    .delay-banner .delay-title { font-size:14px; font-weight:600; color:#ff8844; margin-bottom:6px; }
+    .delay-banner .delay-reason { font-size:13px; color:rgba(200,215,230,.7); line-height:1.6; }
+
+    .disclaimer { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:8px; padding:12px 14px; margin:16px 0; font-size:11px; line-height:1.7; color:rgba(200,215,230,.45); }
+    .disclaimer strong { color:rgba(200,215,230,.6); }
+
     .info-box { background:#111116; border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:16px; margin-bottom:16px; }
     .info-title { font-size:14px; font-weight:600; margin-bottom:10px; }
     .info-content { font-size:13px; line-height:1.8; color:rgba(200,215,230,.7); }
@@ -1510,6 +1559,20 @@ app.get('/pedido/:order_number', rateLimit(10, 60 * 1000), async (req, res) => {
     </div>
 
     <div class="timeline">${timelineHtml}</div>
+
+    ${isDelayed ? `
+      <div class="delay-banner">
+        <div class="delay-title">⚠️ Tu pedido está demorado</div>
+        <div class="delay-reason">${order.delay_reason ? escapeHtml(order.delay_reason) : 'Estamos trabajando para que llegue lo antes posible.'}
+        ${order.estimated_delivery ? '<br>Nueva fecha estimada: <strong>' + escapeHtml(order.estimated_delivery) + '</strong>' : ''}
+        </div>
+      </div>
+    ` : ''}
+
+    <div class="disclaimer">
+      <strong>📦 Envío discreto:</strong> Tu pedido llega en paquete cerrado, sin logos ni descripción del contenido. El remitente no incluye referencia a la tienda.<br><br>
+      <strong>⏱️ Tiempos de entrega:</strong> Tu pedido puede demorar más de lo estimado por motivos ajenos a nosotros (logística del proveedor, feriados, zona de entrega). Te avisaremos si hay cambios.
+    </div>
 
     ${!emailMatch ? `
       <div class="email-prompt">

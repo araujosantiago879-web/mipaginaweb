@@ -482,6 +482,7 @@
       <button class="tab-btn active" data-tab="productos">📦 Productos</button>
       <button class="tab-btn" data-tab="config">⚙️ Configuración</button>
       <button class="tab-btn" data-tab="pedidos">📋 Pedidos</button>
+      <button class="tab-btn" data-tab="zonas">🚚 Zonas de envío</button>
     </div>
 
     <!-- TAB PRODUCTOS -->
@@ -586,6 +587,7 @@
       <div class="pedidos-toolbar">
         <button class="filtro-chip on" data-fp="pending_payment">💳 Pago pendiente</button>
         <button class="filtro-chip" data-fp="confirmed">✅ Confirmados</button>
+        <button class="filtro-chip" data-fp="preparando">📦 Preparando</button>
         <button class="filtro-chip" data-fp="shipped">🚚 Enviados</button>
         <button class="filtro-chip" data-fp="delivered">📦 Entregados</button>
         <button class="filtro-chip" data-fp="delayed">⚠️ Demorados</button>
@@ -611,10 +613,34 @@
         </table>
       </div>
     </div>
+
+    <!-- TAB ZONAS DE ENVÍO -->
+    <div id="tab-zonas" class="tab-content">
+      <h2 class="section-title">Zonas de <em>envío</em></h2>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <p style="font-size:12px;color:var(--muted);margin:0;">Configurá costos y tiempos por zona geográfica. Las zonas se usan para calcular el envío en el checkout.</p>
+        <button class="btn btn-primary" onclick="abrirModalZona()">+ Nueva zona</button>
+      </div>
+      <div id="zonas-loading" class="loading">Cargando zonas…</div>
+      <div id="zonas-list" style="display:none;">
+        <table style="width:100%;border-collapse:collapse;font-family:'Inconsolata',monospace;font-size:12px;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--edge);color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-size:10px;">
+              <th style="padding:12px 8px;text-align:left;">Zona</th>
+              <th style="padding:12px 8px;text-align:left;">CP Desde</th>
+              <th style="padding:12px 8px;text-align:left;">CP Hasta</th>
+              <th style="padding:12px 8px;text-align:right;">Precio</th>
+              <th style="padding:12px 8px;text-align:center;">Días</th>
+              <th style="padding:12px 8px;text-align:center;">Activa</th>
+              <th style="padding:12px 8px;text-align:center;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="zonas-body"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
-
-<!-- MODAL PRODUCTO -->
 <div id="productModal" class="modal-backdrop">
   <div class="modal grande">
     <div class="modal-header">
@@ -685,6 +711,35 @@
           </div>
         </div>
         <span class="rotulo" style="color:var(--lime)">Se actualiza mientras escribís ✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ZONA DE ENVÍO -->
+<div id="zona-modal-bg" class="modal-backdrop">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h3 id="zona-modal-title"><em>Zona</em> de envío</h3>
+      <button class="modal-close" onclick="document.getElementById('zona-modal-bg').classList.remove('active');document.body.style.overflow='';">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="zona-id">
+      <div class="form-group"><label>Nombre de zona</label><input type="text" id="zona-nombre" class="form-input" placeholder="Ej: CABA, GBA Norte…" required></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>CP Desde</label><input type="text" id="zona-cp-from" class="form-input" placeholder="C1000" required></div>
+        <div class="form-group"><label>CP Hasta</label><input type="text" id="zona-cp-to" class="form-input" placeholder="C1499" required></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>Precio ($)</label><input type="number" id="zona-precio" class="form-input" min="0" value="0"></div>
+        <div class="form-group"><label>Días estimados</label><input type="number" id="zona-dias" class="form-input" min="1" value="1"></div>
+      </div>
+      <div class="form-group">
+        <label class="toggle-label"><input type="checkbox" id="zona-activa" checked> Zona activa</label>
+      </div>
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('zona-modal-bg').classList.remove('active');document.body.style.overflow='';">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarZona()">Guardar zona</button>
       </div>
     </div>
   </div>
@@ -1299,6 +1354,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.add('active');
     document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
     if (btn.dataset.tab === 'pedidos') cargarPedidos();
+    if (btn.dataset.tab === 'zonas') cargarZonas();
   });
 });
 
@@ -1309,7 +1365,9 @@ let filtroPedidos = 'pending_payment';
 const STATUS_LABELS = {
   pending_payment: 'Pago pendiente',
   confirmed: 'Confirmado',
+  preparando: 'Preparando',
   shipped: 'Enviado',
+  in_transit: 'En camino',
   delivered: 'Entregado',
   cancelled: 'Cancelado',
   delayed: 'Demorado',
@@ -1319,7 +1377,9 @@ const STATUS_LABELS = {
 const STATUS_COLORS = {
   pending_payment: '#ffaa00',
   confirmed: '#66ffcc',
+  preparando: '#7b9fff',
   shipped: '#25d366',
+  in_transit: '#25d366',
   delivered: '#66ffcc',
   cancelled: '#ff5050',
   delayed: '#ff8844',
@@ -1353,13 +1413,14 @@ function actualizarStatsPedidos() {
   };
   const pendientes = pedidosCache.filter(p => p.status === 'pending_payment').length;
   const confirmados = pedidosCache.filter(p => p.status === 'confirmed').length;
+  const preparando = pedidosCache.filter(p => p.status === 'preparando').length;
   const enviados = pedidosCache.filter(p => p.status === 'shipped').length;
   const entregados = pedidosCache.filter(p => p.status === 'delivered' || p.status === 'completado').length;
   const cancelados = pedidosCache.filter(p => p.status === 'cancelled').length;
   const demorados = pedidosCache.filter(p => p.status === 'delayed').length;
   const compMes = pedidosCache.filter(p => (p.status === 'delivered' || p.status === 'completado') && esDelMes(p.createdAt));
   const facturadoMes = compMes.reduce((s, p) => s + (parseInt(String(p.total).replace(/[^0-9]/g, ''), 10) || 0), 0);
-  statsData.pedidos = { pendientes: pendientes + confirmados + enviados, completadosMes: compMes.length, facturadoMes };
+  statsData.pedidos = { pendientes: pendientes + confirmados + preparando + enviados, completadosMes: compMes.length, facturadoMes };
   renderStats();
   const fact = document.getElementById('fact-mes');
   if (fact) fact.innerHTML = `Facturado este mes: <b>$${facturadoMes.toLocaleString('es-AR')}</b>`;
@@ -1369,6 +1430,7 @@ function actualizarStatsPedidos() {
     let n = 0;
     if (f === 'pending_payment') n = pendientes;
     else if (f === 'confirmed') n = confirmados;
+    else if (f === 'preparando') n = preparando;
     else if (f === 'shipped') n = enviados;
     else if (f === 'delivered') n = entregados;
     else if (f === 'delayed') n = demorados;
@@ -1377,6 +1439,7 @@ function actualizarStatsPedidos() {
     const labels = {
       pending_payment: '💳 Pago pendiente',
       confirmed: '✅ Confirmados',
+      preparando: '📦 Preparando',
       shipped: '🚚 Enviados',
       delivered: '📦 Entregados',
       delayed: '⚠️ Demorados',
@@ -1394,6 +1457,7 @@ function renderPedidos() {
   let lista = pedidosCache;
   if (filtroPedidos === 'pending_payment') lista = lista.filter(p => p.status === 'pending_payment');
   else if (filtroPedidos === 'confirmed') lista = lista.filter(p => p.status === 'confirmed');
+  else if (filtroPedidos === 'preparando') lista = lista.filter(p => p.status === 'preparando');
   else if (filtroPedidos === 'shipped') lista = lista.filter(p => p.status === 'shipped');
   else if (filtroPedidos === 'delivered') lista = lista.filter(p => p.status === 'delivered' || p.status === 'completado');
   else if (filtroPedidos === 'delayed') lista = lista.filter(p => p.status === 'delayed');
@@ -1429,20 +1493,23 @@ function renderPedidos() {
     const statusColor = STATUS_COLORS[p.status] || 'var(--muted)';
     const statusLabel = STATUS_LABELS[p.status] || p.status;
 
-    // Próximo estado según flujo
+    // Próximo estado según flujo: pending → confirmed → preparando → shipped → delivered
     const nextStatus = {
       pending_payment: 'confirmed',
-      confirmed: 'shipped',
+      confirmed: 'preparando',
+      preparando: 'shipped',
       shipped: 'delivered'
     };
     const nextLabel = {
       pending_payment: '✅ Confirmar pago',
-      confirmed: '🚚 Marcar enviado',
-      delivered: null
+      confirmed: '📦 Preparando',
+      preparando: '🚚 Marcar enviado',
+      shipped: '📦 Entregado'
     };
     const nextIcons = {
       pending_payment: '✅',
-      confirmed: '🚚',
+      confirmed: '📦',
+      preparando: '🚚',
       shipped: '📦'
     };
 
@@ -1453,7 +1520,7 @@ function renderPedidos() {
       acciones.push(`<button class="btn-mini ok" onclick="cambiarEstado('${p.id}','${nextStatus[p.status]}')">${nextIcons[p.status] || ''} ${nextLabel[p.status] || 'Avanzar'}</button>`);
     }
     if (p.status !== 'cancelled' && p.status !== 'delivered' && p.status !== 'completado' && p.status !== 'delayed') {
-      acciones.push(`<button class="btn-mini borrar" onclick="cambiarEstado('${p.id}','cancelled')" title="Cancelar pedido">❌</button>`);
+      acciones.push(`<button class="btn-mini borrar" onclick="confirmarCancelar('${p.id}')" title="Cancelar pedido">❌</button>`);
       acciones.push(`<button class="btn-mini" onclick="marcarDemorado('${p.id}')" title="Marcar como demorado" style="border:1px solid #ff8844;color:#ff8844;background:none;">⚠️</button>`);
     }
     if (telWa) {
@@ -1466,13 +1533,21 @@ function renderPedidos() {
       acciones.push(`<button class="btn-mini" onclick="reenviarEmail('${p.id}')" title="Reenviar email" style="background:rgba(255,255,255,.08);color:var(--paper);">📧</button>`);
     }
 
+    // Tracking number inline
+    const trackNum = p.tracking_number || '';
+    const trackInput = `<div style="margin-top:4px;">
+      <input type="text" value="${escapeHtml(trackNum)}" placeholder="Tracking…" 
+        style="width:110px;padding:3px 6px;font-size:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--paper);border-radius:3px;font-family:'Inconsolata',monospace;"
+        onchange="guardarTracking('${p.id}', this.value)">
+    </div>`;
+
     return `<tr style="border-bottom:1px solid var(--edge);">
       <td style="padding:12px 8px;font-family:'Inconsolata',monospace;font-weight:600;color:var(--rose);white-space:nowrap;letter-spacing:1px;">${escapeHtml(orderNum)}</td>
       <td style="padding:12px 8px;color:var(--muted);white-space:nowrap;">${fecha}</td>
       <td style="padding:12px 8px;" class="cliente">${cliente}</td>
       <td style="padding:12px 8px;font-size:11px;">${envio}${items.length ? `<br><a href="#" style="color:var(--rose);font-size:10px;" onclick="event.preventDefault();document.getElementById('ped-det-${i}').classList.toggle('abierto')">ver detalle ▾</a><div class="ped-detalle" id="ped-det-${i}">${detalle}</div>` : ''}</td>
       <td style="padding:12px 8px;color:var(--lime);white-space:nowrap;">${escapeHtml(p.total || '')}</td>
-      <td style="padding:12px 8px;"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}33;">${statusLabel}</span></td>
+      <td style="padding:12px 8px;"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}33;">${statusLabel}</span>${trackInput}</td>
       <td style="padding:12px 8px;text-align:center;white-space:nowrap;">${acciones.join(' ')}</td>
     </tr>`;
   }).join('');
@@ -1490,6 +1565,7 @@ document.querySelectorAll('.filtro-chip').forEach(ch => ch.addEventListener('cli
 async function cambiarEstado(id, nuevoStatus) {
   const descriptions = {
     confirmed: 'Pago confirmado, preparando envío',
+    preparando: 'Preparando pedido para despacho',
     shipped: 'Pedido despachado',
     delivered: 'Pedido entregado',
     cancelled: 'Pedido cancelado'
@@ -1509,6 +1585,18 @@ async function cambiarEstado(id, nuevoStatus) {
 }
 
 async function completarPedido(id) { return cambiarEstado(id, 'delivered'); }
+
+async function guardarTracking(id, trackingNumber) {
+  try {
+    const res = await fetch(`/api/orders/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': token },
+      body: JSON.stringify({ tracking_number: trackingNumber })
+    });
+    if (res.ok) showToast('📍 Tracking actualizado');
+    else showToast('❌ Error al guardar tracking', true);
+  } catch (err) { showToast('Error de red', true); }
+}
 
 async function marcarDemorado(id) {
   const motivo = prompt('Motivo de la demora (opcional):');
@@ -1537,6 +1625,15 @@ async function eliminarPedido(id) {
   } catch (err) { showToast('Error de red', true); }
 }
 
+async function confirmarCancelar(id) {
+  const ok = await confirmar(
+    '¿Cancelar este pedido?',
+    'El pedido pasará a estado <strong>Cancelado</strong>. Podés revertirlo cambiando el estado manualmente desde este panel.',
+    'Cancelar pedido'
+  );
+  if (ok) return cambiarEstado(id, 'cancelled');
+}
+
 async function reenviarEmail(orderId) {
   try {
     const res = await fetch(`/api/admin/orders/${orderId}/resend-email`, {
@@ -1545,6 +1642,132 @@ async function reenviarEmail(orderId) {
     });
     if (res.ok) showToast('📧 Email reenviado');
     else { const d = await res.json(); showToast(d.error || 'Error al reenviar', true); }
+  } catch (err) { showToast('Error de red', true); }
+}
+
+// ─── Zonas de envío ──────────────────────────────────────────────────────────
+let zonasCache = [];
+
+async function cargarZonas() {
+  const loadingDiv = document.getElementById('zonas-loading');
+  const tableDiv = document.getElementById('zonas-list');
+  loadingDiv.textContent = 'Cargando zonas…';
+  loadingDiv.style.display = 'block';
+  tableDiv.style.display = 'none';
+  try {
+    const res = await fetch('/api/admin/shipping/zones', { headers: { 'Authorization': token } });
+    if (!res.ok) throw new Error();
+    zonasCache = await res.json();
+    renderZonas();
+  } catch (err) {
+    loadingDiv.textContent = '❌ Error al cargar zonas';
+  }
+}
+
+function renderZonas() {
+  const loadingDiv = document.getElementById('zonas-loading');
+  const tableDiv = document.getElementById('zonas-list');
+  const tbody = document.getElementById('zonas-body');
+  if (!zonasCache.length) {
+    loadingDiv.textContent = '📭 No hay zonas configuradas.';
+    loadingDiv.style.display = 'block';
+    tableDiv.style.display = 'none';
+    return;
+  }
+  tbody.innerHTML = zonasCache.map(z => {
+    const id = z.id || '';
+    const active = z.activa !== false;
+    return `<tr style="border-bottom:1px solid var(--edge);">
+      <td style="padding:12px 8px;font-weight:600;">${escapeHtml(z.zone_name || '')}</td>
+      <td style="padding:12px 8px;font-family:'Inconsolata',monospace;">${escapeHtml(z.cp_from || '')}</td>
+      <td style="padding:12px 8px;font-family:'Inconsolata',monospace;">${escapeHtml(z.cp_to || '')}</td>
+      <td style="padding:12px 8px;text-align:right;color:var(--lime);">${z.price === 0 ? '<span style="color:var(--lime)">Gratis</span>' : '$' + (z.price || 0).toLocaleString('es-AR')}</td>
+      <td style="padding:12px 8px;text-align:center;">${z.estimated_days || '—'} día${(z.estimated_days || 0) !== 1 ? 's' : ''}</td>
+      <td style="padding:12px 8px;text-align:center;">
+        <label style="cursor:pointer;font-size:18px;" title="${active ? 'Activa' : 'Inactiva'}">
+          <input type="checkbox" ${active ? 'checked' : ''} onchange="toggleZonaActiva('${id}', this.checked)" style="display:none;">
+          ${active ? '✅' : '⬜'}
+        </label>
+      </td>
+      <td style="padding:12px 8px;text-align:center;white-space:nowrap;">
+        <button class="btn-mini" onclick='editarZona(${JSON.stringify(z).replace(/'/g, "&#39;")})' title="Editar" style="background:rgba(255,255,255,.08);color:var(--paper);">✏️</button>
+        <button class="btn-mini borrar" onclick="eliminarZona('${id}')" title="Eliminar">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  loadingDiv.style.display = 'none';
+  tableDiv.style.display = 'block';
+}
+
+async function toggleZonaActiva(id, activa) {
+  try {
+    await fetch(`/api/admin/shipping/zones/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': token },
+      body: JSON.stringify({ activa })
+    });
+    showToast(activa ? '✅ Zona activada' : '⬜ Zona desactivada');
+    cargarZonas();
+  } catch (err) { showToast('Error de red', true); }
+}
+
+function abrirModalZona(zona) {
+  const isEdit = zona && zona.id;
+  const bg = document.getElementById('zona-modal-bg');
+  document.getElementById('zona-modal-title').textContent = isEdit ? 'Editar zona' : 'Nueva zona';
+  document.getElementById('zona-id').value = isEdit ? zona.id : '';
+  document.getElementById('zona-nombre').value = isEdit ? (zona.zone_name || '') : '';
+  document.getElementById('zona-cp-from').value = isEdit ? (zona.cp_from || '') : '';
+  document.getElementById('zona-cp-to').value = isEdit ? (zona.cp_to || '') : '';
+  document.getElementById('zona-precio').value = isEdit ? (zona.price || 0) : '';
+  document.getElementById('zona-dias').value = isEdit ? (zona.estimated_days || 1) : 1;
+  document.getElementById('zona-activa').checked = isEdit ? zona.activa !== false : true;
+  bg.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function editarZona(zona) { abrirModalZona(zona); }
+
+async function guardarZona() {
+  const id = document.getElementById('zona-id').value;
+  const data = {
+    zone_name: document.getElementById('zona-nombre').value.trim(),
+    cp_from: document.getElementById('zona-cp-from').value.trim(),
+    cp_to: document.getElementById('zona-cp-to').value.trim(),
+    price: parseInt(document.getElementById('zona-precio').value, 10) || 0,
+    estimated_days: parseInt(document.getElementById('zona-dias').value, 10) || 1,
+    activa: document.getElementById('zona-activa').checked
+  };
+  if (!data.zone_name || !data.cp_from || !data.cp_to) {
+    return showToast('Faltan campos obligatorios', true);
+  }
+  try {
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/admin/shipping/zones/${id}` : '/api/admin/shipping/zones';
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Authorization': token },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      showToast(id ? '✅ Zona actualizada' : '✅ Zona creada');
+      document.getElementById('zona-modal-bg').classList.remove('active');
+      document.body.style.overflow = '';
+      cargarZonas();
+    } else showToast('❌ Error al guardar', true);
+  } catch (err) { showToast('Error de red', true); }
+}
+
+async function eliminarZona(id) {
+  const ok = await confirmar('¿Eliminar esta zona?', 'Se eliminará permanentemente.');
+  if (!ok) return;
+  try {
+    const res = await fetch(`/api/admin/shipping/zones/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': token }
+    });
+    if (res.ok) { showToast('🗑️ Zona eliminada'); cargarZonas(); }
+    else showToast('❌ Error al eliminar', true);
   } catch (err) { showToast('Error de red', true); }
 }
 
@@ -1645,11 +1868,14 @@ document.getElementById('guardar-config')?.addEventListener('click', e => {
 }, true);
 
 /* ── Confirmación propia (reemplaza a confirm del navegador) ── */
-function confirmar(titulo, textoHtml) {
+function confirmar(titulo, textoHtml, confirmText) {
   return new Promise(resolve => {
     const bg = document.getElementById('confirm-bg');
     document.getElementById('confirm-titulo').textContent = titulo;
     document.getElementById('confirm-texto').innerHTML = textoHtml;
+    const siBtn = document.getElementById('confirm-si');
+    if (confirmText) siBtn.textContent = confirmText;
+    else siBtn.textContent = 'Eliminar';
     bg.classList.add('active');
     const si = document.getElementById('confirm-si');
     const no = document.getElementById('confirm-no');

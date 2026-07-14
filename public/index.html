@@ -1354,6 +1354,29 @@
         </div>
       </div>
 
+      <!-- Método de pago -->
+      <div class="checkout-section" id="checkout-payment-section">
+        <div class="checkout-label">💳 Método de pago</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+            <input type="radio" name="payment-method" value="transferencia" checked style="accent-color:var(--rose);">
+            <span style="font-size:13px;">🏦 Transferencia / Depósito</span>
+          </label>
+          <label id="pm-checkout-efectivo" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+            <input type="radio" name="payment-method" value="efectivo" style="accent-color:var(--rose);">
+            <span style="font-size:13px;">💵 Efectivo contra entrega</span>
+          </label>
+          <label id="pm-checkout-mp" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+            <input type="radio" name="payment-method" value="mercadopago" style="accent-color:var(--rose);">
+            <span style="font-size:13px;">💜 Mercado Pago (te enviamos los datos por WhatsApp)</span>
+          </label>
+          <label id="pm-checkout-otro" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+            <input type="radio" name="payment-method" value="otro" style="accent-color:var(--rose);">
+            <span style="font-size:13px;" id="pm-checkout-otro-label">Otro método</span>
+          </label>
+        </div>
+      </div>
+
       <button class="cart-checkout cart-back-sm" id="cart-back" style="width:100%;background:rgba(255,255,255,.06);color:rgba(200,215,230,.6);padding:10px;font-size:11px;letter-spacing:.5px;margin-top:2px;">
         ← Volver al carrito
       </button>
@@ -2288,6 +2311,19 @@ function renderCart() {
     }
     payDiv.style.display = hasPayment ? 'flex' : 'none';
   }
+  // Checkout payment method radio buttons visibility
+  const pc2 = window.paymentConfig || {};
+  const mpCheckout = document.getElementById('pm-checkout-mp');
+  const efecCheckout = document.getElementById('pm-checkout-efectivo');
+  const otroCheckout = document.getElementById('pm-checkout-otro');
+  const otroLabel = document.getElementById('pm-checkout-otro-label');
+  if (mpCheckout) mpCheckout.style.display = pc2.mercadoPagoLink ? 'flex' : 'none';
+  if (efecCheckout) efecCheckout.style.display = pc2.efectivoHabilitado ? 'flex' : 'none';
+  if (otroCheckout) {
+    const showOtro = pc2.otroHabilitado !== false;
+    otroCheckout.style.display = showOtro ? 'flex' : 'none';
+    if (otroLabel && pc2.otroTitulo) otroLabel.textContent = pc2.otroTitulo;
+  }
 }
 
 function copyText(t) {
@@ -2464,7 +2500,7 @@ document.getElementById('cart-confirm')?.addEventListener('click', async () => {
       nombre: document.getElementById('cart-nombre2')?.value.trim() || '',
       telefono: document.getElementById('cart-telefono2')?.value.trim() || ''
     },
-    paymentMethod: 'transferencia',
+    paymentMethod: document.querySelector('input[name="payment-method"]:checked')?.value || 'transferencia',
     total: `$${(cartTotal() + currentShippingCost).toLocaleString('es-AR')}`
   };
 
@@ -2485,9 +2521,16 @@ document.getElementById('cart-confirm')?.addEventListener('click', async () => {
 
     // Éxito: mostrar paso 3
     const orderNum = data.order_number || '';
+    const selectedPayment = document.querySelector('input[name="payment-method"]:checked')?.value || 'transferencia';
     const waMsg = encodeURIComponent(`Hola! Quiero confirmar mi pedido ${orderNum}. Adjunto comprobante de pago.`);
     const waLink = `https://wa.me/${configWhatsappNumber}?text=${waMsg}`;
     const trackLink = `/pedido/${orderNum}?email=${encodeURIComponent(email)}`;
+    const mpLink = window.paymentConfig?.mercadoPagoLink;
+
+    let mpButton = '';
+    if (selectedPayment === 'mercadopago' && mpLink) {
+      mpButton = `<a href="${mpLink}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#009ee3;color:#fff;font-weight:800;font-size:13px;letter-spacing:1px;padding:14px 20px;border-radius:8px;text-decoration:none;margin-top:8px;">💜 Pagar con Mercado Pago</a>`;
+    }
 
     document.getElementById('checkout-confirm-content').innerHTML = `
       <div style="font-size:32px;">✅</div>
@@ -2497,6 +2540,7 @@ document.getElementById('cart-confirm')?.addEventListener('click', async () => {
         Te enviamos un email a <strong>${escapeHtml(email)}</strong> con los detalles.
       </div>
       <a href="${trackLink}" class="btn-track" target="_blank">📍 Seguir mi pedido</a>
+      ${mpButton}
       <a href="${waLink}" class="btn-wa-confirm" target="_blank">📲 Enviar comprobante por WhatsApp</a>
       <div class="confirm-msg" style="font-size:11px;margin-top:8px;">
         Recordá enviarnos el comprobante de transferencia por WhatsApp para confirmar tu pedido.
