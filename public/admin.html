@@ -584,8 +584,11 @@
     <div id="tab-pedidos" class="tab-content">
       <h2 class="section-title">Pedidos <em>recibidos</em></h2>
       <div class="pedidos-toolbar">
-        <button class="filtro-chip on" data-fp="pendiente">Pendientes</button>
-        <button class="filtro-chip" data-fp="completado">Completados</button>
+        <button class="filtro-chip on" data-fp="pending_payment">💳 Pago pendiente</button>
+        <button class="filtro-chip" data-fp="confirmed">✅ Confirmados</button>
+        <button class="filtro-chip" data-fp="shipped">🚚 Enviados</button>
+        <button class="filtro-chip" data-fp="delivered">📦 Entregados</button>
+        <button class="filtro-chip" data-fp="cancelado">❌ Cancelados</button>
         <button class="filtro-chip" data-fp="">Todos</button>
         <span class="fact" id="fact-mes"></span>
       </div>
@@ -594,9 +597,10 @@
         <table style="width:100%;border-collapse:collapse;font-family:'Inconsolata',monospace;font-size:12px;">
           <thead>
             <tr style="border-bottom:1px solid var(--edge);color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-size:10px;">
+              <th style="padding:12px 8px;text-align:left;">Nº Pedido</th>
               <th style="padding:12px 8px;text-align:left;">Fecha</th>
               <th style="padding:12px 8px;text-align:left;">Cliente</th>
-              <th style="padding:12px 8px;text-align:left;">Pedido</th>
+              <th style="padding:12px 8px;text-align:left;">Envío</th>
               <th style="padding:12px 8px;text-align:left;">Total</th>
               <th style="padding:12px 8px;text-align:left;">Estado</th>
               <th style="padding:12px 8px;text-align:center;">Acción</th>
@@ -1299,7 +1303,26 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // ─── Pedidos ─────────────────────────────────────────────────────────────────
 let pedidosCache = [];
-let filtroPedidos = 'pendiente';
+let filtroPedidos = 'pending_payment';
+
+const STATUS_LABELS = {
+  pending_payment: 'Pago pendiente',
+  confirmed: 'Confirmado',
+  shipped: 'Enviado',
+  delivered: 'Entregado',
+  cancelled: 'Cancelado',
+  completado: 'Completado',
+  pendiente: 'Pendiente'
+};
+const STATUS_COLORS = {
+  pending_payment: '#ffaa00',
+  confirmed: '#66ffcc',
+  shipped: '#25d366',
+  delivered: '#66ffcc',
+  cancelled: '#ff5050',
+  completado: '#66ffcc',
+  pendiente: '#ffaa00'
+};
 
 async function cargarPedidos() {
   const loadingDiv = document.getElementById('pedidos-loading');
@@ -1325,17 +1348,36 @@ function actualizarStatsPedidos() {
     const d = new Date(f);
     return d.getMonth() === ahora.getMonth() && d.getFullYear() === ahora.getFullYear();
   };
-  const pendientes = pedidosCache.filter(p => p.status !== 'completado').length;
-  const compMes = pedidosCache.filter(p => p.status === 'completado' && esDelMes(p.createdAt));
+  const pendientes = pedidosCache.filter(p => p.status === 'pending_payment').length;
+  const confirmados = pedidosCache.filter(p => p.status === 'confirmed').length;
+  const enviados = pedidosCache.filter(p => p.status === 'shipped').length;
+  const entregados = pedidosCache.filter(p => p.status === 'delivered' || p.status === 'completado').length;
+  const cancelados = pedidosCache.filter(p => p.status === 'cancelled').length;
+  const compMes = pedidosCache.filter(p => (p.status === 'delivered' || p.status === 'completado') && esDelMes(p.createdAt));
   const facturadoMes = compMes.reduce((s, p) => s + (parseInt(String(p.total).replace(/[^0-9]/g, ''), 10) || 0), 0);
-  statsData.pedidos = { pendientes, completadosMes: compMes.length, facturadoMes };
+  statsData.pedidos = { pendientes: pendientes + confirmados + enviados, completadosMes: compMes.length, facturadoMes };
   renderStats();
   const fact = document.getElementById('fact-mes');
   if (fact) fact.innerHTML = `Facturado este mes: <b>$${facturadoMes.toLocaleString('es-AR')}</b>`;
+  // Actualizar chips con conteos
   document.querySelectorAll('.filtro-chip').forEach(ch => {
     const f = ch.dataset.fp;
-    const n = f === 'pendiente' ? pendientes : f === 'completado' ? pedidosCache.length - pendientes : pedidosCache.length;
-    ch.textContent = (f === 'pendiente' ? 'Pendientes' : f === 'completado' ? 'Completados' : 'Todos') + ` (${n})`;
+    let n = 0;
+    if (f === 'pending_payment') n = pendientes;
+    else if (f === 'confirmed') n = confirmados;
+    else if (f === 'shipped') n = enviados;
+    else if (f === 'delivered') n = entregados;
+    else if (f === 'cancelado') n = cancelados;
+    else n = pedidosCache.length;
+    const labels = {
+      pending_payment: '💳 Pago pendiente',
+      confirmed: '✅ Confirmados',
+      shipped: '🚚 Enviados',
+      delivered: '📦 Entregados',
+      cancelado: '❌ Cancelados',
+      '': 'Todos'
+    };
+    ch.textContent = (labels[f] || f) + ` (${n})`;
   });
 }
 
@@ -1344,8 +1386,13 @@ function renderPedidos() {
   const tableDiv = document.getElementById('pedidos-list');
   const tbody = document.getElementById('pedidos-body');
   let lista = pedidosCache;
-  if (filtroPedidos === 'pendiente') lista = lista.filter(p => p.status !== 'completado');
-  if (filtroPedidos === 'completado') lista = lista.filter(p => p.status === 'completado');
+  if (filtroPedidos === 'pending_payment') lista = lista.filter(p => p.status === 'pending_payment');
+  else if (filtroPedidos === 'confirmed') lista = lista.filter(p => p.status === 'confirmed');
+  else if (filtroPedidos === 'shipped') lista = lista.filter(p => p.status === 'shipped');
+  else if (filtroPedidos === 'delivered') lista = lista.filter(p => p.status === 'delivered' || p.status === 'completado');
+  else if (filtroPedidos === 'cancelado') lista = lista.filter(p => p.status === 'cancelled');
+  // else '': show all
+
   if (!lista.length) {
     loadingDiv.textContent = '📭 No hay pedidos en esta vista.';
     loadingDiv.style.display = 'block';
@@ -1353,32 +1400,69 @@ function renderPedidos() {
     return;
   }
   tbody.innerHTML = lista.map((p, i) => {
+    const orderNum = p.order_number || '—';
     const fecha = new Date(p.createdAt).toLocaleDateString('es-AR', {
       day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'
     });
     const items = p.items || [];
-    const detalle = items.map(it => `${it.qty}× ${escapeHtml(it.nombre)} — ${escapeHtml(it.precio || '')}`).join('<br>');
+    const detalle = items.map(it => `${it.qty}× ${escapeHtml(it.nombre)} — ${escapeHtml(it.precio || '')}${it.imagen ? ` <img src="${escapeHtml(it.imagen)}" style="width:24px;height:24px;border-radius:3px;object-fit:cover;vertical-align:middle;margin-left:4px;">` : ''}`).join('<br>');
     const ci = p.customerInfo || {};
+    const email = p.email || '';
     const tel = String(ci.telefono || '').replace(/[^0-9]/g, '');
     const telWa = tel ? (tel.startsWith('54') ? tel : '549' + tel) : '';
-    const cliente = (ci.nombre || ci.telefono)
-      ? `${escapeHtml(ci.nombre || '—')}<small>${ci.telefono ? '📱 ' + escapeHtml(ci.telefono) : ''}</small>`
+    const cliente = (ci.nombre || ci.telefono || email)
+      ? `${escapeHtml(ci.nombre || '—')}<small>${ci.telefono ? '📱 ' + escapeHtml(ci.telefono) : ''}${email ? '<br>📧 ' + escapeHtml(email) : ''}</small>`
       : '<span style="color:var(--muted-2)">—</span>';
-    const estado = p.status === 'completado'
-      ? '<span class="estado-pill comp">✅ Completado</span>'
-      : '<span class="estado-pill pend">⏳ Pendiente</span>';
-    const acciones = [
-      p.status !== 'completado' ? `<button class="btn-mini ok" onclick="completarPedido('${p.id}')">✅ Completar</button>` : '',
-      telWa ? `<a class="btn-mini wa" href="https://wa.me/${telWa}" target="_blank" rel="noopener">WhatsApp ↗</a>` : '',
-      p.status === 'completado' ? `<button class="btn-mini borrar" onclick="eliminarPedido('${p.id}')">🗑️</button>` : ''
-    ].filter(Boolean).join(' ');
+
+    // Info de envío
+    const envio = p.shipping_address
+      ? `${escapeHtml(p.shipping_address.city || '')}, ${escapeHtml(p.shipping_address.province || '')}<small>${escapeHtml(p.shippingZone || '')} · CP ${escapeHtml(p.shipping_address.postalCode || '')}</small>`
+      : '<span style="color:var(--muted-2)">Sin dirección</span>';
+
+    const statusColor = STATUS_COLORS[p.status] || 'var(--muted)';
+    const statusLabel = STATUS_LABELS[p.status] || p.status;
+
+    // Próximo estado según flujo
+    const nextStatus = {
+      pending_payment: 'confirmed',
+      confirmed: 'shipped',
+      shipped: 'delivered'
+    };
+    const nextLabel = {
+      pending_payment: '✅ Confirmar pago',
+      confirmed: '🚚 Marcar enviado',
+      delivered: null
+    };
+    const nextIcons = {
+      pending_payment: '✅',
+      confirmed: '🚚',
+      shipped: '📦'
+    };
+
+    const trackLink = `/pedido/${orderNum}`;
+
+    const acciones = [];
+    if (nextStatus[p.status]) {
+      acciones.push(`<button class="btn-mini ok" onclick="cambiarEstado('${p.id}','${nextStatus[p.status]}')">${nextIcons[p.status] || ''} ${nextLabel[p.status] || 'Avanzar'}</button>`);
+    }
+    if (p.status !== 'cancelled' && p.status !== 'delivered' && p.status !== 'completado') {
+      acciones.push(`<button class="btn-mini borrar" onclick="cambiarEstado('${p.id}','cancelled')" title="Cancelar pedido">❌</button>`);
+    }
+    if (telWa) {
+      acciones.push(`<a class="btn-mini wa" href="https://wa.me/${telWa}" target="_blank" rel="noopener">WhatsApp ↗</a>`);
+    }
+    if (orderNum !== '—') {
+      acciones.push(`<a class="btn-mini" href="${trackLink}" target="_blank" title="Ver seguimiento" style="background:rgba(255,255,255,.08);color:var(--paper);">📍</a>`);
+    }
+
     return `<tr style="border-bottom:1px solid var(--edge);">
+      <td style="padding:12px 8px;font-family:'Inconsolata',monospace;font-weight:600;color:var(--rose);white-space:nowrap;letter-spacing:1px;">${escapeHtml(orderNum)}</td>
       <td style="padding:12px 8px;color:var(--muted);white-space:nowrap;">${fecha}</td>
       <td style="padding:12px 8px;" class="cliente">${cliente}</td>
-      <td style="padding:12px 8px;">${items.length} item${items.length !== 1 ? 's' : ''}${items.length ? ` — <a href="#" style="color:var(--rose)" onclick="event.preventDefault();document.getElementById('ped-det-${i}').classList.toggle('abierto')">ver detalle ▾</a><div class="ped-detalle" id="ped-det-${i}">${detalle}</div>` : ''}</td>
+      <td style="padding:12px 8px;font-size:11px;">${envio}${items.length ? `<br><a href="#" style="color:var(--rose);font-size:10px;" onclick="event.preventDefault();document.getElementById('ped-det-${i}').classList.toggle('abierto')">ver detalle ▾</a><div class="ped-detalle" id="ped-det-${i}">${detalle}</div>` : ''}</td>
       <td style="padding:12px 8px;color:var(--lime);white-space:nowrap;">${escapeHtml(p.total || '')}</td>
-      <td style="padding:12px 8px;">${estado}</td>
-      <td style="padding:12px 8px;text-align:center;white-space:nowrap;">${acciones}</td>
+      <td style="padding:12px 8px;"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}33;">${statusLabel}</span></td>
+      <td style="padding:12px 8px;text-align:center;white-space:nowrap;">${acciones.join(' ')}</td>
     </tr>`;
   }).join('');
   loadingDiv.style.display = 'none';
@@ -1392,17 +1476,28 @@ document.querySelectorAll('.filtro-chip').forEach(ch => ch.addEventListener('cli
   renderPedidos();
 }));
 
-async function completarPedido(id) {
+async function cambiarEstado(id, nuevoStatus) {
+  const descriptions = {
+    confirmed: 'Pago confirmado, preparando envío',
+    shipped: 'Pedido despachado',
+    delivered: 'Pedido entregado',
+    cancelled: 'Pedido cancelado'
+  };
   try {
     const res = await fetch(`/api/orders/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'Authorization': token },
-      body: JSON.stringify({ status: 'completado' })
+      body: JSON.stringify({ status: nuevoStatus, event_description: descriptions[nuevoStatus] || '' })
     });
-    if (res.ok) { showToast('✅ Pedido completado'); cargarPedidos(); }
-    else showToast('❌ Error al actualizar', true);
+    if (res.ok) {
+      const label = STATUS_LABELS[nuevoStatus] || nuevoStatus;
+      showToast(`✅ Pedido actualizado: ${label}`);
+      cargarPedidos();
+    } else showToast('❌ Error al actualizar', true);
   } catch (err) { showToast('Error de red', true); }
 }
+
+async function completarPedido(id) { return cambiarEstado(id, 'delivered'); }
 
 async function eliminarPedido(id) {
   const ok = await confirmar('¿Eliminar este pedido?', 'Se borra permanentemente del historial. Esta acción no se puede deshacer.');
