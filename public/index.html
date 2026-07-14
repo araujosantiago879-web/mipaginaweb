@@ -2532,6 +2532,45 @@ document.getElementById('cart-confirm')?.addEventListener('click', async () => {
       mpButton = `<a href="${mpLink}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#009ee3;color:#fff;font-weight:800;font-size:13px;letter-spacing:1px;padding:14px 20px;border-radius:8px;text-decoration:none;margin-top:8px;">💜 Pagar con Mercado Pago</a>`;
     }
 
+    // Datos bancarios para transferencia
+    let bankDetails = '';
+    if (selectedPayment === 'transferencia') {
+      const pc = window.paymentConfig || {};
+      const banco = pc.banco || '';
+      const cbu = pc.cbu || '';
+      const alias = pc.alias || '';
+      const titular = pc.titular || '';
+      bankDetails = `
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;margin-top:12px;text-align:left;">
+          <div style="font-weight:700;font-size:14px;color:var(--paper);margin-bottom:12px;text-align:center;">🏦 Datos para transferir</div>
+          ${banco ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;">
+            <span style="color:var(--muted);">Banco</span>
+            <span style="color:var(--paper);font-weight:600;">${escapeHtml(banco)}</span>
+          </div>` : ''}
+          ${titular ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;">
+            <span style="color:var(--muted);">Titular</span>
+            <span style="color:var(--paper);font-weight:600;">${escapeHtml(titular)}</span>
+          </div>` : ''}
+          ${cbu ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;">
+            <span style="color:var(--muted);">CBU</span>
+            <span style="color:var(--paper);font-weight:600;font-family:'Inconsolata',monospace;letter-spacing:1px;">
+              ${escapeHtml(cbu)}
+              <button onclick="navigator.clipboard.writeText('${escapeHtml(cbu)}');this.textContent='✅';setTimeout(()=>this.textContent='📋',1500)" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:12px;margin-left:6px;padding:2px;" title="Copiar CBU">📋</button>
+            </span>
+          </div>` : ''}
+          ${alias ? `<div style="display:flex;justify-content:space-between;padding:8px 0;font-size:12px;">
+            <span style="color:var(--muted);">Alias</span>
+            <span style="color:var(--lime);font-weight:700;font-family:'Inconsolata',monospace;letter-spacing:1px;">
+              ${escapeHtml(alias)}
+              <button onclick="navigator.clipboard.writeText('${escapeHtml(alias)}');this.textContent='✅';setTimeout(()=>this.textContent='📋',1500)" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:12px;margin-left:6px;padding:2px;" title="Copiar alias">📋</button>
+            </span>
+          </div>` : ''}
+          <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:10px;">
+            Enviá el comprobante por WhatsApp para confirmar tu pedido
+          </div>
+        </div>`;
+    }
+
     document.getElementById('checkout-confirm-content').innerHTML = `
       <div style="font-size:32px;">✅</div>
       <div class="order-num">${orderNum}</div>
@@ -2541,10 +2580,9 @@ document.getElementById('cart-confirm')?.addEventListener('click', async () => {
       </div>
       <a href="${trackLink}" class="btn-track" target="_blank">📍 Seguir mi pedido</a>
       ${mpButton}
+      ${bankDetails}
       <a href="${waLink}" class="btn-wa-confirm" target="_blank">📲 Enviar comprobante por WhatsApp</a>
-      <div class="confirm-msg" style="font-size:11px;margin-top:8px;">
-        Recordá enviarnos el comprobante de transferencia por WhatsApp para confirmar tu pedido.
-      </div>
+      ${selectedPayment === 'transferencia' ? '' : '<div class="confirm-msg" style="font-size:11px;margin-top:8px;">Recordá enviarnos el comprobante de pago por WhatsApp para confirmar tu pedido.</div>'}
     `;
     showCartStep(3);
 

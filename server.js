@@ -51,7 +51,7 @@ function siteUrl(req) {
   return 'https://ladobsex.vercel.app';
 }
 
-function sendOrderReceivedEmail(order) {
+async function sendOrderReceivedEmail(order) {
   if (!order.email) return Promise.resolve();
   const num = order.order_number || '';
   const total = order.total || '';
@@ -59,6 +59,30 @@ function sendOrderReceivedEmail(order) {
   const addrText = [addr.street + (addr.number ? ' ' + addr.number : ''), addr.city + ', ' + addr.province, 'CP: ' + addr.postalCode].filter(Boolean).join(' · ');
   const itemCount = (order.items || []).reduce((s, i) => s + (i.qty || 1), 0);
   const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+
+  let bankHtml = '';
+  if (order.paymentMethod === 'transferencia') {
+    try {
+      const cfg = await getConfig();
+      const banco = cfg.banco || '';
+      const cbu = cfg.cbu || '';
+      const alias = cfg.alias || '';
+      const titular = cfg.titular || '';
+      if (banco || cbu || alias || titular) {
+        bankHtml = `
+        <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:14px;margin-bottom:18px;">
+          <div style="color:rgba(200,215,230,.5);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🏦 Datos para transferir</div>
+          <div style="color:#eef2f5;font-size:13px;line-height:1.8;">
+            ${banco ? '<strong>Banco:</strong> ' + escapeHtml(banco) + '<br>' : ''}
+            ${titular ? '<strong>Titular:</strong> ' + escapeHtml(titular) + '<br>' : ''}
+            ${cbu ? '<strong>CBU:</strong> <span style="font-family:monospace;letter-spacing:1px;">' + escapeHtml(cbu) + '</span><br>' : ''}
+            ${alias ? '<strong>Alias:</strong> <span style="color:#66ffcc;font-family:monospace;letter-spacing:1px;">' + escapeHtml(alias) + '</span>' : ''}
+          </div>
+        </div>`;
+      }
+    } catch (_) { /* config not available, skip */ }
+  }
+
   const html = emailBase(
     `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> fue recibido</h2>`,
     `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Recibimos tu pedido y estamos esperando la confirmación de tu pago.</p>
@@ -70,6 +94,7 @@ function sendOrderReceivedEmail(order) {
          ${order.estimated_delivery ? '<br>📦 Estimado: ' + order.estimated_delivery : ''}
        </div>
      </div>
+     ${bankHtml}
      <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Seguir mi pedido</a>`
   );
   return sendEmail(order.email, 'Tu pedido #' + num + ' fue recibido', html);
