@@ -17,7 +17,7 @@ function getResend() {
     return resendClient;
   } catch (_) { return null; }
 }
-const RESEND_FROM = 'El Lado B <noreply@ladobsex.vercel.app>';
+const RESEND_FROM = 'El Lado B <onboarding@resend.dev>';
 
 function emailBase(titleHtml, bodyHtml) {
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
