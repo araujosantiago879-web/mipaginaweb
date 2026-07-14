@@ -131,12 +131,27 @@ function sendOrderCancelledEmail(order) {
   return sendEmail(order.email, 'Tu pedido #' + num + ' fue cancelado', html);
 }
 
+function sendOrderDelayedEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const reason = order.delay_reason || '';
+  const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> está demorado</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Tu pedido tarda más de lo previsto.${reason ? '<br>Motivo: ' + reason : ''}</p>
+     <p style="color:rgba(200,215,230,.5);font-size:13px;margin:0 0 18px;">Seguimos trabajando para que llegue lo antes posible. Si tenés dudas, escribinos por WhatsApp.</p>
+     <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Seguir mi pedido</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' está demorado', html);
+}
+
 function sendEmailForStatus(order) {
   const status = order.status;
   if (status === 'confirmed') return sendOrderConfirmedEmail(order);
   if (status === 'shipped') return sendOrderShippedEmail(order);
   if (status === 'delivered') return sendOrderDeliveredEmail(order);
   if (status === 'cancelled') return sendOrderCancelledEmail(order);
+  if (status === 'delayed') return sendOrderDelayedEmail(order);
   return Promise.resolve();
 }
 
@@ -1334,24 +1349,28 @@ app.get('/pedido/:order_number', rateLimit(10, 60 * 1000), async (req, res) => {
       confirmed: 'Pago confirmado',
       shipped: 'En camino',
       delivered: 'Entregado',
-      cancelled: 'Cancelado'
+      cancelled: 'Cancelado',
+      delayed: 'Demorado'
     };
     const statusIcons = {
       pending_payment: '💳',
       confirmed: '✅',
       shipped: '🚚',
       delivered: '📦',
-      cancelled: '❌'
+      cancelled: '❌',
+      delayed: '⚠️'
     };
 
     const statusOrder = ['pending_payment', 'confirmed', 'shipped', 'delivered'];
-    const currentIdx = statusOrder.indexOf(order.status);
+    const currentIdx = order.status === 'delayed' ? -1 : statusOrder.indexOf(order.status);
     const isCancelled = order.status === 'cancelled';
+    const isDelayed = order.status === 'delayed';
 
     // Construir timeline
     const timelineHtml = statusOrder.map((st, i) => {
       let cls = 'timeline-step';
       if (isCancelled) cls += (st === 'pending_payment') ? ' active' : '';
+      else if (isDelayed && i <= currentIdx) cls += i === currentIdx ? ' active delayed' : ' done';
       else if (i < currentIdx) cls += ' done';
       else if (i === currentIdx) cls += ' active';
       return `<div class="${cls}">

@@ -588,6 +588,7 @@
         <button class="filtro-chip" data-fp="confirmed">✅ Confirmados</button>
         <button class="filtro-chip" data-fp="shipped">🚚 Enviados</button>
         <button class="filtro-chip" data-fp="delivered">📦 Entregados</button>
+        <button class="filtro-chip" data-fp="delayed">⚠️ Demorados</button>
         <button class="filtro-chip" data-fp="cancelado">❌ Cancelados</button>
         <button class="filtro-chip" data-fp="">Todos</button>
         <span class="fact" id="fact-mes"></span>
@@ -1311,6 +1312,7 @@ const STATUS_LABELS = {
   shipped: 'Enviado',
   delivered: 'Entregado',
   cancelled: 'Cancelado',
+  delayed: 'Demorado',
   completado: 'Completado',
   pendiente: 'Pendiente'
 };
@@ -1320,6 +1322,7 @@ const STATUS_COLORS = {
   shipped: '#25d366',
   delivered: '#66ffcc',
   cancelled: '#ff5050',
+  delayed: '#ff8844',
   completado: '#66ffcc',
   pendiente: '#ffaa00'
 };
@@ -1353,6 +1356,7 @@ function actualizarStatsPedidos() {
   const enviados = pedidosCache.filter(p => p.status === 'shipped').length;
   const entregados = pedidosCache.filter(p => p.status === 'delivered' || p.status === 'completado').length;
   const cancelados = pedidosCache.filter(p => p.status === 'cancelled').length;
+  const demorados = pedidosCache.filter(p => p.status === 'delayed').length;
   const compMes = pedidosCache.filter(p => (p.status === 'delivered' || p.status === 'completado') && esDelMes(p.createdAt));
   const facturadoMes = compMes.reduce((s, p) => s + (parseInt(String(p.total).replace(/[^0-9]/g, ''), 10) || 0), 0);
   statsData.pedidos = { pendientes: pendientes + confirmados + enviados, completadosMes: compMes.length, facturadoMes };
@@ -1367,6 +1371,7 @@ function actualizarStatsPedidos() {
     else if (f === 'confirmed') n = confirmados;
     else if (f === 'shipped') n = enviados;
     else if (f === 'delivered') n = entregados;
+    else if (f === 'delayed') n = demorados;
     else if (f === 'cancelado') n = cancelados;
     else n = pedidosCache.length;
     const labels = {
@@ -1374,6 +1379,7 @@ function actualizarStatsPedidos() {
       confirmed: '✅ Confirmados',
       shipped: '🚚 Enviados',
       delivered: '📦 Entregados',
+      delayed: '⚠️ Demorados',
       cancelado: '❌ Cancelados',
       '': 'Todos'
     };
@@ -1390,6 +1396,7 @@ function renderPedidos() {
   else if (filtroPedidos === 'confirmed') lista = lista.filter(p => p.status === 'confirmed');
   else if (filtroPedidos === 'shipped') lista = lista.filter(p => p.status === 'shipped');
   else if (filtroPedidos === 'delivered') lista = lista.filter(p => p.status === 'delivered' || p.status === 'completado');
+  else if (filtroPedidos === 'delayed') lista = lista.filter(p => p.status === 'delayed');
   else if (filtroPedidos === 'cancelado') lista = lista.filter(p => p.status === 'cancelled');
   // else '': show all
 
@@ -1445,8 +1452,9 @@ function renderPedidos() {
     if (nextStatus[p.status]) {
       acciones.push(`<button class="btn-mini ok" onclick="cambiarEstado('${p.id}','${nextStatus[p.status]}')">${nextIcons[p.status] || ''} ${nextLabel[p.status] || 'Avanzar'}</button>`);
     }
-    if (p.status !== 'cancelled' && p.status !== 'delivered' && p.status !== 'completado') {
+    if (p.status !== 'cancelled' && p.status !== 'delivered' && p.status !== 'completado' && p.status !== 'delayed') {
       acciones.push(`<button class="btn-mini borrar" onclick="cambiarEstado('${p.id}','cancelled')" title="Cancelar pedido">❌</button>`);
+      acciones.push(`<button class="btn-mini" onclick="marcarDemorado('${p.id}')" title="Marcar como demorado" style="border:1px solid #ff8844;color:#ff8844;background:none;">⚠️</button>`);
     }
     if (telWa) {
       acciones.push(`<a class="btn-mini wa" href="https://wa.me/${telWa}" target="_blank" rel="noopener">WhatsApp ↗</a>`);
@@ -1501,6 +1509,20 @@ async function cambiarEstado(id, nuevoStatus) {
 }
 
 async function completarPedido(id) { return cambiarEstado(id, 'delivered'); }
+
+async function marcarDemorado(id) {
+  const motivo = prompt('Motivo de la demora (opcional):');
+  if (motivo === null) return;
+  try {
+    const res = await fetch(`/api/orders/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': token },
+      body: JSON.stringify({ status: 'delayed', delay_reason: motivo, event_description: motivo || 'Pedido demorado' })
+    });
+    if (res.ok) { showToast('⚠️ Pedido marcado como demorado'); cargarPedidos(); }
+    else showToast('❌ Error al actualizar', true);
+  } catch (err) { showToast('Error de red', true); }
+}
 
 async function eliminarPedido(id) {
   const ok = await confirmar('¿Eliminar este pedido?', 'Se borra permanentemente del historial. Esta acción no se puede deshacer.');
