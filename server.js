@@ -5,6 +5,141 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const { MongoClient, ObjectId } = require('mongodb');
 
+// ─── Resend (email transaccional) ───────────────────────────────────────────
+let resendClient = null;
+function getResend() {
+  if (resendClient) return resendClient;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  try {
+    const { Resend } = require('resend');
+    resendClient = new Resend(key);
+    return resendClient;
+  } catch (_) { return null; }
+}
+const RESEND_FROM = 'El Lado B <noreply@ladobsex.vercel.app>';
+
+function emailBase(titleHtml, bodyHtml) {
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#0c0c10;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+<div style="max-width:600px;margin:0 auto;padding:32px 20px;">
+  <div style="text-align:center;margin-bottom:28px;">
+    <a href="/" style="font-family:Georgia,serif;font-size:20px;color:#eef2f5;text-decoration:none;">El <em style="color:#ff3366;font-style:italic;">Lado B</em></a>
+  </div>
+  <div style="background:#111116;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:28px 24px;">
+    ${titleHtml}
+    ${bodyHtml}
+  </div>
+  <div style="text-align:center;margin-top:20px;font-size:11px;color:rgba(200,215,230,.35);">
+    Packaging discreto · Envío a todo el país · Atención 10 a 21 hs
+  </div>
+</div></body></html>`;
+}
+
+async function sendEmail(to, subject, html) {
+  const resend = getResend();
+  if (!resend) return;
+  try {
+    await resend.emails.send({ from: RESEND_FROM, to, subject, html });
+  } catch (err) {
+    console.error('Error enviando email:', err.message);
+  }
+}
+
+function siteUrl(req) {
+  // Simple: always use production domain
+  return 'https://ladobsex.vercel.app';
+}
+
+function sendOrderReceivedEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const total = order.total || '';
+  const addr = order.shipping_address || {};
+  const addrText = [addr.street + (addr.number ? ' ' + addr.number : ''), addr.city + ', ' + addr.province, 'CP: ' + addr.postalCode].filter(Boolean).join(' · ');
+  const itemCount = (order.items || []).reduce((s, i) => s + (i.qty || 1), 0);
+  const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> fue recibido</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Recibimos tu pedido y estamos esperando la confirmación de tu pago.</p>
+     <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:14px;margin-bottom:18px;">
+       <div style="color:rgba(200,215,230,.5);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Resumen</div>
+       <div style="color:#eef2f5;font-size:13px;line-height:1.8;">
+         <strong style="color:#66ffcc;">${itemCount} producto${itemCount !== 1 ? 's' : ''}</strong> · Total: <strong style="color:#66ffcc;">${total}</strong><br>
+         ${addrText ? '📍 ' + addrText : ''}
+         ${order.estimated_delivery ? '<br>📦 Estimado: ' + order.estimated_delivery : ''}
+       </div>
+     </div>
+     <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Seguir mi pedido</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' fue recibido', html);
+}
+
+function sendOrderConfirmedEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> fue confirmado</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Tu pago fue verificado. Estamos preparando tu envío.</p>
+     <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Seguir mi pedido</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' fue confirmado', html);
+}
+
+function sendOrderShippedEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const tracking = order.tracking_number || '';
+  const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> fue enviado</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Tu pedido está en camino.</p>
+     ${tracking ? `<div style="background:rgba(255,255,255,.04);border-radius:6px;padding:14px;margin-bottom:18px;">
+       <div style="color:rgba(200,215,230,.5);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Tracking</div>
+       <div style="color:#66ffcc;font-family:monospace;font-size:14px;">${tracking}</div>
+     </div>` : ''}
+     <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Seguir mi pedido</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' fue enviado', html);
+}
+
+function sendOrderDeliveredEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const link = siteUrl() + '/pedido/' + num + '?email=' + encodeURIComponent(order.email);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> fue entregado</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Tu pedido ya fue entregado. Gracias por comprar con nosotros.</p>
+     <a href="${link}" style="display:inline-block;background:#ff3366;color:#fff;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Ver detalles del pedido</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' fue entregado', html);
+}
+
+function sendOrderCancelledEmail(order) {
+  if (!order.email) return Promise.resolve();
+  const num = order.order_number || '';
+  const reason = order.delay_reason || '';
+  const waNumber = '5492494639700';
+  const waLink = 'https://wa.me/' + waNumber + '?text=' + encodeURIComponent('Hola, quiero consultar por mi pedido #' + num);
+  const html = emailBase(
+    `<h2 style="color:#eef2f5;font-size:18px;margin:0 0 6px;">Tu pedido <span style="color:#ff3366;">#${num}</span> fue cancelado</h2>`,
+    `<p style="color:rgba(200,215,230,.7);font-size:14px;line-height:1.7;margin:0 0 18px;">Tu pedido fue cancelado.${reason ? '<br>Motivo: ' + reason : ''}</p>
+     <p style="color:rgba(200,215,230,.5);font-size:13px;margin:0 0 18px;">Si tenés dudas, escribinos por WhatsApp.</p>
+     <a href="${waLink}" style="display:inline-block;background:#25d366;color:#06220f;font-weight:700;font-size:12px;letter-spacing:1px;padding:12px 24px;border-radius:6px;text-decoration:none;">Consultar por WhatsApp</a>`
+  );
+  return sendEmail(order.email, 'Tu pedido #' + num + ' fue cancelado', html);
+}
+
+function sendEmailForStatus(order) {
+  const status = order.status;
+  if (status === 'confirmed') return sendOrderConfirmedEmail(order);
+  if (status === 'shipped') return sendOrderShippedEmail(order);
+  if (status === 'delivered') return sendOrderDeliveredEmail(order);
+  if (status === 'cancelled') return sendOrderCancelledEmail(order);
+  return Promise.resolve();
+}
+
 const app = express();
 
 app.use(cors());
@@ -1079,6 +1214,7 @@ app.post('/api/orders', rateLimit(10, 60 * 1000), async (req, res) => {
 
     const col = await getOrders();
     const result = await col.insertOne(order);
+    sendOrderReceivedEmail(order).catch(() => {});
     res.json({ id: result.insertedId, order_number, ...order });
   } catch (err) {
     console.error(err);
@@ -1122,6 +1258,7 @@ app.patch('/api/orders/:id', checkAuth, async (req, res) => {
         $set: updates,
         $push: { tracking_events: newEvent }
       });
+      sendEmailForStatus({ ...order, ...updates, email: order.email, order_number: order.order_number }).catch(() => {});
     } else {
       await col.updateOne({ _id: id }, { $set: updates });
     }
@@ -1130,6 +1267,21 @@ app.patch('/api/orders/:id', checkAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al actualizar pedido' });
+  }
+});
+
+// POST /api/admin/orders/:id/resend-email (auth required)
+app.post('/api/admin/orders/:id/resend-email', checkAuth, async (req, res) => {
+  try {
+    const col = await getOrders();
+    const order = await col.findOne({ _id: new ObjectId(req.params.id) });
+    if (!order) return res.status(404).json({ error: 'Pedido no encontrado' });
+    if (!order.email) return res.status(400).json({ error: 'El pedido no tiene email' });
+    await sendEmailForStatus(order);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Error reenviando email:', err);
+    res.status(500).json({ error: 'Error al reenviar email' });
   }
 });
 

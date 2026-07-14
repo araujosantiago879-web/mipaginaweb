@@ -1454,6 +1454,9 @@ function renderPedidos() {
     if (orderNum !== '—') {
       acciones.push(`<a class="btn-mini" href="${trackLink}" target="_blank" title="Ver seguimiento" style="background:rgba(255,255,255,.08);color:var(--paper);">📍</a>`);
     }
+    if (p.email) {
+      acciones.push(`<button class="btn-mini" onclick="reenviarEmail('${p.id}')" title="Reenviar email" style="background:rgba(255,255,255,.08);color:var(--paper);">📧</button>`);
+    }
 
     return `<tr style="border-bottom:1px solid var(--edge);">
       <td style="padding:12px 8px;font-family:'Inconsolata',monospace;font-weight:600;color:var(--rose);white-space:nowrap;letter-spacing:1px;">${escapeHtml(orderNum)}</td>
@@ -1509,6 +1512,17 @@ async function eliminarPedido(id) {
     });
     if (res.ok) { showToast('🗑️ Pedido eliminado'); cargarPedidos(); }
     else showToast('❌ Error al eliminar', true);
+  } catch (err) { showToast('Error de red', true); }
+}
+
+async function reenviarEmail(orderId) {
+  try {
+    const res = await fetch(`/api/admin/orders/${orderId}/resend-email`, {
+      method: 'POST',
+      headers: { 'Authorization': token }
+    });
+    if (res.ok) showToast('📧 Email reenviado');
+    else { const d = await res.json(); showToast(d.error || 'Error al reenviar', true); }
   } catch (err) { showToast('Error de red', true); }
 }
 
