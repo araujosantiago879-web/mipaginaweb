@@ -604,7 +604,8 @@
               <th style="padding:12px 8px;text-align:left;">Fecha</th>
               <th style="padding:12px 8px;text-align:left;">Cliente</th>
               <th style="padding:12px 8px;text-align:left;">Envío</th>
-              <th style="padding:12px 8px;text-align:left;">Total</th>
+              <th style="padding:12px 8px;text-align:right;">Total</th>
+              <th style="padding:12px 8px;text-align:left;">Pago</th>
               <th style="padding:12px 8px;text-align:left;">Estado</th>
               <th style="padding:12px 8px;text-align:center;">Acción</th>
             </tr>
@@ -1493,6 +1494,28 @@ function renderPedidos() {
     const statusColor = STATUS_COLORS[p.status] || 'var(--muted)';
     const statusLabel = STATUS_LABELS[p.status] || p.status;
 
+    // Badge de método de pago
+    const pm = p.paymentMethod || '';
+    const pmIcons = { transferencia: '🏦', efectivo: '💵', mercadopago: '💜', otro: '💳' };
+    const pmLabels = { transferencia: 'Transferencia', efectivo: 'Efectivo', mercadopago: 'MP', otro: 'Otro' };
+    const isPaid = p.status !== 'pending_payment';
+    const payColor = isPaid ? '#66ffcc' : '#ffaa00';
+    const payBg = isPaid ? 'rgba(102,255,204,.12)' : 'rgba(255,170,0,.12)';
+    const payBorder = isPaid ? 'rgba(102,255,204,.3)' : 'rgba(255,170,0,.3)';
+    const paymentBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;background:${payBg};color:${payColor};border:1px solid ${payBorder};">
+      ${isPaid ? '✅' : '⏳'} ${pmIcons[pm] || '💳'} ${pmLabels[pm] || '—'}
+    </span>`;
+
+    // Tiempo transcurrido desde la creación
+    const now = Date.now();
+    const created = new Date(p.createdAt).getTime();
+    const diffMin = Math.floor((now - created) / 60000);
+    let timeElapsed = '';
+    if (diffMin < 1) timeElapsed = 'Ahora mismo';
+    else if (diffMin < 60) timeElapsed = `Hace ${diffMin} min`;
+    else if (diffMin < 1440) timeElapsed = `Hace ${Math.floor(diffMin / 60)} h`;
+    else timeElapsed = `Hace ${Math.floor(diffMin / 1440)} día${Math.floor(diffMin / 1440) !== 1 ? 's' : ''}`;
+
     // Próximo estado según flujo: pending → confirmed → preparando → shipped → delivered
     const nextStatus = {
       pending_payment: 'confirmed',
@@ -1547,6 +1570,10 @@ function renderPedidos() {
       <td style="padding:12px 8px;" class="cliente">${cliente}</td>
       <td style="padding:12px 8px;font-size:11px;">${envio}${items.length ? `<br><a href="#" style="color:var(--rose);font-size:10px;" onclick="event.preventDefault();document.getElementById('ped-det-${i}').classList.toggle('abierto')">ver detalle ▾</a><div class="ped-detalle" id="ped-det-${i}">${detalle}</div>` : ''}</td>
       <td style="padding:12px 8px;color:var(--lime);white-space:nowrap;">${escapeHtml(p.total || '')}</td>
+      <td style="padding:12px 8px;font-size:11px;white-space:nowrap;">
+        ${paymentBadge}
+        <div style="color:rgba(200,215,230,.4);font-size:10px;margin-top:2px;">${timeElapsed}</div>
+      </td>
       <td style="padding:12px 8px;"><span style="display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:600;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}33;">${statusLabel}</span>${trackInput}</td>
       <td style="padding:12px 8px;text-align:center;white-space:nowrap;">${acciones.join(' ')}</td>
     </tr>`;
