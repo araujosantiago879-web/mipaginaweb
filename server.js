@@ -68,15 +68,21 @@ async function sendOrderReceivedEmail(order) {
       const cbu = cfg.cbu || '';
       const alias = cfg.alias || '';
       const titular = cfg.titular || '';
-      if (banco || cbu || alias || titular) {
+      const accountType = cfg.accountType || '';
+      const accountNumber = cfg.accountNumber || '';
+      const cuit = cfg.cuit || '';
+      if (banco || cbu || alias || titular || accountType || accountNumber || cuit) {
         bankHtml = `
         <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:14px;margin-bottom:18px;">
           <div style="color:rgba(200,215,230,.5);font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🏦 Datos para transferir</div>
           <div style="color:#eef2f5;font-size:13px;line-height:1.8;">
-            ${banco ? '<strong>Banco:</strong> ' + escapeHtml(banco) + '<br>' : ''}
             ${titular ? '<strong>Titular:</strong> ' + escapeHtml(titular) + '<br>' : ''}
-            ${cbu ? '<strong>CBU:</strong> <span style="font-family:monospace;letter-spacing:1px;">' + escapeHtml(cbu) + '</span><br>' : ''}
-            ${alias ? '<strong>Alias:</strong> <span style="color:#66ffcc;font-family:monospace;letter-spacing:1px;">' + escapeHtml(alias) + '</span>' : ''}
+            ${alias ? '<strong>Alias:</strong> <span style="color:#66ffcc;font-family:monospace;letter-spacing:1px;">' + escapeHtml(alias) + '</span><br>' : ''}
+            ${cbu ? '<strong>CBU/CVU:</strong> <span style="font-family:monospace;letter-spacing:1px;">' + escapeHtml(cbu) + '</span><br>' : ''}
+            ${banco ? '<strong>Banco:</strong> ' + escapeHtml(banco) + '<br>' : ''}
+            ${accountType ? '<strong>Tipo de cuenta:</strong> ' + escapeHtml(accountType) + '<br>' : ''}
+            ${accountNumber ? '<strong>N° de cuenta:</strong> ' + escapeHtml(accountNumber) + '<br>' : ''}
+            ${cuit ? '<strong>CUIT/CUIL:</strong> ' + escapeHtml(cuit) : ''}
           </div>
         </div>`;
       }
@@ -315,6 +321,9 @@ async function connectDB() {
     if (existing.otroHabilitado === undefined) updates.otroHabilitado = false;
     if (existing.otroTitulo === undefined) updates.otroTitulo = '';
     if (existing.otroTexto === undefined) updates.otroTexto = '';
+    if (existing.accountType === undefined) updates.accountType = '';
+    if (existing.accountNumber === undefined) updates.accountNumber = '';
+    if (existing.cuit === undefined) updates.cuit = '';
     // Actualizar número placeholder si es necesario
     if (existing.whatsappNumber === '5492494000000' || existing.whatsappNumber === '5492490000000') {
       updates.whatsappNumber = WA_NUMBER;

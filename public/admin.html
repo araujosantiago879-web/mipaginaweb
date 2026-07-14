@@ -544,10 +544,22 @@
         <div class="config-card">
           <h3><em>Pago</em> online</h3>
           <div class="form-group"><label>💰 Mercado Pago (link de pago)</label><input type="text" id="config-mp" class="form-input" placeholder="https://mpago.liner/..."></div>
-          <div class="form-group"><label>🏦 Nombre del banco</label><input type="text" id="config-banco" class="form-input" placeholder="Banco Nación"></div>
-          <div class="form-group"><label>🔢 CBU</label><input type="text" id="config-cbu" class="form-input" placeholder="0000000000000000000000"><div class="hint" id="cbu-hint"></div></div>
-          <div class="form-group"><label>🔤 Alias</label><input type="text" id="config-alias" class="form-input" placeholder="lado-b.mp"></div>
-          <div class="form-group"><label>👤 Titular</label><input type="text" id="config-titular" class="form-input" placeholder="Nombre del titular"></div>
+          <div class="form-group"><label>🏦 Banco o billetera virtual</label><input type="text" id="config-banco" class="form-input" placeholder="Banco Nación / Mercado Pago / Ualá"></div>
+          <div class="form-group"><label>👤 Titular de la cuenta</label><input type="text" id="config-titular" class="form-input" placeholder="Nombre y apellido del titular"></div>
+          <div class="form-group"><label>🔤 Alias (para transferencias)</label><input type="text" id="config-alias" class="form-input" placeholder="lado-b.mp"></div>
+          <div class="form-group"><label>🔢 CBU / CVU</label><input type="text" id="config-cbu" class="form-input" placeholder="0000000000000000000000"><div class="hint" id="cbu-hint"></div></div>
+          <div class="form-group">
+            <label>📋 Tipo de cuenta</label>
+            <select id="config-account-type" class="form-input" style="appearance:auto;">
+              <option value="">No especificar</option>
+              <option value="Caja de ahorro">Caja de ahorro</option>
+              <option value="Cuenta corriente">Cuenta corriente</option>
+              <option value="Cuenta sueldo">Cuenta sueldo</option>
+              <option value="Billetera virtual">Billetera virtual</option>
+            </select>
+          </div>
+          <div class="form-group"><label>🔢 Número de cuenta (para depósito en sucursal)</label><input type="text" id="config-account-number" class="form-input" placeholder="12345678"></div>
+          <div class="form-group"><label>🏢 CUIT / CUIL</label><input type="text" id="config-cuit" class="form-input" placeholder="20-12345678-9"></div>
           <div class="form-group">
             <label>💵 Efectivo</label>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -1296,6 +1308,9 @@ async function cargarConfig() {
     document.getElementById('config-cbu').value = cfg.cbu || '';
     document.getElementById('config-alias').value = cfg.alias || '';
     document.getElementById('config-titular').value = cfg.titular || '';
+    document.getElementById('config-account-type').value = cfg.accountType || '';
+    document.getElementById('config-account-number').value = cfg.accountNumber || '';
+    document.getElementById('config-cuit').value = cfg.cuit || '';
     document.getElementById('config-efectivo-habilitado').checked = cfg.efectivoHabilitado || false;
     document.getElementById('config-efectivo-texto').value = cfg.efectivoTexto || '';
     document.getElementById('config-otro-habilitado').checked = cfg.otroHabilitado || false;
@@ -1319,6 +1334,9 @@ document.getElementById('guardar-config').addEventListener('click', async () => 
     cbu: document.getElementById('config-cbu').value,
     alias: document.getElementById('config-alias').value,
     titular: document.getElementById('config-titular').value,
+    accountType: document.getElementById('config-account-type').value,
+    accountNumber: document.getElementById('config-account-number').value,
+    cuit: document.getElementById('config-cuit').value,
     efectivoHabilitado: document.getElementById('config-efectivo-habilitado').checked,
     efectivoTexto: document.getElementById('config-efectivo-texto').value,
     otroHabilitado: document.getElementById('config-otro-habilitado').checked,

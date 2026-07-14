@@ -1965,6 +1965,9 @@ async function loadConfig() {
       cbu: config.cbu || '',
       alias: config.alias || '',
       titular: config.titular || '',
+      accountType: config.accountType || '',
+      accountNumber: config.accountNumber || '',
+      cuit: config.cuit || '',
       efectivoHabilitado: config.efectivoHabilitado || false,
       efectivoTexto: config.efectivoTexto || '',
       otroHabilitado: config.otroHabilitado || false,
@@ -2617,8 +2620,11 @@ function openBankModal() {
   const cbu = pc.cbu || '';
   const alias = pc.alias || '';
   const titular = pc.titular || '';
+  const accountType = pc.accountType || '';
+  const accountNumber = pc.accountNumber || '';
+  const cuit = pc.cuit || '';
 
-  if (!banco && !cbu && !alias && !titular) {
+  if (!banco && !cbu && !alias && !titular && !accountType && !accountNumber && !cuit) {
     showToast('Los datos bancarios no están configurados', true);
     return;
   }
@@ -2626,17 +2632,20 @@ function openBankModal() {
   const row = (label, value, color, mono, copyVal) => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
       <span style="color:var(--muted);font-size:12px;">${label}</span>
-      <span style="display:flex;align-items:center;gap:6px;">
+      <span style="display:flex;align-items:center;gap:6px;max-width:60%;text-align:right;">
         <span style="color:${color || 'var(--paper)'};font-weight:600;font-size:13px;${mono ? "font-family:'Inconsolata',monospace;letter-spacing:1px;" : ''}">${escapeHtml(value)}</span>
         ${copyVal ? `<button onclick="navigator.clipboard.writeText('${escapeHtml(copyVal)}');this.textContent='✅';setTimeout(()=>this.textContent='📋',1500)" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:13px;padding:2px;" title="Copiar">📋</button>` : ''}
       </span>
     </div>`;
 
   let html = '';
-  if (banco) html += row('Banco', banco, 'var(--paper)', false, '');
   if (titular) html += row('Titular', titular, 'var(--paper)', false, '');
-  if (cbu) html += row('CBU', cbu, 'var(--paper)', true, cbu);
   if (alias) html += row('Alias', alias, 'var(--lime)', true, alias);
+  if (cbu) html += row('CBU / CVU', cbu, 'var(--paper)', true, cbu);
+  if (banco) html += row('Banco', banco, 'var(--paper)', false, '');
+  if (accountType) html += row('Tipo de cuenta', accountType, 'var(--paper)', false, '');
+  if (accountNumber) html += row('N° de cuenta', accountNumber, 'var(--paper)', true, accountNumber);
+  if (cuit) html += row('CUIT / CUIL', cuit, 'var(--paper)', true, cuit);
 
   document.getElementById('bank-modal-content').innerHTML = html;
   document.getElementById('bank-modal').style.display = 'flex';
