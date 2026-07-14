@@ -1561,6 +1561,23 @@ app.post('/api/admin/change-password', checkAuth, async (req, res) => {
   }
 });
 
+// ─── Test endpoint temporal (quitar después) ──────────────────────────────────
+app.get('/api/test-email', async (req, res) => {
+  const resend = getResend();
+  if (!resend) return res.json({ ok: false, error: 'Resend no inicializado — falta RESEND_API_KEY o el paquete no está instalado' });
+  try {
+    const result = await resend.emails.send({
+      from: RESEND_FROM,
+      to: 'araujosantiago879@gmail.com',
+      subject: 'Test El Lado B',
+      html: '<h1 style="color:#ff3366;">Funciona!</h1><p>Si ves esto, el envío está OK.</p>'
+    });
+    res.json({ ok: true, result });
+  } catch (err) {
+    res.json({ ok: false, error: err.message, statusCode: err.statusCode });
+  }
+});
+
 // ─── Export para Vercel / escuchar en local ───────────────────────────────────
 module.exports = app;
 if (require.main === module) {
