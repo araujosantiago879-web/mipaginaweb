@@ -2322,12 +2322,12 @@ function renderCart() {
     } else if (efecBlock) { efecBlock.style.display = 'none'; }
     // Otro
     const otroBlock = document.getElementById('pm-otro');
-    if (otroBlock) {
+    if (otroBlock && pc.otroHabilitado === true) {
       otroBlock.style.display = 'flex';
       document.getElementById('cp-otro-titulo').textContent = pc.otroTitulo || 'Transferencias';
       document.getElementById('cp-otro-texto').textContent = pc.otroTexto || 'Datos para transferir';
       hasPayment = true;
-    }
+    } else if (otroBlock) { otroBlock.style.display = 'none'; }
     payDiv.style.display = hasPayment ? 'flex' : 'none';
   }
   // Checkout payment method radio buttons visibility
@@ -2338,7 +2338,7 @@ function renderCart() {
   const otroLabel = document.getElementById('pm-checkout-otro-label');
   if (mpCheckout) mpCheckout.style.display = pc2.mercadoPagoLink ? 'flex' : 'none';
   if (otroCheckout) {
-    const showOtro = pc2.otroHabilitado !== false;
+    const showOtro = pc2.otroHabilitado === true;
     otroCheckout.style.display = showOtro ? 'flex' : 'none';
     if (otroLabel && pc2.otroTitulo) otroLabel.textContent = pc2.otroTitulo;
   }
