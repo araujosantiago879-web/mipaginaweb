@@ -1357,13 +1357,8 @@
       <div class="checkout-section" id="checkout-payment-section">
         <div class="checkout-label">💳 Método de pago</div>
         <div style="display:flex;flex-direction:column;gap:6px;">
-          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
-            <input type="radio" name="payment-method" value="transferencia" checked style="accent-color:var(--rose);">
-            <span style="font-size:13px;">Transferencia / Depósito</span>
-            <span onclick="event.preventDefault();event.stopPropagation();openBankModal()" style="margin-left:auto;font-size:10px;color:var(--rose);border:1px solid var(--rose);border-radius:4px;padding:3px 8px;cursor:pointer;white-space:nowrap;font-weight:600;">Ver datos ↗</span>
-          </label>
           <label id="pm-checkout-efectivo" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
-            <input type="radio" name="payment-method" value="efectivo" style="accent-color:var(--rose);">
+            <input type="radio" name="payment-method" value="efectivo" checked style="accent-color:var(--rose);">
             <span style="font-size:13px;">💵 Efectivo contra entrega</span>
           </label>
           <label id="pm-checkout-mp" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
