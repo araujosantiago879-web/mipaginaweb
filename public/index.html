@@ -1361,6 +1361,11 @@
             <input type="radio" name="payment-method" value="efectivo" checked style="accent-color:var(--rose);">
             <span style="font-size:13px;">💵 Efectivo contra entrega</span>
           </label>
+          <label onclick="openBankModal()" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+            <input type="radio" name="payment-method" value="transferencia" style="accent-color:var(--rose);">
+            <span style="font-size:13px;">🏦 Transferencia / Depósito</span>
+            <span style="margin-left:auto;font-size:10px;color:var(--rose);border:1px solid var(--rose);border-radius:4px;padding:3px 8px;white-space:nowrap;font-weight:600;">Ver datos ↗</span>
+          </label>
           <label id="pm-checkout-mp" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
             <input type="radio" name="payment-method" value="mercadopago" style="accent-color:var(--rose);">
             <span style="font-size:13px;">💜 Mercado Pago (te enviamos los datos por WhatsApp)</span>
@@ -2618,19 +2623,28 @@ function openBankModal() {
     return;
   }
 
-  const row = (label, value, color, mono, copyVal) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);">
-      <span style="color:var(--muted);font-size:12px;">${label}</span>
-      <span style="display:flex;align-items:center;gap:6px;max-width:60%;text-align:right;">
-        <span style="color:${color || 'var(--paper)'};font-weight:600;font-size:13px;${mono ? "font-family:'Inconsolata',monospace;letter-spacing:1px;" : ''}">${escapeHtml(value)}</span>
-        ${copyVal ? `<button onclick="navigator.clipboard.writeText('${escapeHtml(copyVal)}');this.textContent='✅';setTimeout(()=>this.textContent='📋',1500)" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:13px;padding:2px;" title="Copiar">📋</button>` : ''}
+  let html = '';
+  if (titular) html += `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <span style="color:var(--muted);font-size:12px;">Nombre y apellido</span>
+      <span style="color:var(--paper);font-weight:600;font-size:13px;">${escapeHtml(titular)}</span>
+    </div>`;
+  if (alias) html += `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <span style="color:var(--muted);font-size:12px;">Alias</span>
+      <span style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--lime);font-weight:700;font-size:13px;font-family:'Inconsolata',monospace;letter-spacing:1px;">${escapeHtml(alias)}</span>
+        <button onclick="navigator.clipboard.writeText('${escapeHtml(alias)}');this.textContent='✅';setTimeout(()=>this.textContent='📋',1500)" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:13px;padding:2px;" title="Copiar">📋</button>
       </span>
     </div>`;
-
-  let html = '';
-  if (titular) html += row('Nombre y apellido', titular, 'var(--paper)', false, '');
-  if (alias) html += row('Alias', alias, 'var(--lime)', true, alias);
-  if (cbu) html += row('CVU / CBU', cbu, 'var(--paper)', true, cbu);
+  if (cbu) html += `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;">
+      <span style="color:var(--muted);font-size:12px;">CVU</span>
+      <span style="display:flex;align-items:center;gap:6px;">
+        <span style="color:var(--paper);font-weight:600;font-size:13px;font-family:'Inconsolata',monospace;letter-spacing:1px;">${escapeHtml(cbu)}</span>
+        <button onclick="navigator.clipboard.writeText('${escapeHtml(cbu)}');this.textContent='✅';setTimeout(()=>this.textContent='📋',1500)" style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:13px;padding:2px;" title="Copiar">📋</button>
+      </span>
+    </div>`;
 
   document.getElementById('bank-modal-content').innerHTML = html;
   document.getElementById('bank-modal').style.display = 'flex';
