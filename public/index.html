@@ -1359,9 +1359,10 @@
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
             <input type="radio" name="payment-method" value="transferencia" checked style="accent-color:var(--rose);">
+            <span style="font-size:13px;">Transferencia / Depósito</span>
             <span onclick="event.preventDefault();event.stopPropagation();openBankModal()" style="margin-left:auto;font-size:10px;color:var(--rose);border:1px solid var(--rose);border-radius:4px;padding:3px 8px;cursor:pointer;white-space:nowrap;font-weight:600;">Ver datos ↗</span>
           </label>
-          <label id="pm-checkout-efectivo" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+          <label id="pm-checkout-efectivo" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
             <input type="radio" name="payment-method" value="efectivo" style="accent-color:var(--rose);">
             <span style="font-size:13px;">💵 Efectivo contra entrega</span>
           </label>
@@ -2336,6 +2337,7 @@ function renderCart() {
   const otroCheckout = document.getElementById('pm-checkout-otro');
   const otroLabel = document.getElementById('pm-checkout-otro-label');
   if (mpCheckout) mpCheckout.style.display = pc2.mercadoPagoLink ? 'flex' : 'none';
+  if (efecCheckout) efecCheckout.style.display = pc2.efectivoHabilitado ? 'flex' : 'none';
   if (otroCheckout) {
     const showOtro = pc2.otroHabilitado !== false;
     otroCheckout.style.display = showOtro ? 'flex' : 'none';
