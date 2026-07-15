@@ -1205,11 +1205,8 @@ app.post('/api/orders', rateLimit(10, 60 * 1000), async (req, res) => {
     })) : [];
     if (!items.length) return res.status(400).json({ error: 'Pedido vacío' });
 
-    // ── Validar email ──
+    // ── Validar email (opcional) ──
     const email = String(b.email || '').trim().toLowerCase();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: 'Email inválido' });
-    }
 
     // ── Validar dirección ──
     const addr = b.shipping_address || {};

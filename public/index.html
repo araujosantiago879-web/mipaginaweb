@@ -1316,10 +1316,6 @@
       <div class="cart-total" id="cart-total2"></div>
 
       <div class="checkout-section">
-        <input type="email" id="cart-email" class="cart-cliente-input" placeholder="Email (para seguimiento del pedido)" required autocomplete="email">
-      </div>
-
-      <div class="checkout-section">
         <div class="checkout-label">📍 Dirección de envío</div>
         <div class="checkout-row">
           <input type="text" id="cart-street" class="cart-cliente-input" placeholder="Calle" required autocomplete="street-address">
@@ -2489,9 +2485,6 @@ document.getElementById('cart-confirm')?.addEventListener('click', async () => {
   const instructions = document.getElementById('cart-instructions')?.value.trim() || '';
 
   // Validación
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return showToast('Ingresá un email válido', true);
-  }
   if (!street) return showToast('Ingresá la calle', true);
   if (!number) return showToast('Ingresá el número', true);
   if (!city) return showToast('Ingresá la ciudad', true);
