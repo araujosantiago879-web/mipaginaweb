@@ -1361,6 +1361,11 @@
             <input type="radio" name="payment-method" value="efectivo" checked style="accent-color:var(--rose);">
             <span style="font-size:13px;">💵 Efectivo contra entrega</span>
           </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
+            <input type="radio" name="payment-method" value="transferencia" style="accent-color:var(--rose);">
+            <span style="font-size:13px;">🏦 Transferencia / Depósito</span>
+            <span onclick="event.preventDefault();event.stopPropagation();openBankModal()" style="margin-left:auto;font-size:10px;color:var(--rose);border:1px solid var(--rose);border-radius:4px;padding:3px 8px;cursor:pointer;white-space:nowrap;font-weight:600;">Ver datos ↗</span>
+          </label>
           <label id="pm-checkout-mp" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
             <input type="radio" name="payment-method" value="mercadopago" style="accent-color:var(--rose);">
             <span style="font-size:13px;">💜 Mercado Pago (te enviamos los datos por WhatsApp)</span>
@@ -2609,15 +2614,11 @@ function getProductById(id) {
 // ── Modal datos bancarios ──
 function openBankModal() {
   const pc = window.paymentConfig || {};
-  const banco = pc.banco || '';
   const cbu = pc.cbu || '';
   const alias = pc.alias || '';
   const titular = pc.titular || '';
-  const accountType = pc.accountType || '';
-  const accountNumber = pc.accountNumber || '';
-  const cuit = pc.cuit || '';
 
-  if (!banco && !cbu && !alias && !titular && !accountType && !accountNumber && !cuit) {
+  if (!cbu && !alias && !titular) {
     showToast('Los datos bancarios no están configurados', true);
     return;
   }
@@ -2632,13 +2633,9 @@ function openBankModal() {
     </div>`;
 
   let html = '';
-  if (titular) html += row('Titular', titular, 'var(--paper)', false, '');
+  if (titular) html += row('Nombre y apellido', titular, 'var(--paper)', false, '');
   if (alias) html += row('Alias', alias, 'var(--lime)', true, alias);
-  if (cbu) html += row('CBU / CVU', cbu, 'var(--paper)', true, cbu);
-  if (banco) html += row('Banco', banco, 'var(--paper)', false, '');
-  if (accountType) html += row('Tipo de cuenta', accountType, 'var(--paper)', false, '');
-  if (accountNumber) html += row('N° de cuenta', accountNumber, 'var(--paper)', true, accountNumber);
-  if (cuit) html += row('CUIT / CUIL', cuit, 'var(--paper)', true, cuit);
+  if (cbu) html += row('CVU / CBU', cbu, 'var(--paper)', true, cbu);
 
   document.getElementById('bank-modal-content').innerHTML = html;
   document.getElementById('bank-modal').style.display = 'flex';
