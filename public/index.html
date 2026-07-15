@@ -1316,8 +1316,7 @@
       <div class="cart-total" id="cart-total2"></div>
 
       <div class="checkout-section">
-        <div class="checkout-label">📧 Email (para seguimiento del pedido)</div>
-        <input type="email" id="cart-email" class="cart-cliente-input" placeholder="tu@email.com" required autocomplete="email">
+        <input type="email" id="cart-email" class="cart-cliente-input" placeholder="Email (para seguimiento del pedido)" required autocomplete="email">
       </div>
 
       <div class="checkout-section">
@@ -1360,7 +1359,7 @@
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
             <input type="radio" name="payment-method" value="transferencia" checked style="accent-color:var(--rose);">
-            <span style="font-size:13px;">🏦 Transferencia / Depósito</span>
+            <span style="font-size:13px;">Transferencia / Depósito</span>
             <span onclick="event.preventDefault();event.stopPropagation();openBankModal()" style="margin-left:auto;font-size:10px;color:var(--rose);border:1px solid var(--rose);border-radius:4px;padding:3px 8px;cursor:pointer;white-space:nowrap;font-weight:600;">Ver datos ↗</span>
           </label>
           <label id="pm-checkout-efectivo" style="display:none;align-items:center;gap:8px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.04);transition:all .15s;">
