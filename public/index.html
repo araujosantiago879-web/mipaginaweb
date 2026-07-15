@@ -2338,9 +2338,7 @@ function renderCart() {
   const otroLabel = document.getElementById('pm-checkout-otro-label');
   if (mpCheckout) mpCheckout.style.display = pc2.mercadoPagoLink ? 'flex' : 'none';
   if (otroCheckout) {
-    const showOtro = pc2.otroHabilitado === true;
-    otroCheckout.style.display = showOtro ? 'flex' : 'none';
-    if (otroLabel && pc2.otroTitulo) otroLabel.textContent = pc2.otroTitulo;
+    otroCheckout.style.display = 'none';
   }
 }
 
