@@ -1626,10 +1626,8 @@
   <section class="testimonios reveal">
     <div style="font-family:'Inconsolata';font-size:10px;letter-spacing:3px;color:var(--rose);margin-bottom:10px;display:flex;align-items:center;gap:10px;"><span style="width:22px;height:1px;background:var(--rose);display:inline-block;"></span>Lo que dicen</div>
     <h2 class="section-h2">Reseñas <em>reales</em></h2>
-    <div class="testi-grid">
-      <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Pedí un vibrador y llegó en menos de dos horas, en una bolsa completamente discreta. La atención por WhatsApp fue re amable y sin hacerme sentir incómoda.</div><div class="testi-foot"><div class="testi-av">M</div><div><div class="testi-name">María G.</div><div class="testi-when">Mayo 2025 · Compra verificada ✓</div></div></div></div>
-      <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Me asesoraron sin juzgarme para nada. El producto llegó al día siguiente exactamente como lo describían. Voy a volver a comprar sin dudas.</div><div class="testi-foot"><div class="testi-av">L</div><div><div class="testi-name">Lucía R.</div><div class="testi-when">Abril 2025 · Compra verificada ✓</div></div></div></div>
-      <div class="testi"><div class="testi-stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div><div class="testi-q">Compré un kit de regalo y llegó en una caja súper prolija sin que nadie supiera qué había adentro. Los precios son muy buenos comparado con otros lugares.</div><div class="testi-foot"><div class="testi-av">C</div><div><div class="testi-name">Carlos M.</div><div class="testi-when">Marzo 2025 · Compra verificada ✓</div></div></div></div>
+    <div class="testi-grid" id="reviews-grid">
+      <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:13px;">Cargando reseñas…</div>
     </div>
 
     <!-- ── Formulario de reseña ── -->
@@ -1647,8 +1645,9 @@
           </div>
         </div>
         <textarea id="review-text" placeholder="Contá tu experiencia…" required class="review-textarea" rows="3"></textarea>
-        <button type="submit" class="review-submit">Enviar reseña por WhatsApp</button>
+        <button type="submit" class="review-submit">Enviar reseña</button>
       </form>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;">Tu reseña será visible tras ser aprobada por el equipo.</div>
     </div>
   </section>
 </div>
@@ -3109,15 +3108,53 @@ document.querySelectorAll('.review-star').forEach(s => {
     document.querySelectorAll('.review-star').forEach(st => st.classList.toggle('active', parseInt(st.dataset.val) <= reviewRating));
   });
 });
-document.getElementById('reviewForm').addEventListener('submit', e => {
+
+function renderReviews(reviews) {
+  const grid = document.getElementById('reviews-grid');
+  if (!grid) return;
+  if (!reviews.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:20px;font-size:13px;">Todavía no hay reseñas. ¡Sé el primero!</div>';
+    return;
+  }
+  grid.innerHTML = reviews.map(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const initial = (r.name || '?')[0].toUpperCase();
+    const when = new Date(r.createdAt).toLocaleDateString('es-AR', { month: 'short', year: 'numeric' });
+    return `<div class="testi">
+      <div class="testi-stars">${'<span class="star">★</span>'.repeat(r.rating)}${'<span class="star" style="color:var(--muted-2)">★</span>'.repeat(5 - r.rating)}</div>
+      <div class="testi-q">${escapeHtml(r.text)}</div>
+      <div class="testi-foot"><div class="testi-av">${initial}</div><div><div class="testi-name">${escapeHtml(r.name)}</div><div class="testi-when">${when} · Compra verificada ✓</div></div></div>
+    </div>`;
+  }).join('');
+}
+
+async function loadReviews() {
+  try {
+    const res = await fetch('/api/reviews');
+    if (!res.ok) return;
+    const reviews = await res.json();
+    renderReviews(reviews);
+  } catch (_) {}
+}
+
+document.getElementById('reviewForm').addEventListener('submit', async e => {
   e.preventDefault();
   const name = document.getElementById('review-name').value.trim();
   const text = document.getElementById('review-text').value.trim();
   if (!name || !text || !reviewRating) { showToast('Completá tu nombre, puntuación y reseña', true); return; }
+
+  try {
+    await fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, text, rating: reviewRating })
+    });
+  } catch (_) {}
+
   const stars = '★'.repeat(reviewRating) + '☆'.repeat(5 - reviewRating);
   const msg = `¡Hola! Quiero dejar una reseña:\n\n👤 ${name}\n⭐ ${stars}\n📝 ${text}`;
   window.open(`https://wa.me/${configWhatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
-  showToast('¡Gracias por tu reseña!');
+  showToast('¡Gracias! Tu reseña quedó pendiente de aprobación.');
   document.getElementById('reviewForm').reset();
   document.querySelectorAll('.review-star').forEach(st => st.classList.remove('active'));
   reviewRating = 0;
@@ -3417,7 +3454,7 @@ function escapeHtml(str) {
 }
 
 // ── Inicializar ──
-loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { renderFooterCats(); }); renderCart(); });
+loadProductOverrides(); loadConfig().then(() => { loadProducts().then(() => { renderFooterCats(); }); renderCart(); }); loadReviews();
 
 // (el og:image ahora es un PNG real servido con URL absoluta)
 </script>

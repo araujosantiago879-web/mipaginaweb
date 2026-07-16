@@ -358,6 +358,10 @@ async function getCounters() {
   const database = await connectDB();
   return database.collection('counters');
 }
+async function getReviews() {
+  const database = await connectDB();
+  return database.collection('reviews');
+}
 
 // ─── Order number atómico: LD-00001 ─────────────────────────────────────────
 async function getNextOrderNumber() {
@@ -1369,6 +1373,85 @@ app.delete('/api/orders/:id', checkAuth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al eliminar pedido' });
+  }
+});
+
+// ─── Reviews (reseñas) ─────────────────────────────────────────────────────
+
+// POST /api/reviews (público, rate-limited)
+app.post('/api/reviews', rateLimit(5, 60 * 1000), async (req, res) => {
+  try {
+    const b = req.body || {};
+    const name = String(b.name || '').trim().slice(0, 120);
+    const text = String(b.text || '').trim().slice(0, 1000);
+    const rating = Math.max(1, Math.min(5, parseInt(b.rating) || 5));
+    if (!name || !text) return res.status(400).json({ error: 'Nombre y reseña son requeridos' });
+
+    const review = {
+      name,
+      text,
+      rating,
+      approved: false,
+      createdAt: new Date()
+    };
+
+    const col = await getReviews();
+    const result = await col.insertOne(review);
+    res.json({ id: result.insertedId, ...review });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al guardar reseña' });
+  }
+});
+
+// GET /api/reviews (público — solo aprobadas)
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const col = await getReviews();
+    const reviews = await col.find({ approved: true }).sort({ createdAt: -1 }).limit(50).toArray();
+    res.json(reviews.map(({ _id, ...r }) => ({ id: _id, ...r })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener reseñas' });
+  }
+});
+
+// GET /api/admin/reviews (auth — todas)
+app.get('/api/admin/reviews', checkAuth, async (req, res) => {
+  try {
+    const col = await getReviews();
+    const filter = req.query.pendientes === '1' ? { approved: false } : {};
+    const reviews = await col.find(filter).sort({ createdAt: -1 }).limit(100).toArray();
+    res.json(reviews.map(({ _id, ...r }) => ({ id: _id, ...r })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al obtener reseñas' });
+  }
+});
+
+// PATCH /api/admin/reviews/:id/approve (auth)
+app.patch('/api/admin/reviews/:id/approve', checkAuth, async (req, res) => {
+  try {
+    const col = await getReviews();
+    const { ObjectId } = require('mongodb');
+    await col.updateOne({ _id: new ObjectId(req.params.id) }, { $set: { approved: true } });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al aprobar reseña' });
+  }
+});
+
+// DELETE /api/admin/reviews/:id (auth)
+app.delete('/api/admin/reviews/:id', checkAuth, async (req, res) => {
+  try {
+    const col = await getReviews();
+    const { ObjectId } = require('mongodb');
+    await col.deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al eliminar reseña' });
   }
 });
 

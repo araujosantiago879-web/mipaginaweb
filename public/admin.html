@@ -483,6 +483,7 @@
       <button class="tab-btn" data-tab="config">⚙️ Configuración</button>
       <button class="tab-btn" data-tab="pedidos">📋 Pedidos</button>
       <button class="tab-btn" data-tab="zonas">🚚 Zonas de envío</button>
+      <button class="tab-btn" data-tab="reviews">⭐ Reseñas</button>
     </div>
 
     <!-- TAB PRODUCTOS -->
@@ -651,6 +652,18 @@
           <tbody id="zonas-body"></tbody>
         </table>
       </div>
+    </div>
+
+    <!-- TAB RESEÑAS -->
+    <div id="tab-reviews" class="tab-content">
+      <h2 class="section-title">Reseñas <em>de clientes</em></h2>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="filtro-chip on" data-rf="pendientes">⏳ Pendientes <span id="reviews-pend-count"></span></button>
+        <button class="filtro-chip" data-rf="aprobadas">✅ Aprobadas</button>
+        <button class="filtro-chip" data-rf="todas">Todas</button>
+      </div>
+      <div id="reviews-loading" class="loading">Cargando reseñas…</div>
+      <div id="reviews-list" style="display:none;"></div>
     </div>
   </div>
 </div>
@@ -1374,6 +1387,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
     if (btn.dataset.tab === 'pedidos') cargarPedidos();
     if (btn.dataset.tab === 'zonas') cargarZonas();
+    if (btn.dataset.tab === 'reviews') cargarReviews();
   });
 });
 
@@ -1939,6 +1953,91 @@ function confirmar(titulo, textoHtml, confirmText) {
     bg.addEventListener('click', fondoH);
   });
 }
+
+// ─── Reseñas ───────────────────────────────────────────────────────────────
+let reviewsFiltro = 'pendientes';
+let reviewsCache = [];
+
+async function cargarReviews() {
+  const loadingDiv = document.getElementById('reviews-loading');
+  const listDiv = document.getElementById('reviews-list');
+  loadingDiv.style.display = 'block';
+  listDiv.style.display = 'none';
+  try {
+    const params = reviewsFiltro === 'pendientes' ? '?pendientes=1' : '';
+    const res = await fetch(`/api/admin/reviews${params}`, { headers: { 'Authorization': token } });
+    if (!res.ok) throw new Error();
+    reviewsCache = await res.json();
+    if (reviewsFiltro === 'aprobadas') reviewsCache = reviewsCache.filter(r => r.approved);
+    renderReviewsAdmin();
+    const pendRes = await fetch('/api/admin/reviews?pendientes=1', { headers: { 'Authorization': token } });
+    const pendientes = pendRes.ok ? await pendRes.json() : [];
+    const pendCount = document.getElementById('reviews-pend-count');
+    if (pendCount) pendCount.textContent = pendientes.length ? `(${pendientes.length})` : '';
+  } catch (_) {
+    loadingDiv.style.display = 'none';
+    listDiv.style.display = 'block';
+    listDiv.innerHTML = '<div style="color:var(--muted);padding:20px;">Error al cargar reseñas</div>';
+  }
+}
+
+function renderReviewsAdmin() {
+  const loadingDiv = document.getElementById('reviews-loading');
+  const listDiv = document.getElementById('reviews-list');
+  loadingDiv.style.display = 'none';
+  listDiv.style.display = 'block';
+  if (!reviewsCache.length) {
+    listDiv.innerHTML = '<div style="color:var(--muted);padding:20px;text-align:center;">No hay reseñas para mostrar</div>';
+    return;
+  }
+  listDiv.innerHTML = reviewsCache.map(r => {
+    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+    const fecha = new Date(r.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+    const statusBadge = r.approved
+      ? '<span style="color:#66ffcc;font-size:10px;font-weight:600;">✅ Aprobada</span>'
+      : '<span style="color:#ffaa00;font-size:10px;font-weight:600;">⏳ Pendiente</span>';
+    const acciones = [];
+    if (!r.approved) acciones.push(`<button class="btn-mini ok" onclick="aprobarReview('${r.id}')">✅ Aprobar</button>`);
+    acciones.push(`<button class="btn-mini borrar" onclick="eliminarReview('${r.id}')">❌ Eliminar</button>`);
+    return `<div style="border:1px solid var(--edge);border-radius:8px;padding:16px;margin-bottom:8px;background:rgba(255,255,255,.03);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'Inconsolata',monospace;color:var(--amber);letter-spacing:1px;">${stars}</span>
+          <strong style="font-size:13px;">${escapeHtml(r.name)}</strong>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${statusBadge}
+          <span style="font-size:10px;color:var(--muted);">${fecha}</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--paper);line-height:1.6;margin-bottom:10px;">${escapeHtml(r.text)}</div>
+      <div style="display:flex;gap:6px;">${acciones.join(' ')}</div>
+    </div>`;
+  }).join('');
+}
+
+async function aprobarReview(id) {
+  try {
+    const res = await fetch(`/api/admin/reviews/${id}/approve`, { method: 'PATCH', headers: { 'Authorization': token } });
+    if (res.ok) { showToast('✅ Reseña aprobada'); cargarReviews(); }
+  } catch (_) { showToast('Error al aprobar', true); }
+}
+
+async function eliminarReview(id) {
+  const ok = await confirmar('¿Eliminar esta reseña?');
+  if (!ok) return;
+  try {
+    const res = await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE', headers: { 'Authorization': token } });
+    if (res.ok) { showToast('🗑️ Reseña eliminada'); cargarReviews(); }
+  } catch (_) { showToast('Error al eliminar', true); }
+}
+
+document.querySelectorAll('[data-rf]').forEach(ch => ch.addEventListener('click', () => {
+  document.querySelectorAll('[data-rf]').forEach(x => x.classList.remove('on'));
+  ch.classList.add('on');
+  reviewsFiltro = ch.dataset.rf;
+  cargarReviews();
+}));
 </script>
 </body>
 </html>
