@@ -460,7 +460,7 @@
     .card {
       display:flex; flex-direction:column;
       background:var(--ink-2);
-      transition:box-shadow .3s, border-color .3s;
+      transition:box-shadow .3s, border-color .3s, transform .3s;
       position:relative; overflow:hidden;
       cursor:pointer;
       border:1px solid rgba(255,255,255,0.06);
@@ -470,6 +470,7 @@
       box-shadow:0 8px 30px rgba(0,0,0,.4);
       border-color:rgba(255,255,255,0.12);
       z-index:2;
+      transform:scale(1.05);
     }
     /* Skeleton de carga */
     @keyframes skShimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
@@ -1020,6 +1021,15 @@
       padding:6px 11px; background:rgba(5,5,8,.65); backdrop-filter:blur(4px);
       border:1px solid rgba(255,255,255,.15); color:var(--paper); border-radius:99px;
       pointer-events:none;
+    }
+
+    .modal-lens {
+      display:none; position:absolute;
+      width:120px; height:120px; border-radius:50%;
+      border:2px solid rgba(255,255,255,0.3);
+      background-repeat:no-repeat;
+      pointer-events:none; z-index:10;
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
     }
 
     /* ── Visor de zoom a pantalla completa ── */
@@ -2757,6 +2767,48 @@ document.getElementById('zoom-close')?.addEventListener('click', closeZoom);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.getElementById('zoom-bg').classList.contains('open')) closeZoom();
 });
+
+// ── Lupa desktop en modal ──
+(function() {
+  const photoWrap = document.getElementById('m-photo-wrap');
+  const photo = document.getElementById('m-photo');
+  if (!photoWrap || !photo) return;
+
+  // Solo en dispositivos con hover real (desktop). Tablets/mobile usan tap-to-zoom.
+  if (!window.matchMedia('(hover:hover)').matches) return;
+
+  const lens = document.createElement('div');
+  lens.className = 'modal-lens';
+  photoWrap.appendChild(lens);
+
+  const ZOOM = 2.5;
+  const LENS_SIZE = 120;
+  const CLAMP_MIN = 15;
+  const CLAMP_MAX = 85;
+
+  photoWrap.addEventListener('mousemove', e => {
+    const rect = photoWrap.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    lens.style.display = 'block';
+    lens.style.left = (x - LENS_SIZE / 2) + 'px';
+    lens.style.top = (y - LENS_SIZE / 2) + 'px';
+
+    const rawBgX = (x / rect.width) * 100;
+    const rawBgY = (y / rect.height) * 100;
+    const bgX = Math.min(CLAMP_MAX, Math.max(CLAMP_MIN, rawBgX));
+    const bgY = Math.min(CLAMP_MAX, Math.max(CLAMP_MIN, rawBgY));
+
+    lens.style.backgroundImage = `url(${photo.src})`;
+    lens.style.backgroundSize = `${rect.width * ZOOM}px ${rect.height * ZOOM}px`;
+    lens.style.backgroundPosition = `${bgX}% ${bgY}%`;
+  });
+
+  photoWrap.addEventListener('mouseleave', () => {
+    lens.style.display = 'none';
+  });
+})();
 
 // handleNL eliminado — reemplazado por canal de WhatsApp
 
