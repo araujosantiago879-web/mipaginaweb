@@ -1011,7 +1011,7 @@
       max-height:90vh; overflow:auto;
       border-radius:2px;
     }
-    .modal-photo { overflow:hidden; background:var(--ink-2); position:relative; cursor:zoom-in; }
+    .modal-photo { overflow:hidden; background:var(--ink-2); position:relative; cursor:zoom-in; aspect-ratio:1/1; max-width:250px; }
     .modal-photo img { width:100%; height:100%; object-fit:cover; display:block; }
     .modal-zoom-hint {
       display:none; align-items:center; gap:6px;
@@ -1165,7 +1165,7 @@
       footer { padding:40px 16px 28px; }
       .footer-grid { grid-template-columns:1fr 1fr; gap:24px; }
       .modal { grid-template-columns:1fr; max-height:92vh; }
-      .modal-photo { max-height:none; aspect-ratio:1/1; }
+      .modal-photo { max-height:none; aspect-ratio:1/1; max-width:250px; }
       .modal-info { padding:24px 20px; }
       .modal-zoom-hint { display:flex; }
     }
